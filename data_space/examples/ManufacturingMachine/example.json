@@ -1,0 +1,91 @@
+{
+  "id": "urn:ngsi-ld:ManufacturingMachine:horno-001",
+  "type": "ManufacturingMachine",
+  "name": {
+    "type": "Property",
+    "value": "Horno E-Therm Línea 1"
+  },
+  "description": {
+    "type": "Property",
+    "value": "Cámara de ahumado y cocción E-Therm instalada en línea 1. Incluye Touch-Control, generador de humo, sondas de temperatura y humedad."
+  },
+  "serialNumber": {
+    "type": "Property",
+    "value": "ET-2024-001"
+  },
+  "status": {
+    "type": "Property",
+    "value": "running"
+  },
+  "online": {
+    "type": "Property",
+    "value": true
+  },
+  "power": {
+    "type": "Property",
+    "value": 45
+  },
+  "voltage": {
+    "type": "Property",
+    "value": 400
+  },
+  "machineModel": {
+    "type": "Relationship",
+    "object": "urn:ngsi-ld:ManufacturingMachineModel:e-therm-001"
+  },
+  "building": {
+    "type": "Relationship",
+    "object": "urn:ngsi-ld:Building:edificio-001"
+  },
+  "location": {
+    "type": "GeoProperty",
+    "value": {
+      "type": "Point",
+      "coordinates": [
+        -3.7038,
+        40.4168
+      ]
+    }
+  },
+  "address": {
+    "type": "Property",
+    "value": {
+      "addressLocality": "Madrid",
+      "addressCountry": "ES",
+      "streetAddress": "Nave 2, Planta 1"
+    }
+  },
+  "installedAt": {
+    "type": "Property",
+    "value": "2024-01-15T00:00:00Z"
+  },
+  "supplierName": {
+    "type": "Property",
+    "value": "Emerson Technik"
+  },
+  "hasPart": {
+    "type": "Property",
+    "value": [
+      "urn:ngsi-ld:Device:tc-001",
+      "urn:ngsi-ld:Device:burner-001",
+      "urn:ngsi-ld:Device:fan-circulation-001",
+      "urn:ngsi-ld:Device:fan-extraction-001",
+      "urn:ngsi-ld:Device:smoke-generator-001",
+      "urn:ngsi-ld:Device:probe-product-temp",
+      "urn:ngsi-ld:Device:probe-room-1",
+      "urn:ngsi-ld:Device:probe-room-2",
+      "urn:ngsi-ld:Device:probe-room-3",
+      "urn:ngsi-ld:Device:probe-room-4",
+      "urn:ngsi-ld:Device:probe-smoke-generator",
+      "urn:ngsi-ld:Device:probe-humidity"
+    ]
+  },
+  "dataProvider": {
+    "type": "Property",
+    "value": "https://provider.example.com"
+  },
+  "source": {
+    "type": "Property",
+    "value": "Sistema SCADA línea 1"
+  }
+}

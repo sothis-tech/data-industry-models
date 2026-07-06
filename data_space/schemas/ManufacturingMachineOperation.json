@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/IndustrialOven/schemas/ManufacturingMachineOperation.json",
+  "title": "ManufacturingMachineOperation (Industrial Oven – extendido)",
+  "description": "Extiende el modelo oficial con perfil operationOutput E-Therm. No modifica atributos existentes.",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "https://smart-data-models.github.io/dataModel.ManufacturingMachine/ManufacturingMachineOperation/schema.json"
+    },
+    {
+      "properties": {
+        "operationOutput": {
+          "allOf": [
+            {
+              "type": "object",
+              "description": "Base: output de la operación. Extensión: perfil E-Therm con campos adicionales."
+            },
+            {
+              "properties": {
+                "programName": { "type": "string" },
+                "programId": { "type": "string" },
+                "temperatureSetPoint": { "type": "number" },
+                "temperatureMin": { "type": "number" },
+                "temperatureMax": { "type": "number" },
+                "humiditySetPoint": { "type": "number" },
+                "humidityMin": { "type": "number" },
+                "humidityMax": { "type": "number" },
+                "controlMode": {
+                  "type": "string",
+                  "enum": ["Time", "RoomTemperature", "ProductTemperature"]
+                },
+                "rhControl": { "type": "boolean" },
+                "processSteps": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "durationMinutes": { "type": "number" },
+                "alarms": { "type": "array" },
+                "errors": { "type": "array" },
+                "batchId": { "type": "string" },
+                "productType": { "type": "string" }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

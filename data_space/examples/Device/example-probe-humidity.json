@@ -1,0 +1,10 @@
+{
+  "id": "urn:ngsi-ld:Device:probe-humidity",
+  "type": "Device",
+  "name": "Sonda humedad psicométrica",
+  "description": "Sonda de humedad relativa en cámara. Medición psicométrica para control de humidificación (RH control).",
+  "category": ["sensor"],
+  "controlledProperty": ["humidity"],
+  "dataProvider": "https://provider.example.com",
+  "source": "Sistema E-Therm"
+}

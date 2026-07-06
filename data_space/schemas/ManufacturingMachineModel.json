@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/IndustrialOven/schemas/ManufacturingMachineModel.json",
+  "title": "ManufacturingMachineModel (Industrial Oven – sin cambios)",
+  "description": "Modelo base sin modificar. Valores recomendados para standardOperations en perfil E-Therm: ver docs/extensions.md",
+  "$ref": "https://smart-data-models.github.io/dataModel.ManufacturingMachine/ManufacturingMachineModel/schema.json"
+}

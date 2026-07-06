@@ -1,0 +1,25 @@
+# ============================================================
+# PROVEEDOR: OpenAI Cloud
+# ============================================================
+# Las credenciales sensibles deben ir en el archivo .env:
+#   OPENAI_API_KEY=...
+#
+# Las variables de entorno tienen prioridad sobre los valores
+# escritos aquí. Valores aquí = fallback si no hay .env.
+# ============================================================
+
+# ── Parámetros de rendimiento ─────────────────────────────────
+request_timeout: 120.0
+max_tool_calls: 5
+
+# ── Parámetros del modelo ─────────────────────────────────────
+temperature: 0.1
+max_tokens_gestor: 2048
+max_tokens_specialist: 512
+
+# ── Modelo ────────────────────────────────────────────────────
+default_model: "gpt-4o"
+
+# ── Credenciales OpenAI ───────────────────────────────────────
+# Env var prioritaria: OPENAI_API_KEY
+# openai_api_key → usar .env, nunca escribirla aquí

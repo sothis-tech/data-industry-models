@@ -1,0 +1,50 @@
+# =============================================================================
+# Dependencias del backend - versiones fijadas del entorno funcional
+#
+# GPU: Tesla V100-PCIE-16GB (sm_70 / Volta) | Driver: 570.133.20 | CUDA: 12.8
+#
+# IMPORTANTE - PyTorch y CUDA:
+#   - Usar cu121 (no cu124/cu128): cu128+ no compila kernels para sm_70 (V100).
+#   - CUDA 12.8 driver es backward compatible con PyTorch compilado para cu121.
+#   - Si se cambia la GPU, revisar la arquitectura sm_XX y ajustar el sufijo cu*.
+#     Referencia: https://arnon.dk/matching-sm-architectures-arch-and-gencode-for-various-nvidia-cards/
+# =============================================================================
+
+# --- Core Backend ---
+fastapi==0.115.0
+uvicorn[standard]==0.32.0
+websockets==14.1
+python-multipart==0.0.12
+pydantic==2.13.3
+
+# --- PyTorch (cu121: compatible con V100/sm_70 y driver CUDA 12.8) ---
+--extra-index-url https://download.pytorch.org/whl/cu121
+torch==2.3.1+cu121
+torchvision==0.18.1+cu121
+torchaudio==2.3.1+cu121
+
+# --- Numérico ---
+numpy==1.26.4
+
+# --- Audio / VAD ---
+scipy==1.15.3
+soundfile==0.13.1
+webrtcvad==2.0.10
+
+# --- Speech-to-Text ---
+openai-whisper==20250625
+
+# --- Text-to-Speech ---
+piper-tts>=1.2.0
+
+# --- Agente externo (cliente HTTP) ---
+aiohttp==3.13.5
+
+# --- Data / Testing ---
+pandas==2.3.3
+matplotlib==3.10.8
+seaborn==0.13.2
+
+# --- Utilidades ---
+python-dotenv==1.2.2
+typing_extensions==4.15.0

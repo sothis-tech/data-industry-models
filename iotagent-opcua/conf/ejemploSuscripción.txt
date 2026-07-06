@@ -1,0 +1,43 @@
+curl --location 'http://localhost:4041/iot/devices' \
+--header 'fiware-service: ibermot' \
+--header 'fiware-servicepath: /' \
+--header 'Content-Type: application/ld+json' \
+--header 'Link: <http://context-provider/industrial-oven-context.jsonld>; rel="http://www.w3.org/ns/json-ld#context"; type="application/ld+json"' \
+--data-raw '{
+    "devices": [
+        {
+            "device_id": "prensa-001-fuerza-meas",
+            "entity_name": "urn:ngsi-ld:DeviceMeasurement:prensa-001-fuerza-meas",
+            "entity_type": "DeviceMeasurement",
+            "apikey": "iot-ibermot",
+            "service": "ibermot",
+            "subservice": "/",
+            "@context": [
+                "http://context-provider/industrial-oven-context.jsonld"
+            ],
+            "attributes": [
+                {
+                    "name": "numValue",
+                    "type": "Property"
+                }
+            ],
+            "internal_attributes": {
+                "contexts": [
+                    {
+                        "id": "prensa-001-fuerza-meas",
+                        "type": "DeviceMeasurement",
+                        "mappings": [
+                            {
+                                "ocb_id": "numValue",
+                                "opcua_id": "ns=2;i=4",
+                                "object_id": "numValue",
+                                "inputArguments": []
+                            }
+                        ]
+                    }
+                ]
+            },
+            "endpoint": "opc.tcp://opcua-sim-v2:5679"
+        }
+    ]
+}'

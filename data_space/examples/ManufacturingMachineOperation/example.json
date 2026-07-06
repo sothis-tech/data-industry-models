@@ -1,0 +1,72 @@
+{
+  "id": "urn:ngsi-ld:ManufacturingMachineOperation:op-001",
+  "type": "ManufacturingMachineOperation",
+  "machine": {
+    "type": "Relationship",
+    "object": "urn:ngsi-ld:ManufacturingMachine:horno-001"
+  },
+  "operationType": {
+    "type": "Property",
+    "value": [
+      "process"
+    ]
+  },
+  "status": {
+    "type": "Property",
+    "value": "finished"
+  },
+  "result": {
+    "type": "Property",
+    "value": "ok"
+  },
+  "plannedStartAt": {
+    "type": "Property",
+    "value": "2024-02-10T08:00:00Z"
+  },
+  "plannedEndAt": {
+    "type": "Property",
+    "value": "2024-02-10T14:00:00Z"
+  },
+  "startedAt": {
+    "type": "Property",
+    "value": "2024-02-10T08:05:00Z"
+  },
+  "endedAt": {
+    "type": "Property",
+    "value": "2024-02-10T13:58:00Z"
+  },
+  "operator": {
+    "type": "Relationship",
+    "object": "urn:ngsi-ld:Person:operador-001"
+  },
+  "operationOutput": {
+    "type": "Property",
+    "value": {
+      "programName": "Programa 15",
+      "programId": "15",
+      "temperatureSetPoint": 72,
+      "temperatureMin": 68,
+      "temperatureMax": 75,
+      "humiditySetPoint": 65,
+      "humidityMin": 60,
+      "humidityMax": 70,
+      "controlMode": "ProductTemperature",
+      "rhControl": true,
+      "processSteps": [
+        "smoking",
+        "cooking",
+        "drying"
+      ],
+      "durationMinutes": 353,
+      "alarms": []
+    }
+  },
+  "dataProvider": {
+    "type": "Property",
+    "value": "https://provider.example.com"
+  },
+  "source": {
+    "type": "Property",
+    "value": "Touch-Control TC"
+  }
+}

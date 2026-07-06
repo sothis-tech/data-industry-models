@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local / secrets
+.env
+.env.local
+*.local
+
+# Borradores y documentación no subida (debates, arquitectura en curso)
+_local/
+
+# Manual de instrucciones (no subir a repo)
+*[Oo]peration*[Ii]nstructions*[Ss]moking*[Cc]ooking*.pdf

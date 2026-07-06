@@ -1,0 +1,49 @@
+[project]
+name = "llamaindex-mcp"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi-mcp>=0.2.0",
+    "ipykernel>=6.29.5",
+    "linkup-sdk>=0.2.4",
+    "llama-index>=0.12.30",
+    "llama-index-core>=0.12.30",
+    "llama-index-embeddings-huggingface>=0.5.5",
+    "llama-index-llms-ollama>=0.5.4",
+    "llama-index-llms-openai>=0.3.33",
+    "llama-index-llms-azure-openai>=0.4.2",
+    "llama-index-tools-mcp>=0.1.1",
+    "llama-index-vector-stores-chroma>=0.4.2",
+    "mcp[cli]>=1.6.0",
+    "nest-asyncio>=1.6.0",
+    "openai>=1.40.0,<2.0.0",
+    "openpyxl>=3.1.5",
+    "pandas>=2.2.3",
+    "pillow>=11.1.0",
+    "pymongo>=4.13.2",
+    "pyyaml>=6.0.2",
+    "requests>=2.32.3",
+    "streamlit>=1.50.0",
+    "watchdog>=6.0.0",
+    "rank-bm25>=0.2.2",
+]
+
+# ============================================================
+# Layout src/ con imports limpios (engine.*, project.*, …)
+# ------------------------------------------------------------
+# El código vive en src/ y se importa SIN el prefijo 'src.'. Esto se logra
+# poniendo src/ en sys.path: cada entrypoint (src/interfaces/*, tests/*) lo
+# hace en su arranque, y en contenedor se fija con ENV PYTHONPATH=/app/src.
+# Para desarrollo local también puedes exportar:  export PYTHONPATH=src
+#
+# No declaramos un paquete instalable para no invalidar el uv.lock --frozen;
+# el proyecto se ejecuta, no se distribuye como wheel.
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+

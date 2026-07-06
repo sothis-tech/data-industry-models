@@ -1,0 +1,24 @@
+# Dependencias locales (CRÍTICO)
+node_modules/
+
+# Carpetas de build local (Nginx usará la que compile Docker)
+dist/
+build/
+out/
+
+# Logs de NPM
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Variables de entorno
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Git y configuración de IDEs
+.git/
+.vscode/
+.idea/

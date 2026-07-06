@@ -1,0 +1,130 @@
+_format_version: "3.0"
+_transform: true
+
+consumers:
+  - username: orion-consumer              # identidad interna de Kong para las peticiones autenticadas con tokens de Keycloak
+
+jwt_secrets:                              # Configuración de la clave para validar los tokens de las peticiones
+  - consumer: orion-consumer
+    key: "http://localhost:8085/realms/fiware"
+    algorithm: RS256
+    rsa_public_key: |
+      -----BEGIN PUBLIC KEY-----
+      MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA04N+vjkB0P6LAmEyWdtnh9a+bUgaYlRCPa5/LNJAm1rDJwUIFJglaYHt1gORMC50wIK2VfAWGDeZ1IeK5fmd4Ebu+Vr6f6zX3qf5J9HCj2RcRHCDrxC5xxcXcWixDOjQWpkB6xGsS1rpN/VajtKIH1YTNfrURtBZocmIM1XzRp9HhyLd4iazro35GKnH0YMHbxRh8NL1XOAL5kDfKHgAclPtGLSx4WzVmTlRjgmEi00BKRR65WQnr+tGsuVIrtFTg/Eq1QletCe+bOBph2RR/q1LUP4wV662pIXUYJ1XX1UTjzk7UCFibzn0AmrhRkETI+HxkC7GTzsfBtHyUeHenQIDAQAB
+      -----END PUBLIC KEY-----
+
+services:
+  - name: keycloak
+    url: http://keycloak:8085             # Nombre y puerto internos del contenedor Keycloak
+
+  - name: orion-ld
+    url: http://orion-ld:1026             # Nombre y puerto internos del contenedor Orion-LD
+    plugins:
+      - name: jwt                         # Plugin para validar los tokens
+        config:
+          run_on_preflight: true
+          key_claim_name: "iss"
+          claims_to_verify:
+            - exp
+
+  - name: quantumleap
+    url: http://quantumleap:8668          # Nombre y puerto internos del contenedor Quantum Leap
+    plugins:
+      - name: jwt                         # Plugin para validar los tokens
+        config:
+          run_on_preflight: true
+          key_claim_name: "iss"
+          claims_to_verify:
+            - exp  
+  
+  - name: rag-manager
+    url: http://rag-manager:8300          # Nombre y puerto internos del RAG manager
+    plugins:
+      - name: jwt                         # Plugin para validar los tokens
+        config:
+          run_on_preflight: true
+          key_claim_name: "iss"
+          claims_to_verify:
+            - exp   
+
+  - name: mcp-server
+    url: http://mcp-server:8082           # Nombre y puerto internos del MCP Server
+    plugins:
+      - name: jwt                         # Plugin para validar los tokens
+        config:
+          run_on_preflight: true
+          key_claim_name: "iss"
+          claims_to_verify:
+            - exp   
+
+  - name: voice-agent
+    url: http://voice-agent:8004           # Nombre y puerto internos del Voice Agent
+    plugins:
+      - name: jwt                          # Plugin para validar los tokens
+        config:
+          run_on_preflight: true
+          key_claim_name: "iss"
+          claims_to_verify:
+            - exp   
+
+routes:
+  - name: orion-any
+    service: orion-ld
+    paths:
+      - /                                 # La ruta por defecto es a las consultas a Orion
+    plugins:
+      - name: request-transformer         # Plugin que premite modificar dinámicamente las peticiones
+        config:
+          remove:
+            headers:
+              - fiware-service            # De momento eliminamos fiware-service porque se intenta utilizar siempre NGSILD-Tenant
+              - fiware-servicepath        # fiware-service path no utilizamos
+      - name: tenant-role
+        config:
+          tenant_header: "NGSILD-Tenant"  # Plugin personalizado para validar Tenant
+
+  - name: keycloak-realms
+    service: keycloak
+    paths:
+      - /realms                           # Se utiliza la ruta realms para reenviar directamente peticiones a keycloak
+    strip_path: false                     # En este caso se mantiene la ruta porque no se añade nada 
+
+  - name: quantumleap-route
+    service: quantumleap
+    paths:
+      - /quantum                          # La ruta de peticiones a Quantum Leap
+    strip_path: true                      # En este caso se elimina la ruta para pasar url limpia sin prefijo quantum
+    plugins:
+      - name: tenant-role
+        config:
+          tenant_header: "NGSILD-Tenant"  # Plugin personalizado para validar Tenant
+
+  - name: rag-route
+    service: rag-manager
+    paths:
+      - /rag                              # La ruta de peticiones a RAG manager
+    strip_path: true                      # En este caso se elimina la ruta para pasar url limpia sin prefijo rag 
+    plugins:
+      - name: tenant-role
+        config:
+          tenant_header: "NGSILD-Tenant"  # Plugin personalizado para validar Tenant
+
+  - name: mcp-route
+    service: mcp-server
+    paths:
+      - /mcp                              # La ruta de peticiones a MCP Server
+    strip_path: true                      # En este caso se elimina la ruta para pasar url limpia sin prefijo mcp 
+    plugins:
+      - name: tenant-role
+        config:
+          tenant_header: "NGSILD-Tenant"  # Plugin personalizado para validar Tenant
+
+  - name: voice-agent
+    service: voice-agent
+    paths:
+      - /voice                            # La ruta de peticiones a Voice Agent
+    strip_path: true                      # En este caso se elimina la ruta para pasar url limpia sin prefijo voice
+    plugins:
+      - name: tenant-role
+        config:
+          tenant_header: "NGSILD-Tenant"  # Plugin personalizado para validar Tenant

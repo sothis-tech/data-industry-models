@@ -1,0 +1,33 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: ./backend
+    container_name: python-backend
+    ports:
+      - "8000:8000"  # API accesible desde el exterior (opcional)
+      - "5679:5679"  # Puerto del servidor OPC UA
+    volumes:
+      - ./backend/plant_state.yaml:/app/plant_state.yaml # Persistencia local del YAML
+    networks:
+      - industrial-net
+
+  frontend:
+    build: 
+      context: ./frontend
+    container_name: react-frontend4
+    ports:
+      - "81:80" # El dashboard será accesible en el puerto 80 de tu servidor Linux
+    depends_on:
+      - backend
+    networks:
+      - industrial-net
+
+volumes:
+  mongo-data:
+
+networks:
+  industrial-net:
+    driver: bridge

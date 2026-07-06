@@ -1,0 +1,35 @@
+FROM python:3.10-slim
+
+# Instalar dependencias del sistema
+RUN apt-get update && apt-get install -y \
+    ffmpeg \
+    espeak-ng \
+    git \
+    build-essential \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# Crear directorio de trabajo
+WORKDIR /app
+
+# Actualizar pip primero (como sugiere el mensaje de error)
+RUN python -m pip install --upgrade pip
+
+# Copiar requirements (usa requirements.txt para Docker)
+COPY requirements.txt .
+
+# Instalar dependencias Python
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copiar código del backend
+COPY backend/ ./backend/
+COPY scripts/download_tts_model.py ./scripts/
+
+# Descargar modelo TTS durante la construcción
+RUN python scripts/download_tts_model.py
+
+# Exponer puerto
+EXPOSE 8004
+
+# Comando por defecto
+CMD ["uvicorn", "backend.server:app", "--host", "0.0.0.0", "--port", "8004", "--timeout-keep-alive", "300", "--ws-ping-interval", "180", "--ws-ping-timeout", "180"]

@@ -1,0 +1,30 @@
+# Modelador NGSI-LD — un solo servicio (FastAPI sirve SPA + /api en :8844 dentro del contenedor).
+# Uso en VM: copiar repo, crear .env a partir de .env.docker.example y:
+#   docker compose up -d --build
+
+services:
+  modelador:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: inn-data-space-modelador:latest
+    ports:
+      - "${HOST_PORT:-8844}:8844"
+    environment:
+      # CORS: orígenes del navegador (coma separados). "*" sin credenciales en cookie.
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+      LOG_FORMAT: ${LOG_FORMAT:-json}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      # Chatbot / AEA
+      AEA_WS_URL: ${AEA_WS_URL:-}
+      CHAT_LLM_URL: ${CHAT_LLM_URL:-}
+      CHAT_LLM_API_KEY: ${CHAT_LLM_API_KEY:-}
+      CHAT_LLM_TIMEOUT_SECONDS: ${CHAT_LLM_TIMEOUT_SECONDS:-30}
+      CHAT_CLIENT_ID: ${CHAT_CLIENT_ID:-modelador}
+      CHAT_LEVEL_ID: ${CHAT_LEVEL_ID:-default_level}
+      # RAG / ChromaDB
+      RAG_URL: ${RAG_URL:-}
+      RAG_API_KEY: ${RAG_API_KEY:-}
+      RAG_MAX_MB: ${RAG_MAX_MB:-20}
+      RAG_CHROMA_DB: ${RAG_CHROMA_DB:-default}
+    restart: unless-stopped

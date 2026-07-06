@@ -1,0 +1,27 @@
+# ============================================================
+# PROVEEDOR: Azure OpenAI
+# ============================================================
+# Las credenciales sensibles deben ir en el archivo .env:
+#   AZURE_OPENAI_API_KEY=...
+#
+# Las variables de entorno tienen prioridad sobre los valores
+# escritos aquí. Valores aquí = fallback si no hay .env.
+# ============================================================
+
+# ── Parámetros de rendimiento ─────────────────────────────────
+request_timeout: 120.0
+max_tool_calls: 5
+
+# ── Parámetros del modelo ─────────────────────────────────────
+temperature: 0.0
+max_tokens_gestor: 1024        # Respuestas del agente principal
+max_tokens_specialist: 512     # Respuestas de agentes especialistas
+
+# ── Credenciales Azure OpenAI ─────────────────────────────────
+# Env vars prioritarias:
+#   AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_DEPLOYMENT,
+#   AZURE_OPENAI_API_VERSION, AZURE_OPENAI_API_KEY
+azure_endpoint: "https://smart-data-model.openai.azure.com"
+azure_deployment: "gpt-4o-mini"
+azure_api_version: "2024-12-01-preview"
+# azure_api_key → usar .env, nunca escribirla aquí

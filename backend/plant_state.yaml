@@ -1,0 +1,96 @@
+server:
+  namespace_uri: urn:ConfigurablePlant:OPCUA
+nodes:
+- kind: Object
+  browse_name: Test_Assets
+  children:
+  - kind: Variable
+    browse_name: Sensor_Test_0
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_1
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_2
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_3
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_4
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_5
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_6
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_7
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_8
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_9
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000

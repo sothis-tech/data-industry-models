@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/IndustrialOven/schemas/Device.json",
+  "title": "Device (sin extendir)",
+  "description": "Modelo base sin modificar. Usar directamente el schema oficial de Smart Data Models.",
+  "$ref": "https://smart-data-models.github.io/dataModel.Device/Device/schema.json"
+}

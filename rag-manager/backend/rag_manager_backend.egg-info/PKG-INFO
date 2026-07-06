@@ -1,0 +1,14 @@
+Metadata-Version: 2.4
+Name: rag-manager-backend
+Version: 1.0.0
+Requires-Python: >=3.10
+Requires-Dist: fastapi
+Requires-Dist: uvicorn[standard]
+Requires-Dist: python-multipart
+Requires-Dist: httpx
+Requires-Dist: chromadb>=1.0.0
+Requires-Dist: llama-index-core
+Requires-Dist: llama-index-vector-stores-chroma
+Requires-Dist: llama-index-embeddings-huggingface
+Requires-Dist: sentence-transformers
+Requires-Dist: pymupdf

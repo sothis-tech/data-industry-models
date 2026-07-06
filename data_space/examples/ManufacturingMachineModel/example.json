@@ -1,0 +1,27 @@
+{
+  "id": "urn:ngsi-ld:ManufacturingMachineModel:e-therm-001",
+  "type": "ManufacturingMachineModel",
+  "name": "E-Therm Smoking & Cooking Chamber",
+  "description": "Cámara de ahumado y cocción E-Therm. Modelo de horno industrial para procesado de productos cárnicos (ahumado, cocción, secado, maduración).",
+  "manufacturerName": "Emerson Technik",
+  "brandName": "E-Therm",
+  "manufacturingMachineType": ["oven"],
+  "standardOperations": [
+    "reddeningWarming",
+    "roastingBaking",
+    "drying",
+    "smoking",
+    "cooking",
+    "evacuation",
+    "airCirculation",
+    "dryingMaturing",
+    "maturing",
+    "cleaning0",
+    "cleaning1",
+    "cleaning2"
+  ],
+  "processDescription": "Horno industrial con control de temperatura (producto, cámara 1-4, generador de humo), humedad psicométrica, programas de hasta 98 pasos y 100 programas configurable.",
+  "documentation": "https://example.com/ethern-manual-operation-instructions",
+  "dataProvider": "https://provider.example.com",
+  "source": "Manual Operation instructions Smoking & cooking chamber E-Therm"
+}

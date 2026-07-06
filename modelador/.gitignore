@@ -1,0 +1,31 @@
+# Backend
+backend/venv/
+backend/__pycache__/
+*.pyc
+*.pyo
+
+# Node (si se usa)
+node_modules/
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.local
+
+# Playwright / artefactos si se ejecuta desde la raíz del repo
+/test-results/
+/playwright-report/
+/blob-report/
+
+# Cursor: skills y ajustes locales (no versionar)
+.cursor/
+
+# Documentación binaria (PDF/DOCX) en docs/
+docs/*.pdf
+docs/*.docx

@@ -1,0 +1,24 @@
+# Dependencias de desarrollo (Jupyter, IPython, etc.)
+# Instalar con: pip install -r requirements-dev.txt
+
+# Jupyter y notebooks
+jupyter>=1.0.0
+jupyterlab>=4.0.0
+ipykernel>=6.29.0
+ipython>=9.2.0
+notebook>=7.0.0
+
+# Utilidades de desarrollo
+ipython_pygments_lexers>=1.1.0
+matplotlib-inline>=0.1.7
+
+# Herramientas de análisis y visualización (ya en requirements.txt pero por si acaso)
+pandas>=2.0.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# Utilidades adicionales
+debugpy>=1.8.0
+
+# MLflow para tracking de experimentos
+mlflow>=2.0.0

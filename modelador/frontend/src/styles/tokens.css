@@ -1,0 +1,106 @@
+/**
+ * Design tokens: custom properties compartidos por toda la aplicación.
+ * Tema oscuro en :root; tema claro en [data-theme="light"].
+ */
+:root,
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  /* Superficies */
+  --bg:        #0d1117;
+  --surface:   #161b22;
+  --surface-2: #1c2333;
+  --surface-3: #21262d;
+
+  /* Texto */
+  --text:  #e6edf3;
+  --muted: #7d8590;
+
+  /* Estructura */
+  --border: #30363d;
+
+  /* Acento / primario */
+  --accent:       #58a6ff;
+  --accent-hover: #79bfff;
+  --on-accent:    #0d1117;
+  --accent-dim:   rgba(88, 166, 255, 0.12);
+  --accent-10:    rgba(88, 166, 255, 0.10);
+
+  /* Semánticos */
+  --success: #3fb950;
+  --warning: #d29922;
+  --error:   #f85149;
+  --danger:  #e63946;
+
+  /* Utilidades de tema */
+  --implicit-line:  #aaa;
+  --badge-fg:       #fff;
+  --hover-surface:  rgba(255, 255, 255, 0.04);
+  --overlay:        rgba(0, 0, 0, 0.7);
+  --overlay-light:  rgba(0, 0, 0, 0.45);
+  --graph-label-shadow: rgba(0, 0, 0, 0.8);
+  --chat-overlay:   rgba(0, 0, 0, 0.25);
+  --chat-overlay-2: rgba(0, 0, 0, 0.35);
+  --chat-table-bg:  rgba(0, 0, 0, 0.2);
+  --panel-shadow:   rgba(0, 0, 0, 0.35);
+
+  /* Sombras */
+  --shadow-sm:  0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md:  0 4px 16px rgba(0, 0, 0, 0.45);
+  --shadow-lg:  0 8px 32px rgba(0, 0, 0, 0.55);
+  --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+
+  /* Radios */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* Tipografía */
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+
+  /* Alturas fijas del shell */
+  --topbar-h: 48px;
+  --tabs-h:   40px;
+  --status-h: 32px;
+}
+
+[data-theme='light'] {
+  color-scheme: light;
+
+  --bg:        #ffffff;
+  --surface:   #f6f8fa;
+  --surface-2: #eaeef2;
+  --surface-3: #d0d7de;
+
+  --text:  #1f2328;
+  --muted: #656d76;
+
+  --border: #d0d7de;
+
+  --accent:       #0969da;
+  --accent-hover: #0550ae;
+  --on-accent:    #ffffff;
+  --accent-dim:   rgba(9, 105, 218, 0.12);
+  --accent-10:    rgba(9, 105, 218, 0.10);
+
+  --success: #1a7f37;
+  --warning: #9a6700;
+  --error:   #cf222e;
+  --danger:  #cf222e;
+
+  --implicit-line:  #8b949e;
+  --badge-fg:       #ffffff;
+  --hover-surface:  rgba(0, 0, 0, 0.04);
+  --overlay:        rgba(0, 0, 0, 0.45);
+  --overlay-light:  rgba(0, 0, 0, 0.25);
+  --graph-label-shadow: rgba(0, 0, 0, 0.35);
+  --chat-overlay:   rgba(0, 0, 0, 0.06);
+  --chat-overlay-2: rgba(0, 0, 0, 0.08);
+  --chat-table-bg:  rgba(0, 0, 0, 0.04);
+  --panel-shadow:   rgba(0, 0, 0, 0.12);
+
+  --shadow-sm:  0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md:  0 4px 16px rgba(0, 0, 0, 0.10);
+  --shadow-lg:  0 8px 32px rgba(0, 0, 0, 0.14);
+  --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}

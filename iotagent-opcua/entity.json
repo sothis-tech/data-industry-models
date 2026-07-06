@@ -1,0 +1,12 @@
+ {
+  "@context": {
+    "temperature": "https://smartdatamodels.org/DeviceMeasurement.json#temperature",
+    "Device": "https://smartdatamodels.org/DeviceMeasurement.json#Device"
+  },
+  "id": "urn:ngsi-ld:Device:smart_device_test",
+  "type": "Device",
+  "temperature": {
+    "type": "Property",
+    "value": 25.0
+  }
+} 

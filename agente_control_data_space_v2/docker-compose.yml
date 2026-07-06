@@ -1,0 +1,54 @@
+services:
+  api-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: industrial-mcp-api
+    ports:
+      - "${API_PORT:-8082}:8082"
+    volumes:
+      # config_docker.yaml se monta como el config.yaml que la app lee en config/.
+      - ./config/config_docker.yaml:/app/config/config.yaml:ro
+      - ./config/providers:/app/config/providers:ro
+      - ./config/.env:/app/config/.env:ro
+      # Datos en runtime persistidos fuera del contenedor.
+      - ./var/logs:/app/var/logs
+      - ./var/results:/app/var/results
+      # Buffer temporal de gráficos del proyecto de las gafas.
+      - ./src/utils/chart_outputs:/app/src/utils/chart_outputs
+      # Caché de modelos HuggingFace y Torch — evita re-download en cada rebuild
+      - hf_cache:/app/.cache/hf
+      - torch_cache:/app/.cache/torch
+      - uv_cache:/app/.cache/uv
+      - ../chromadb_service/manuales:/app/manuales
+    env_file:
+      - ./config/.env
+    environment:
+      - API_PORT=8082
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app/src
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    networks:
+      - mcp-net
+      - red_iot
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  mcp-net:
+    external: true
+    name: mcp-net
+  red_iot:
+    external: true
+    name: red_iot
+
+volumes:
+  hf_cache:
+  torch_cache:
+  uv_cache:

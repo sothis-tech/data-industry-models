@@ -1,0 +1,60 @@
+server:
+  host: 0.0.0.0
+  port: 5679
+  name: "Mock OPC UA - Simple Plant"
+  application_uri: "urn:mock:simple:server"
+  namespace_uri: "urn:SimplePlant:OPCUA"
+  security: "None"  # None | Sign | SignAndEncrypt
+
+simulation:
+  default_update_ms: 1200
+
+nodes:
+  - kind: Object
+    browse_name: "PLC2"
+    children:
+
+      - kind: Variable
+        browse_name: "Temperature"
+        data_type: "Double"
+        writable: true
+        engineering_units: "°C"
+        simulation:
+          mode: "normal"
+          mean: 22.5
+          stddev: 0.4
+          min: 18.0
+          max: 28.0
+          update_ms: 800
+          noise:
+            enabled: true
+            type: "gaussian"
+            params:
+              mean: 0.0
+              stddev: 0.5
+          anomaly:
+            enabled: true
+            probability: 0.02
+            type: "spike"
+            params:
+              multiplier: 1.5
+              offset: 10.0
+
+      - kind: Variable
+        browse_name: "Speed"
+        data_type: "Int32"
+        writable: true
+        engineering_units: "m/s"
+        simulation:
+          mode: "normal"
+          mean: 120
+          stddev: 8
+          min: 0
+          max: 200
+          update_ms: 1000
+          anomaly:
+            enabled: true
+            probability: 0.005
+            type: "drop"
+            params:
+              value: 0

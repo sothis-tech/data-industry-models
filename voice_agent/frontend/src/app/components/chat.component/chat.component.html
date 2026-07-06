@@ -1,0 +1,33 @@
+<div class="chat-wrapper" [class.dark-mode]="isDarkMode">
+  <div class="chat-container">
+    <div class="chat-header">
+      <h2>💬 Chatbot</h2>
+      <button class="toggle-theme" (click)="toggleDarkMode()">
+        {{ isDarkMode ? '☀️ Light Mode' : '🌙 Dark Mode' }}
+      </button>
+    </div>
+
+    <div class="chat-window">
+      <div *ngFor="let m of messages" class="msg-pair">
+        <div [ngClass]="m.from" class="message fade-in">{{ m.text }}</div>
+      </div>
+
+      <div *ngIf="isTalking" class="msg-pair">
+        <div class="user message typing-indicator">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        </div>
+      </div>
+
+      <div *ngIf="isProcessing" class="msg-pair">
+        <div class="bot message typing-indicator">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button (click)="startCapture()" [disabled]="isTalking">🎤 Start</button>
+      <button (click)="stopCapture()" [disabled]="!isTalking">⏹ Stop</button>
+    </div>
+  </div>
+</div>

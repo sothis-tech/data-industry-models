@@ -1,0 +1,18 @@
+# binarios e imágenes Docker: NUNCA al git
+*.tar
+# generados
+.venv/
+**/.venv/
+node_modules/
+**/node_modules/
+__pycache__/
+*.pyc
+opcua-sim-v2-docker/
+
+.mypy_cache/
+**/.mypy_cache/
+
+# iotagent-opcua OPC UA: identidad/clave privada del agente y locks (no subir)
+iotagent-opcua/certificates/own/
+**/certificates/**/mutex.lock
+chromadb_service/chroma_data/

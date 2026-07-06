@@ -1,0 +1,25 @@
+# ============================================================
+# PROVEEDOR: vLLM Local
+# ============================================================
+# Las credenciales opcionales pueden ir en el archivo .env:
+#   VLLM_API_BASE=...
+#   VLLM_API_KEY=...
+#
+# Las variables de entorno tienen prioridad sobre los valores
+# escritos aquí. Valores aquí = fallback si no hay .env.
+# ============================================================
+
+# ── Parámetros de rendimiento ─────────────────────────────────
+request_timeout: 240.0         # Más tiempo: inferencia local más lenta
+max_tool_calls: 10
+
+# ── Parámetros del modelo ─────────────────────────────────────
+temperature: 0.1
+max_tokens_gestor: 2048
+max_tokens_specialist: 1024
+
+# ── Modelo y endpoint ─────────────────────────────────────────
+# Env vars prioritarias: VLLM_API_BASE, VLLM_API_KEY
+default_model: "hugging-quants/Meta-Llama-3.1-8B-Instruct-GPTQ-INT4"
+api_base: "http://localhost:8000/v1"
+api_key: "vllm-industrial-key"

@@ -1,0 +1,10 @@
+{
+  "id": "urn:ngsi-ld:Device:burner-001",
+  "type": "Device",
+  "name": "Quemador",
+  "description": "Quemador en variante gas. Referencia al fabricante según manual E-Therm (burner/burners manufacturer).",
+  "category": ["actuator"],
+  "controlledProperty": ["temperature"],
+  "dataProvider": "https://provider.example.com",
+  "source": "Sistema E-Therm"
+}

@@ -1,0 +1,133 @@
+version: 1
+disable_existing_loggers: false
+
+filters:
+  context_filter:
+    (): engine.logging_setup.ContextFilter
+  redact_filter:
+    (): engine.logging_setup.SecretRedactionFilter
+
+formatters:
+  console:
+    format: "%(asctime)s.%(msecs)03d [%(levelname)-7s] %(name)-25s │ %(message)s"
+    datefmt: "%H:%M:%S"
+
+  standard:
+    format: "%(asctime)s.%(msecs)03d [%(levelname)-7s] %(name)s [%(session_id)s/%(request_id)s] %(message)s"
+    datefmt: "%Y-%m-%d %H:%M:%S"
+
+  detailed:
+    format: "%(asctime)s.%(msecs)03d [%(levelname)-7s] %(name)s [%(session_id)s/%(request_id)s] %(filename)s:%(lineno)d │ %(message)s"
+    datefmt: "%Y-%m-%d %H:%M:%S"
+
+  json:
+    (): engine.logging_setup.JsonFormatter
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: console
+    stream: ext://sys.stdout
+    filters: [context_filter, redact_filter]
+
+  file_app:
+    class: logging.handlers.TimedRotatingFileHandler
+    level: INFO
+    formatter: standard
+    filename: app/app.log
+    when: midnight
+    interval: 1
+    backupCount: 14
+    encoding: utf-8
+    filters: [context_filter, redact_filter]
+
+  file_errors:
+    class: logging.handlers.TimedRotatingFileHandler
+    level: WARNING
+    formatter: detailed
+    filename: errors/errors.log
+    when: midnight
+    interval: 1
+    backupCount: 30
+    encoding: utf-8
+    filters: [context_filter, redact_filter]
+
+  file_conversations:
+    class: logging.handlers.TimedRotatingFileHandler
+    level: INFO
+    formatter: json
+    filename: conversations/conversations.jsonl
+    when: midnight
+    interval: 1
+    backupCount: 60
+    encoding: utf-8
+    filters: [context_filter]
+
+  file_metrics:
+    class: logging.handlers.TimedRotatingFileHandler
+    level: INFO
+    formatter: json
+    filename: metrics/metrics.jsonl
+    when: midnight
+    interval: 1
+    backupCount: 30
+    encoding: utf-8
+    filters: [context_filter]
+
+loggers:
+  # ── Loggers del proyecto ─────────────────────────────────────────────
+  mcp:
+    level: DEBUG
+    handlers: [console, file_app, file_errors]
+    propagate: false
+
+  mcp.client:
+    level: DEBUG
+    propagate: true
+
+  mcp.api:
+    level: INFO
+    propagate: true
+
+  mcp.servers:
+    level: INFO
+    propagate: true
+
+  mcp.tools:
+    level: DEBUG
+    propagate: true
+
+  mcp.agent:
+    level: INFO
+    propagate: true
+
+  mcp.conversations:
+    level: INFO
+    handlers: [file_conversations]
+    propagate: false
+
+  mcp.metrics:
+    level: INFO
+    handlers: [file_metrics]
+    propagate: false
+
+  # ── Librerías terceras ───────────────────────────────────────────────
+  # NOTA: NO poner un logger 'mcp' aquí — colisiona con el padre del proyecto.
+  httpx:               { level: WARNING, propagate: true }
+  httpcore:            { level: WARNING, propagate: true }
+  openai:              { level: WARNING, propagate: true }
+  openai._base_client: { level: WARNING, propagate: true }
+  llama_index:         { level: WARNING, propagate: true }
+  urllib3:             { level: WARNING, propagate: true }
+  uvicorn:             { level: INFO,    propagate: true }
+  uvicorn.access:      { level: WARNING, propagate: true }
+  fastapi:             { level: INFO,    propagate: true }
+
+  # Silenciamos asyncio: sus errores de cierre de async generators durante
+  # Ctrl+C son ruidosos y no indican un problema real (bug conocido MCP+Py3.13).
+  asyncio:             { level: CRITICAL, propagate: true }
+
+root:
+  level: WARNING
+  handlers: [console, file_app, file_errors]

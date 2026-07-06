@@ -1,0 +1,279 @@
+server:
+  host: 0.0.0.0
+  port: 5679
+  name: "Mock OPC UA - Configurable Plant"
+  application_uri: "urn:mock:configurable:server"
+  namespace_uri: "urn:ConfigurablePlant:OPCUA"
+  security: "None"  # None | Sign | SignAndEncrypt (este ejemplo usa None)
+
+simulation:
+  # fallback cuando una variable no defina update_ms
+  default_update_ms: 1200
+
+nodes:
+  - kind: Object
+    browse_name: "PLC"
+    children:
+
+      - kind: Variable
+        browse_name: "LastUpdate"
+        data_type: "DateTime"
+        writable: true
+        simulation:
+          mode: "now"           # now | step | jitter
+          update_ms: 1000
+
+      - kind: Object
+        browse_name: "Line1"
+        children:
+          - kind: Variable
+            browse_name: "Temperature"
+            data_type: "Double"
+            writable: true
+            engineering_units: "°C"
+            simulation:
+              mode: "normal"     # normal | uniform | choice | toggle | step
+              mean: 22.5
+              stddev: 0.4
+              min: 18.0
+              max: 28.0
+              update_ms: 800
+              # EJEMPLO 1: Ruido Gaussiano y Anomalías de Pico
+              noise:
+                enabled: true
+                type: "gaussian"
+                params:
+                  mean: 0.0
+                  stddev: 0.5    # Añade una oscilación extra a la curva normal
+              anomaly:
+                enabled: true
+                probability: 0.02 # 2% de probabilidad de que ocurra un pico
+                type: "spike"
+                params:
+                  multiplier: 1.5
+                  offset: 10.0   # Dispara la temperatura temporalmente
+
+          - kind: Variable
+            browse_name: "Pressure"
+            data_type: "Float"
+            writable: true
+            simulation:
+              mode: "uniform"
+              min: 0.8
+              max: 1.2
+              update_ms: 900
+              # EJEMPLO 2: Ruido Blanco (porcentual) y Anomalías de Caída
+              noise:
+                enabled: true
+                type: "white"
+                params:
+                  percent: 2.0   # Varía el valor un +/- 2%
+              anomaly:
+                enabled: true
+                probability: 0.01 # 1% de probabilidad
+                type: "drop"
+                params:
+                  value: 0.0     # Simula una despresurización o sensor desconectado
+
+          - kind: Variable
+            browse_name: "Speed"
+            data_type: "Int32"
+            writable: true
+            simulation:
+              mode: "normal"
+              mean: 120
+              stddev: 8
+              min: 0
+              max: 200
+              update_ms: 1000
+              # EJEMPLO 3: Solo Anomalía (Fallo de motor) en un entero
+              anomaly:
+                enabled: true
+                probability: 0.005 # Muy raro (0.5%)
+                type: "drop"
+                params:
+                  value: 0         # El motor se para bruscamente
+
+          - kind: Variable
+            browse_name: "Running"
+            data_type: "Boolean"
+            writable: true
+            simulation:
+              mode: "toggle"
+              update_ms: 1500
+
+          - kind: Variable
+            browse_name: "Mode"
+            data_type: "String"
+            writable: true
+            simulation:
+              mode: "choice"
+              choices: ["AUTO", "MANUAL", "MAINT"]
+              update_ms: 2000
+
+          - kind: Variable
+            browse_name: "QualityCodes"
+            data_type: "Int32"
+            value_rank: 1           # array 1D
+            array_length: 5
+            writable: true
+            simulation:
+              mode: "choice"
+              choices: [0,0,0,1,2]
+              update_ms: 1800
+
+          - kind: Object
+            browse_name: "Sensors"
+            children:
+              - kind: Variable
+                browse_name: "S1"
+                data_type: "Float"
+                writable: true
+                simulation:
+                  mode: "step"       # Cambiamos a step para ver el efecto del ruido sobre una rampa
+                  min: 0
+                  max: 100
+                  step: 2.0
+                  # EJEMPLO 4: Sensor ruidoso sobre un patrón en escalera (rampa)
+                  noise:
+                    enabled: true
+                    type: "gaussian"
+                    params:
+                      mean: 0.0
+                      stddev: 3.5
+              - kind: Variable
+                browse_name: "S2"
+                data_type: "Float"
+                writable: true
+                simulation:
+                  mode: "uniform"
+                  min: 0
+                  max: 100
+              - kind: Variable
+                browse_name: "S3"
+                data_type: "Float"
+                writable: true
+                simulation:
+                  mode: "uniform"
+                  min: 0
+                  max: 100
+
+          - kind: Method
+            browse_name: "ResetSpeed"
+            input_args:
+              - { name: "targetSpeed", data_type: "Int32" }
+            output_args:
+              - { name: "oldSpeed", data_type: "Int32" }
+              - { name: "newSpeed", data_type: "Int32" }
+            implementation: "reset_speed"   # hook por nombre (lo implementamos en el código)
+
+      - kind: Object
+        browse_name: "Line2"
+        children:
+          - kind: Variable
+            browse_name: "Temperature"
+            data_type: "Double"
+            writable: true
+            simulation:
+              mode: "normal"
+              mean: 24.0
+              stddev: 0.5
+              min: 18
+              max: 30
+              # EJEMPLO 5: Ruido Uniforme
+              noise:
+                enabled: true
+                type: "uniform"
+                params:
+                  min: -1.5
+                  max: 1.5
+
+          - kind: Variable
+            browse_name: "Pressure"
+            data_type: "Float"
+            writable: true
+            simulation:
+              mode: "uniform"
+              min: 0.7
+              max: 1.3
+
+          - kind: Variable
+            browse_name: "Speed"
+            data_type: "Int32"
+            writable: true
+            simulation:
+              mode: "normal"
+              mean: 90
+              stddev: 12
+              min: 0
+              max: 200
+
+          - kind: Variable
+            browse_name: "Running"
+            data_type: "Boolean"
+            writable: true
+            simulation:
+              mode: "toggle"
+
+          - kind: Variable
+            browse_name: "Mode"
+            data_type: "String"
+            writable: true
+            simulation:
+              mode: "choice"
+              choices: ["AUTO","MANUAL","MAINT"]
+
+          - kind: Variable
+            browse_name: "QualityCodes"
+            data_type: "Int32"
+            value_rank: 1
+            array_length: 3
+            writable: true
+            simulation:
+              mode: "choice"
+              choices: [0,0,1,2,3]
+
+          - kind: Object
+            browse_name: "Sensors"
+            children:
+              - kind: Variable
+                browse_name: "S4"
+                data_type: "Float"
+                writable: true
+                simulation: { mode: "uniform", min: 20, max: 80 }
+              - kind: Variable
+                browse_name: "S5"
+                data_type: "Float"
+                writable: true
+                simulation: { mode: "uniform", min: 20, max: 80 }
+
+      # Ejemplo matriz 2x3 para probar ValueRank y ArrayDimensions
+      - kind: Variable
+        browse_name: "FloatMatrix2x3"
+        data_type: "Float"
+        value_rank: 2          # matriz
+        array_dimensions: [2, 3]
+        writable: true
+        simulation:
+          mode: "uniform"
+          min: 0.4
+          max: 0.6
+          # EJEMPLO 6: Ruido aplicado a elementos de una matriz (cada valor muta independiente)
+          noise:
+            enabled: true
+            type: "white"
+            params:
+              percent: 5.0
+
+      # Algunos tipos básicos adicionales
+      - kind: Variable
+        browse_name: "GuidExample"
+        data_type: "Guid"
+        writable: true
+        simulation: { mode: "guid" }
+
+      - kind: Variable
+        browse_name: "ByteStringExample"
+        data_type: "ByteString"
+        writable: true
+        initial: "0x010203FE"     # puedes usar initial para fijar valor inicial
