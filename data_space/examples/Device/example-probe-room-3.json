@@ -1,0 +1,10 @@
+{
+  "id": "urn:ngsi-ld:Device:probe-room-3",
+  "type": "Device",
+  "name": "Sonda temperatura cámara 3",
+  "description": "Termómetro de ambiente en cámara. Punto de medida 3 de 4.",
+  "category": ["sensor"],
+  "controlledProperty": ["temperature"],
+  "dataProvider": "https://provider.example.com",
+  "source": "Sistema E-Therm"
+}

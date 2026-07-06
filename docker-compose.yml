@@ -1,0 +1,397 @@
+version: '3.8'
+
+services:
+  # 1. Servidor MQTT (Mosquitto)
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: dataspace-mqtt_broker
+    restart: unless-stopped
+    ports:
+      - "1884:1883"
+      - "9002:9001"
+
+  # 2. Middleware (posible cambio por iotagent)
+  # sparkplug-middleware:
+  #   build: .
+  #   container_name: sparkplug_middleware
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - mosquitto
+  #   ports:
+  #     - "5001:5000"
+  #   environment:
+  #     - MQTT_BROKER=mosquitto 
+  #     - MQTT_PORT=1883
+  #     - FIWARE_BROKER_URL=http://fiware-orion-ld:1026
+  #     - GROUP_ID=AUTO
+  #     - BROWSE_PROF=true
+  #   volumes:
+  #     - ./middleware_state.json:/app/middleware_state.json
+  #     - ./middleware_mapping.json:/app/middleware_mapping.json
+  #     - ./templates:/app/templates
+
+  # 3. Mongo / BD
+  mongo:
+    image: mongo:4.4
+    container_name: dataspace-mongo
+    restart: unless-stopped
+    ports:
+      - "27020:27017"
+    volumes:
+      - mongo_data_dataspace:/data/db
+
+  # 4. FIWARE
+  orion-ld:
+    image: fiware/orion-ld:1.12.0
+    container_name: dataspace-orion-ld
+    restart: unless-stopped
+    depends_on:
+      - mongo
+    ports:
+      - "1027:1026"
+    command: [ "-dbhost", "dataspace-mongo", "-logLevel", "DEBUG" ]
+    environment:
+      - ORIONLD_MONGO_HOST=dataspace-mongo
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:1026/version"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # 5. Quantum leap (+ CrateDB)
+  crate-db:
+    image: crate:6.2.3
+    #hostname: crate-db
+    container_name: dataspace-crate-db
+    restart: unless-stopped
+    ports:
+        - "4202:4200"
+        - "4302:4300"
+    command:
+        crate -Cauth.host_based.enabled=false -Chttp.cors.enabled=true -Chttp.cors.allow-origin="*"
+    volumes:
+        - crate_data_dataspace:/data
+    # environment:
+    #     - CRATE_HEAP_SIZE=2g
+
+  quantumleap:
+    #image: fiware/quantum-leap
+    image: orchestracities/quantumleap:1.0.0
+    #hostname: quantumleap
+    container_name: dataspace-quantumleap
+    restart: unless-stopped
+    ports:
+        - "8669:8668"
+    depends_on:
+        - crate-db
+    environment:
+        - CRATE_HOST=dataspace-crate-db
+
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: dataspace-rag-chromadb
+    command: ["run", "--host", "0.0.0.0", "--port", "8002"]
+    ports:
+      - "8012:8002"
+    volumes:
+      - ./chromadb_service/chroma_data:/chroma          # ← /data en lugar de /chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+      - ANONYMIZED_TELEMETRY=FALSE
+    networks:
+      - default
+    restart: unless-stopped
+#    healthcheck:
+#      test: ["CMD-SHELL", "timeout 1s bash -c ':> /dev/tcp/127.0.0.1/8002' || exit 1"]
+#      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/127.0.0.1/8002' || exit 1"]
+#      interval: 20s
+#      timeout: 5s
+#      retries: 5
+#      start_period: 15s
+
+  rag-manager:
+    build:
+      context: ./rag-manager/backend
+      dockerfile: Dockerfile
+    image: inn-rag-manager:latest
+    container_name: dataspace-rag-manager
+    restart: unless-stopped
+    ports:
+      - "8300:8300"
+    environment:
+      CHROMA_HOST: chromadb
+      CHROMA_PORT: 8002
+      CHROMA_COLLECTION: manuales_tecnicos
+      DOCS_PATH: /data/rag_docs
+      HF_HOME: /data/hf_cache
+      PORT: 8300
+    volumes:
+      - rag_docs:/data/rag_docs
+      - hf_cache:/data/hf_cache
+    networks:
+      - default
+ #     - mcp-net
+  
+  # 6. Modelador
+  modelador:
+    build:
+      context: ./modelador
+      dockerfile: Dockerfile
+    image: inn-data-space-modelador:latest
+    container_name: dataspace-modelador
+    env_file:
+      - ./modelador/.env
+    ports:
+      - "${HOST_PORT:-8844}:8844"
+    environment:
+      # CORS: orígenes del navegador (coma separados). "*" sin credenciales en cookie.
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+      LOG_FORMAT: ${LOG_FORMAT:-json}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  # 7. Postgres Keycloak Kong
+  postgres:
+    image: postgres:15
+    container_name: dataspace-postgres_kc
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=keycloak
+      - POSTGRES_USER=keycloak
+      - POSTGRES_PASSWORD=keycloak
+    volumes:
+      - kc_pg:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: dataspace-keycloak
+    restart: unless-stopped
+    environment:
+      - KC_DB=postgres
+      - KC_DB_URL=jdbc:postgresql://postgres:5432/keycloak
+      - KC_DB_USERNAME=keycloak
+      - KC_DB_PASSWORD=keycloak
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin_kc
+      - KC_HOSTNAME_URL=http://localhost:8085
+      - KC_HOSTNAME_ADMIN_URL=http://localhost:8085
+      - KC_HOSTNAME_STRICT=false
+      - KC_HTTP_ENABLED=true
+    command: ["start", "--http-port=8085"]
+    depends_on:
+      - postgres
+    ports:
+      - "8085:8085"
+    
+  kong:
+    build:
+      context: .                   # donde está tu Dockerfile y la carpeta plugins/
+      dockerfile: DockerfileKong   # el Dockerfile que copia el plugin tenant-role
+    container_name: dataspace-kong
+    restart: unless-stopped
+    depends_on:
+      - orion-ld
+      - keycloak
+    environment:
+      KONG_DATABASE: "off"                       # modo DB-less
+      KONG_DECLARATIVE_CONFIG: "/kong/kong.yml"
+      KONG_PROXY_LISTEN: "0.0.0.0:8000"
+      KONG_ADMIN_LISTEN: "0.0.0.0:8001"
+      KONG_LOG_LEVEL: "debug"
+    volumes:
+      - ./kong:/kong                 
+    ports:
+      - "8010:8000"    # proxy público
+      - "8011:8001"    # Admin API
+
+  # 8. MCP-Server
+  mcp-server:
+    build:
+      context: ./agente_control_data_space_v2
+      dockerfile: Dockerfile
+    image: agente-control-data-space:latest
+    container_name: dataspace-mcp-server
+    restart: unless-stopped
+    depends_on:
+      orion-ld:
+        condition: service_healthy
+      mosquitto:
+        condition: service_started
+      quantumleap:
+        condition: service_started
+      chromadb:
+        condition: service_started
+    ports:
+      - "${API_PORT:-8082}:8082"
+    env_file:
+      - ./agente_control_data_space_v2/config/.env
+    environment:
+      - API_PORT=8082
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app/src 
+    volumes:
+      - ./agente_control_data_space_v2/config/config_docker.yaml:/app/config/config.yaml:ro   # ← config/
+      - ./agente_control_data_space_v2/config/providers:/app/config/providers:ro              # ← config/
+      - ./agente_control_data_space_v2/config/.env:/app/config/.env:ro                        # ← config/
+      - ./agente_control_data_space_v2/var/logs:/app/var/logs                                 # ← var/
+      - ./agente_control_data_space_v2/var/results:/app/var/results                           # ← var/
+      - ./agente_control_data_space_v2/src/utils/chart_outputs:/app/src/utils/chart_outputs   # ← src/utils/
+      - hf_cache:/app/.cache/hf
+      - torch_cache:/app/.cache/torch
+      - uv_cache:/app/.cache/uv
+      - ./chromadb_service/manuales:/app/manuales
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  voice-agent:
+    build:
+      context: ./voice_agent
+      dockerfile: Dockerfile.backend
+    container_name: dataspace-voice-agent
+    ports:
+      - "8014:8004"
+    env_file:
+      - ./voice_agent/config.env
+      - ${BACKEND_ENV_FILE:-./voice_agent/config.dev.env}
+    volumes:
+      - ./voice_agent/backend:/app/backend
+      - ./voice_agent/scripts:/app/scripts
+      - ./voice_agent/output:/app/output
+      - whisper_cache:/root/.cache/whisper
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+  # 9. iotagent OPCUA
+  iot-agent:
+    build:
+      context: ./iotagent-opcua
+      dockerfile: docker/Dockerfile
+    image: iotagent-opcua:sothis
+    hostname: iotagent-opcua
+    container_name: dataspace-iotagent-opcua
+    restart: unless-stopped
+    depends_on:
+      - mongo
+      - orion-ld
+      - context-provider
+    # networks:
+    #   - hostnet
+    ports:
+      - "4041:4041"
+      - "9229:9229"
+    environment:
+      - "CONFIGURATION_TYPE=dynamic"
+      - "IOTA_CB_HOST=orion-ld"
+      - "IOTA_CB_PORT=1026"
+      - "IOTA_CB_NGSIVERSION=ld"
+      - "IOTA_JSON_LD_CONTEXT=http://context-provider/industrial-oven-context.jsonld"
+      - "IOTA_FALLBACK_TENANT=ibermot"
+      - "IOTA_RELAX_TEMPLATE_VALIDATION=true"
+      - "IOTA_CB_SERVICE=ibermot"
+      - "IOTA_CB_SUBSERVICE=/"
+      - "DEFAULT_KEY=iot"
+      - "IOTA_REGISTRY_TYPE=mongodb"
+      - "IOTA_MONGO_HOST=mongo"
+      - "IOTA_MONGO_PORT=27017"
+      - "IOTA_MONGO_DB=iotagent_opcua"
+      - "IOTA_NORTH_PORT=4041"
+      - "IOTA_PROVIDER_URL=http://iotagent-opcua:4041"
+    volumes:
+      - ./iotagent-opcua/conf:/opt/iotagent-opcua/conf
+  
+  # Servidor de Contextos (para iotagent y modelador principalmente, pero accesible para cualquier servicio que quiera consultar contextos predefinidos o subir nuevos)
+  context-provider:
+    image: nginx:alpine
+    hostname: context-provider
+    container_name: dataspace-context-provider
+    restart: unless-stopped
+    # networks:
+    #   - hostnet
+    ports:
+      - "8080:80"
+    volumes:
+      - ./data_space/context:/usr/share/nginx/html:ro
+
+  # 10. Nuestro Backend (API Vinculador + Simulador OPC UA)
+  opcua-linker-backend:
+    build: 
+      context: simulador/backend # Asegúrate de que la ruta apunte a la carpeta del backend
+    container_name: dataspace-opcua-backend
+    restart: unless-stopped
+    ports:
+      - "8020:8000"  # API accesible desde tu host en el 8020
+      - "5679:5679"  # Puerto del servidor OPC UA
+    volumes:
+      - ./backend/plant_state.yaml:/app/plant_state.yaml
+    networks:
+      - default # Usamos tu red "default" (red_dataspace)
+
+  # 11. Nuestro Frontend (UI en React servida por Nginx)
+  opcua-linker-frontend:
+    build: 
+      context: simulador/frontend # Asegúrate de que la ruta apunte a la carpeta del frontend
+    container_name: dataspace-opcua-frontend
+    restart: unless-stopped
+    ports:
+      - "8030:80" # El dashboard será accesible en http://IP_DE_TU_SERVIDOR:8030
+    depends_on:
+      - opcua-linker-backend
+    # volumes:      
+    # Sobrescribimos el config.js compilado con uno que tenemos en el host
+    #   - ./config_produccion.js:/usr/share/nginx/html/config.js
+    networks:
+      - default
+
+
+#  frontend:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile.frontend
+#    container_name: voice-agent-frontend
+#    ports:
+#      - "4201:4200"
+#    restart: unless-stopped
+#    depends_on:
+#      - backend
+
+# ════════════════════════════════════════════════════════════════════════════
+# VOLUMENES (declarados todos los que se usan)
+# ════════════════════════════════════════════════════════════════════════════
+volumes:
+  mongo_data_dataspace:
+  crate_data_dataspace:
+  kc_pg:
+  rag_docs:
+  hf_cache:
+  torch_cache:
+  uv_cache:
+  whisper_cache:
+
+# ════════════════════════════════════════════════════════════════════════════
+# REDES
+# ════════════════════════════════════════════════════════════════════════════
+networks:
+  default:
+    name: red_dataspace
+  
+#  mcp-net:
+#    external: true
+#    name: mcp-net

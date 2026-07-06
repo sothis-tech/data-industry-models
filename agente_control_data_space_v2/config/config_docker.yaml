@@ -1,0 +1,157 @@
+# ============================================================
+# CONFIGURACIÓN PRINCIPAL
+# Para cambiar de proveedor edita únicamente "provider".
+# Los parámetros de cada proveedor están en:
+#   configs/providers/<provider>.yaml
+# ============================================================
+agent:
+  provider: "azure"   # opciones: "azure" | "openai" | "local"
+  agent_mode: "multi"   # "multi" (Gestor + 1 especialista por MCP) | "single" (un agente con todas las tools)
+
+
+# ============================================================
+# SERVIDORES MCP (Modo STDIO)
+# ============================================================
+servers:
+  mongodb_demo:
+    enabled: false
+    type: "stdio"
+    command: "uv"
+    args: ["--quiet", "run", "src/servers/mongodb_server.py", "--server_type=stdio"]
+    env:
+      MONGO_URI: "mongodb://localhost:27020/"
+    description: "Servidor MongoDB para gestión de documentos"
+
+  mongodb:
+    enabled: false
+    type: "stdio"
+    command: "npx"
+    args: ["-y", "mongodb-mcp-server@latest", "--readOnly"]
+    env:
+      MDB_MCP_CONNECTION_STRING: "mongodb://localhost:27020"
+    description: "Servidor oficial de MongoDB (Solo lectura)"
+
+  sparkplug_demo:
+    enabled: false
+    type: "stdio"
+    command: "uv"
+    args: ["--quiet", "run", "src/servers/sparkplug_server.py", "--server_type=stdio"]
+    env:
+      #SPARKPLUG_API_URL: "http://host.docker.internal:5001/api"
+      SPARKPLUG_API_URL: "http://sparkplug-middleware:5000/api"
+    description: "Servidor Industrial IoT"
+
+  rag_knowledge:
+    enabled: true
+    type: "stdio"
+    command: "uv"
+    args: ["--quiet", "run", "src/servers/rag_server.py", "--server_type=stdio"]
+    env:
+      #HF_HOME: "/data/proyectos/hf_cache"
+      #TORCH_HOME: "/data/proyectos/torch_cache"
+      #UV_CACHE_DIR: "/data/uv_cache"
+      HF_HOME: "/app/.cache/hf"
+      TORCH_HOME: "/app/.cache/torch"
+      UV_CACHE_DIR: "/app/.cache/uv"
+      CHROMA_HOST: "chromadb"   # ← nombre del contenedor
+      CHROMA_PORT: "8002"                  # ← puerto INTERNO de chroma
+      CHROMA_COLLECTION: "manuales_tecnicos"
+      CHROMA_DOCS_PATH: "/app/manuales"
+    description: "Base de Conocimiento Vectorial (Manuales PDF)"
+
+  filesystem:
+    enabled: false
+    type: "stdio"
+    command: "uv"
+    args: ["run", "src/servers/filesystem_server.py", "--server_type=stdio"]
+    description: "Servidor filesystem"
+
+  sql_server_demo:
+    enabled: false
+    type: "stdio"
+    command: "uv"
+    args: ["run", "src/servers/sql_server_server.py", "--server_type=stdio"]
+
+  sqlite_demo:
+    enabled: false
+    type: "stdio"
+    command: "uv"
+    args: ["run", "src/servers/sqlite_server.py", "--server_type=stdio"]
+
+  time_service:
+    enabled: false
+    type: "stdio"
+    command: "uvx"
+    args: ["mcp-server-time", "--local-timezone=Europe/Madrid"]
+    description: "Servidor de hora mundial oficial"
+
+  orion_ld:
+    enabled: true
+    type: stdio
+    command: uv
+    args:
+      - "--quiet"
+      - run
+      - src/servers/orion_server.py
+      - --server_type=stdio
+    env:
+      # ORION_URL: "http://host.docker.internal:1027"
+      ORION_URL: "http://orion-ld:1026"
+      NGSI_CONTEXT_URL: "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
+      NGSI_TENANT: ""
+      ORION_TIMEOUT: "15"
+    description: "Context Broker Orion-LD - NGSI-LD (solo lectura)"
+
+  cratedb_demo:
+    enabled: false
+    type: "stdio"
+    command: "uv"
+    args: ["--quiet", "run", "src/servers/cratedb_server.py", "--server_type=stdio"]
+    env:
+      CRATEDB_HOST: "localhost"
+      CRATEDB_PORT: "4202"
+      CRATEDB_USER: "crate"
+      CRATEDB_PASSWORD: ""
+      CRATEDB_SCHEMA: "doc"
+      CRATEDB_TIMEOUT: "30"
+    description: "CrateDB directo (desactivado — se usa vía Quantum Leap)"
+ 
+  quantumleap:
+    enabled: true
+    type: "stdio"
+    command: "uv"
+    args: ["--quiet", "run", "src/servers/quantumleap_server.py", "--server_type=stdio"]
+    env:
+      # QL_HOST: "host.docker.internal"
+      QL_HOST: "quantumleap"
+      QL_PORT: "8668"            # ← cambia aquí si el puerto cambia
+      QL_FIWARE_SERVICE: ""   
+      QL_FIWARE_SERVICEPATH: "/"
+      QL_TIMEOUT: "30"
+    description: "Quantum Leap — Histórico NGSI-LD (IoT time-series)"
+
+
+  # chart_engine:
+  #   enabled: false
+  #   type: "stdio"
+  #   command: "uv"
+  #   args: ["--quiet", "run", "src/servers/chart_engine_server.py", "--server_type=stdio"]
+  #   env:
+  #     #QL_HOST: "localhost"
+  #     QL_HOST: "host.docker.internal"
+  #     QL_PORT: "8669"
+  #     NGSI_TENANT: ""
+  #     CHART_OUTPUT_DIR: "./chart_outputs"
+  #     #CHART_BASE_URL: "http://localhost:8082"
+  #     CHART_BASE_URL: "http://host.docker.internal:8082"
+  #     CHART_TTL_MINUTES: "60"
+  #   description: "Motor de gráficos — genera templates accesibles via URL"
+
+
+# ============================================================
+# CONFIGURACIÓN DE LA APP (Streamlit)
+# ============================================================
+app:
+  title: "Chat MCP Industrial"
+  layout: "wide"
+  page_icon: "🏭"

@@ -1,0 +1,3 @@
+@echo off
+echo Iniciando servidor backend con timeout extendido...
+uvicorn backend.server:app --reload --reload-include config.env --timeout-keep-alive 300 --ws-ping-interval 180 --ws-ping-timeout 180

@@ -1,0 +1,70 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #0f0f0f;
+  --bg2:       #161616;
+  --bg3:       #1e1e1e;
+  --border:    #2a2a2a;
+  --border2:   #3a3a3a;
+  --text:      #e8e8e8;
+  --text2:     #888;
+  --text3:     #555;
+  --accent:    #4ade80;
+  --accent2:   #166534;
+  --warn:      #fbbf24;
+  --warn2:     #78350f;
+  --danger:    #f87171;
+  --danger2:   #7f1d1d;
+  --info:      #60a5fa;
+  --info2:     #1e3a5f;
+  --radius:    6px;
+  --radius2:   10px;
+  --mono:      "IBM Plex Mono", monospace;
+  --sans:      "IBM Plex Sans", sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+button {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border2);
+  background: var(--bg3);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+button:hover:not(:disabled) { background: #2a2a2a; border-color: #4a4a4a; }
+button:disabled { opacity: 0.4; cursor: not-allowed; }
+button.primary { background: var(--accent2); border-color: var(--accent); color: var(--accent); }
+button.primary:hover:not(:disabled) { background: #1a4a2a; }
+button.danger  { color: var(--danger); border-color: var(--danger2); }
+button.danger:hover:not(:disabled) { background: var(--danger2); }
+
+input, select {
+  font-family: var(--sans);
+  font-size: 13px;
+  padding: 7px 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border2);
+  background: var(--bg2);
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s;
+}
+input:focus, select:focus { border-color: var(--accent); }
+input::placeholder { color: var(--text3); }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }

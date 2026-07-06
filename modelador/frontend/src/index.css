@@ -1,0 +1,20 @@
+/**
+ * Punto de entrada de estilos.
+ * Solo contiene @import — los estilos reales van en src/styles/.
+ *
+ * Orden de carga:
+ *   1. tokens      → custom properties (colores, fuentes, tamaños)
+ *   2. base        → reset, botones, elementos HTML globales
+ *   3. layout      → shell de la app (topbar, tabs)
+ *   4. components  → componentes reutilizables (modales, status-bar, onboarding…)
+ *   5. pages/*     → estilos específicos de cada página
+ */
+
+@import './styles/tokens.css';
+@import './styles/base.css';
+@import './styles/layout.css';
+@import './styles/components.css';
+@import './styles/agent-panel.css';
+@import './styles/pages/config.css';
+@import './styles/pages/entities.css';
+@import './styles/pages/visualization.css';

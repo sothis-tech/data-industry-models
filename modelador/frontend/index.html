@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('inn-modelador-theme');
+          if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+          else document.documentElement.dataset.theme = 'light';
+        } catch (e) {
+          document.documentElement.dataset.theme = 'light';
+        }
+      })();
+    </script>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>INN Data Space Modelador</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

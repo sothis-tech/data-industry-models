@@ -1,0 +1,10 @@
+{
+  "id": "urn:ngsi-ld:Device:probe-smoke-generator",
+  "type": "Device",
+  "name": "Sonda temperatura generador de humo",
+  "description": "Temperatura en el interior del generador de humo. Protección contra incendio (límite 180 °C).",
+  "category": ["sensor"],
+  "controlledProperty": ["temperature"],
+  "dataProvider": "https://provider.example.com",
+  "source": "Sistema E-Therm"
+}

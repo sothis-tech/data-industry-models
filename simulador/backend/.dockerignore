@@ -1,0 +1,23 @@
+# Entornos virtuales
+venv/
+env/
+.venv/
+
+# Caché de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Variables de entorno y secretos
+.env
+.env.local
+
+# Git y configuración de IDEs
+.git/
+.vscode/
+.idea/
+
+# Archivos de logs de pruebas
+*.log

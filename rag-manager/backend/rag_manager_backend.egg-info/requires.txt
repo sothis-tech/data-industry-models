@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+python-multipart
+httpx
+chromadb>=1.0.0
+llama-index-core
+llama-index-vector-stores-chroma
+llama-index-embeddings-huggingface
+sentence-transformers
+pymupdf

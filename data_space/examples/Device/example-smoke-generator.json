@@ -1,0 +1,10 @@
+{
+  "id": "urn:ngsi-ld:Device:smoke-generator-001",
+  "type": "Device",
+  "name": "Generador de humo",
+  "description": "Generador de humo: depósito de serrín, motor, placas, placa de combustión, filtro de ceniza, resistencia de encendido (1 kW), motor de extracción (0,2 kW).",
+  "category": ["actuator"],
+  "controlledProperty": ["smoke"],
+  "dataProvider": "https://provider.example.com",
+  "source": "Sistema E-Therm"
+}

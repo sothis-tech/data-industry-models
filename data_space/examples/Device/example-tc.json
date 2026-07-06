@@ -1,0 +1,11 @@
+{
+  "id": "urn:ngsi-ld:Device:tc-001",
+  "type": "Device",
+  "name": "Touch-Control (TC)",
+  "description": "Panel de control / PLC que ejecuta programas, ciclos y comandos del horno E-Therm. Hasta 100 programas de 98 pasos.",
+  "category": ["actuator"],
+  "controlledProperty": ["power"],
+  "serialNumber": "TC-ET-001",
+  "dataProvider": "https://provider.example.com",
+  "source": "Sistema E-Therm"
+}

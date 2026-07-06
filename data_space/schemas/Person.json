@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/IndustrialOven/schemas/Person.json",
+  "title": "Person (Industrial Oven profile)",
+  "description": "Persona (operador, etc.). Schema.org/Person. Uso local.",
+  "type": "object",
+  "required": ["id", "type"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uri",
+      "description": "Identificador único. Ej.: urn:ngsi-ld:Person:{id}"
+    },
+    "type": {
+      "type": "string",
+      "const": "Person",
+      "description": "Tipo de entidad NGSI"
+    },
+    "name": { "type": "string", "description": "Nombre de la persona" },
+    "dataProvider": { "type": "string" },
+    "source": { "type": "string" }
+  }
+}

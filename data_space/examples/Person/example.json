@@ -1,0 +1,7 @@
+{
+  "id": "urn:ngsi-ld:Person:operador-001",
+  "type": "Person",
+  "name": "Operador turno mañana",
+  "dataProvider": "https://provider.example.com",
+  "source": "RRHH"
+}

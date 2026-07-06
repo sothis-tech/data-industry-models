@@ -1,0 +1,120 @@
+# Copyright 2022 Engineering Ingegneria Informatica S.p.A.
+#
+# This file is part of the IoT Agent for the OPCUA protocol (iotagent-opcua) component
+#
+# iotagent-opcua is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the License,
+# or (at your option) any later version.
+#
+# iotagent-opcua is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public
+# License along with iotagent-opcua.
+# If not, see http://www.gnu.org/licenses/.
+#
+# For those usages not covered by the GNU Affero General Public License
+# please contact with: [manfredi.pistone@eng.it, gabriele.deluca@eng.it, walterdomenico.vergara@eng.it, mattiagiuseppe.marzano@eng.it]
+
+version: "3.1"
+
+volumes:
+  mongodb: ~
+
+services:
+  iot-agent:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: iotagent-opcua:sothis
+    hostname: iotagent-opcua
+    depends_on:
+      - mongodb
+      #- opcua-sim-v2
+      - orion
+    networks:
+      - hostnet
+    ports:
+      - "4041:4041"
+      - "9229:9229"
+    environment:
+      - "CONFIGURATION_TYPE=dynamic"
+      - "IOTA_CB_HOST=orion"
+      - "IOTA_CB_PORT=1026"
+      - "IOTA_CB_NGSIVERSION=ld"
+      # ------- config para ld?
+      # - "IOTA_JSON_LD_CONTEXT=https://raw.githubusercontent.com/smart-data-models/dataModel.Device/master/context.jsonld"
+      # - "IOTA_JSON_LD_CONTEXT=https://smartdatamodels.org/context.jsonld"
+      - "IOTA_JSON_LD_CONTEXT=http://context-provider/industrial-oven-context.jsonld"
+      - "IOTA_FALLBACK_TENANT=ibermot"
+      - "IOTA_RELAX_TEMPLATE_VALIDATION=true"
+      # -----------------------
+      - "IOTA_CB_SERVICE=ibermot"
+      - "IOTA_CB_SUBSERVICE=/"
+      - "DEFAULT_KEY=iot"
+      - "IOTA_REGISTRY_TYPE=mongodb"
+      - "IOTA_MONGO_HOST=mongodb"
+      - "IOTA_MONGO_PORT=27017"
+      - "IOTA_MONGO_DB=iotagent_opcua"
+      - "IOTA_NORTH_PORT=4041"
+      - "IOTA_PROVIDER_URL=http://iotagent-opcua:4041"
+    volumes:
+      - ../conf:/opt/iotagent-opcua/conf
+
+  mongodb:
+    image: mongo:4.2
+    hostname: mongodb
+    networks:
+      - hostnet
+    expose:
+      - "27017"
+    ports:
+      - "27021:27017"
+    command: --bind_ip_all
+    volumes:
+      - mongodb:/data
+
+  orion:
+    #image: fiware/orion:3.10.1
+    image: fiware/orion-ld:1.12.0
+    hostname: orion
+    depends_on:
+      - mongodb
+    networks:
+      - hostnet
+    ports:
+      - "1026:1026"
+    command: -dbhost mongodb -logLevel DEBUG
+    #command: -dbhost mongodb -logLevel DEBUG -forwarding -experimental
+
+  # opcua-sim-v2:
+  #   build: ./opcua-sim-v2-docker
+  #   container_name: opcua-sim-v2
+  #   networks:
+  #     - hostnet
+  #   ports:
+  #     - "5679:5679"
+  #   restart: unless-stopped
+
+  # iotcarsrv:
+  #   hostname: iotcarsrv
+  #   image: iotagent4fiware/opcuacarsrv:latest
+  #   networks:
+  #     - hostnet
+  #   ports:
+  #     - "5001:5001"
+
+  context-provider:
+    image: nginx:alpine
+    hostname: context-provider
+    networks:
+      - hostnet
+    ports:
+      - "8080:80"
+    volumes:
+      - ./context-server:/usr/share/nginx/html:ro
+networks:
+  hostnet:

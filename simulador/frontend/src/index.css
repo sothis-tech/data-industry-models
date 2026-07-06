@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+/* Define class-based dark mode for Tailwind v4 */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Limpiar márgenes y asegurar que ocupa toda la pantalla */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Aplicar el color de fondo y texto dinámico al body */
+body {
+  @apply bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300 font-sans;
+}

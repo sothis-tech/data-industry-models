@@ -1,0 +1,10 @@
+{
+  "id": "urn:ngsi-ld:Device:fan-extraction-001",
+  "type": "Device",
+  "name": "Ventilador de extracción",
+  "description": "Ventilador de extracción de aire. Potencias según número de carros (tabla del manual E-Therm).",
+  "category": ["actuator"],
+  "controlledProperty": ["speed"],
+  "dataProvider": "https://provider.example.com",
+  "source": "Sistema E-Therm"
+}

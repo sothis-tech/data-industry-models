@@ -1,0 +1,31 @@
+# ── Python ───────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.python-version
+
+# ── Entorno / secretos ───────────────────────────────────
+config/.env
+.env
+
+# ── Datos en runtime (no versionar contenido, sí la carpeta) ─
+var/logs/**/*
+!var/logs/**/.gitkeep
+var/results/*
+!var/results/.gitkeep
+src/utils/chart_outputs/*
+!src/utils/chart_outputs/.gitkeep
+manuales/*
+!manuales/.gitkeep
+
+# ── Cachés ───────────────────────────────────────────────
+.cache/
+hf_cache/
+torch_cache/
+uv_cache/
+
+# ── IDE ──────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp

@@ -1,0 +1,11 @@
+{
+  "id": "urn:ngsi-ld:DeviceMeasurement:meas-room1-001",
+  "type": "DeviceMeasurement",
+  "refDevice": "urn:ngsi-ld:Device:probe-room-1",
+  "numValue": 74.2,
+  "controlledProperty": "temperature",
+  "unit": "CEL",
+  "dateObserved": "2024-02-10T12:30:00Z",
+  "dataProvider": "https://provider.example.com",
+  "source": "Sistema E-Therm - sonda cámara 1"
+}

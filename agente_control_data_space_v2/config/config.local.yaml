@@ -1,0 +1,57 @@
+# config.local.yaml — desarrollo y benchmark desde host
+# Uso:
+#   python clients/mcp_client.py --config config.local.yaml
+#   python benchmark.py --config config.local.yaml --category rag-test
+agent:
+  provider: "azure"
+  agent_mode: "multi"   # "multi" (Gestor + 1 especialista por MCP) | "single" (un agente con todas las tools)
+  default_tenant: "ibermot"
+
+servers:
+  rag_knowledge:
+    enabled: true
+    type: "stdio"
+    command: "uv"
+    args: ["--quiet", "run", "src/servers/rag_server.py", "--server_type=stdio"]
+    env:
+      HF_HOME: "/data/proyectos/hf_cache"
+      TORCH_HOME: "/data/proyectos/torch_cache"
+      UV_CACHE_DIR: "/data/uv_cache"
+      CHROMA_HOST: "localhost"
+      CHROMA_PORT: "8012"         
+      CHROMA_COLLECTION: "manuales_tecnicos"
+      CHROMA_DOCS_PATH: "/data/proyectos/chromadb_service/manuales"
+
+  orion_ld:
+    enabled: true
+    type: stdio
+    command: uv
+    args:
+      - "--quiet"
+      - run
+      - src/servers/orion_server.py
+      - --server_type=stdio
+    env:
+      ORION_URL: "http://localhost:1027"   
+      NGSI_CONTEXT_URL: "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
+      NGSI_TENANT: "ibermot"
+      ORION_TIMEOUT: "15"
+
+  quantumleap:
+    enabled: true
+    type: "stdio"
+    command: "uv"
+    args: ["--quiet", "run", "src/servers/quantumleap_server.py", "--server_type=stdio"]
+    env:
+      QL_HOST: "localhost"
+      QL_PORT: "8669"
+      QL_FIWARE_SERVICE: "ibermot"   
+      QL_FIWARE_SERVICEPATH: "/"
+      QL_TIMEOUT: "30"
+      ORION_URL: "http://localhost:1027"
+      ORION_TIMEOUT: "15"
+
+app:
+  title: "Chat MCP Industrial"
+  layout: "wide"
+  page_icon: "🏭"

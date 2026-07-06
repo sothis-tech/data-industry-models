@@ -1,0 +1,184 @@
+/**
+ * Reset, tipografía global y estilos de elementos HTML básicos.
+ * No debe contener estilos de componentes ni de páginas.
+ */
+
+:root {
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  font-feature-settings: 'cv11', 'ss01'; /* Inter: numerales más legibles */
+  line-height: 1.5;
+  color: var(--text);
+  background-color: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+#root {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ─── Scrollbar (WebKit) ─────────────────────────────────────── */
+::-webkit-scrollbar         { width: 6px; height: 6px; }
+::-webkit-scrollbar-track   { background: transparent; }
+::-webkit-scrollbar-thumb   { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+::-webkit-scrollbar-corner  { background: transparent; }
+
+/* Firefox */
+* { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+
+/* ─── Selección de texto ─────────────────────────────────────── */
+::selection { background: var(--accent-dim); color: var(--accent); }
+
+/* ─── Checkboxes y radios nativos ────────────────────────────── */
+input[type='checkbox'],
+input[type='radio'] {
+  accent-color: var(--accent);
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+}
+
+/* ─── Botones ────────────────────────────────────────────────── */
+button {
+  cursor: pointer;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 6px 14px;
+  background: var(--surface-2);
+  font-size: 0.84rem;
+  font-family: inherit;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.5;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+  white-space: nowrap;
+  box-shadow: var(--shadow-inset);
+}
+
+button:hover:not(:disabled) {
+  background: var(--surface-3);
+  border-color: var(--accent);
+  box-shadow: var(--shadow-inset), 0 0 0 3px var(--accent-10);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+button:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+/* Variante primaria */
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+  box-shadow: 0 0 0 0 var(--accent-10);
+}
+button.primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  box-shadow: 0 0 0 3px var(--accent-10);
+}
+
+/* Variante secundaria */
+button.secondary {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+/* Variante peligrosa */
+button.danger {
+  color: var(--error);
+  border-color: rgba(248, 81, 73, 0.4);
+  background: transparent;
+}
+button.danger:hover:not(:disabled) {
+  background: rgba(248, 81, 73, 0.1);
+  border-color: var(--error);
+  box-shadow: 0 0 0 3px rgba(248, 81, 73, 0.1);
+}
+
+/* ─── Controles de formulario ────────────────────────────────── */
+select,
+input,
+textarea {
+  font-family: inherit;
+  font-size: 0.875rem;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 6px 10px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted);
+  opacity: 0.7;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-10);
+}
+
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%237d8590' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+  cursor: pointer;
+}
+
+/* ─── Enlace base ────────────────────────────────────────────── */
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+a:hover { text-decoration: underline; }
+
+/* ─── Código inline ──────────────────────────────────────────── */
+code {
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 1px 5px;
+  font-size: 0.85em;
+  font-family: var(--font-mono);
+  color: var(--accent);
+}
+
+/* ─── Texto auxiliar ─────────────────────────────────────────── */
+.helper {
+  color: var(--muted);
+  font-size: 0.875rem;
+  margin: 0 0 8px;
+  line-height: 1.5;
+}

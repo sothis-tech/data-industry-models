@@ -1,0 +1,11 @@
+{
+  "name": "ngsi-ld-data-space-modelador",
+  "version": "0.1.0",
+  "description": "Modelador oficial de espacios de datos NGSI-LD. Conexión a Orion-LD, carga de modelo, visualización y gestión de entidades.",
+  "private": true,
+  "scripts": {
+    "start": "cd backend && uvicorn main:app --reload",
+    "backend": "cd backend && uvicorn main:app --reload --host 0.0.0.0 --port 8000",
+    "frontend": "cd frontend && npm run dev"
+  }
+}

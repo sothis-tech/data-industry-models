@@ -1,0 +1,41 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: voice-agent-backend
+    # Backend voice-agent en 8000; agente del compañero en 8081
+    ports:
+      - "8000:8000"
+    env_file:
+      - config.env
+      - ${BACKEND_ENV_FILE:-config.dev.env}
+    volumes:
+      - ./backend:/app/backend
+      - ./scripts:/app/scripts
+      - ./output:/app/output
+      - whisper_cache:/root/.cache/whisper
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: voice-agent-frontend
+    ports:
+      - "4201:4200"
+    restart: unless-stopped
+    depends_on:
+      - backend
+
+volumes:
+  whisper_cache:

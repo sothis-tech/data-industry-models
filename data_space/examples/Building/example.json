@@ -1,0 +1,40 @@
+{
+  "id": "urn:ngsi-ld:Building:edificio-001",
+  "type": "Building",
+  "name": {
+    "type": "Property",
+    "value": "Nave de procesado - Planta 1"
+  },
+  "category": {
+    "type": "Property",
+    "value": [
+      "industrial"
+    ]
+  },
+  "address": {
+    "type": "Property",
+    "value": {
+      "addressLocality": "Madrid",
+      "addressCountry": "ES",
+      "streetAddress": "Polígono Industrial, Nave 2"
+    }
+  },
+  "location": {
+    "type": "GeoProperty",
+    "value": {
+      "type": "Point",
+      "coordinates": [
+        -3.7038,
+        40.4168
+      ]
+    }
+  },
+  "dataProvider": {
+    "type": "Property",
+    "value": "https://provider.example.com"
+  },
+  "source": {
+    "type": "Property",
+    "value": "Gestión de instalaciones"
+  }
+}

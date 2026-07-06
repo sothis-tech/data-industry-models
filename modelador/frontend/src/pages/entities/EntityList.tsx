@@ -1,0 +1,186 @@
+import { useEffect, useRef } from 'react'
+import Select from 'react-select'
+import type { NgsiLdEntity } from '../../types/entity'
+
+type SelectOption = { value: string; label: string }
+
+/** Estilos para react-select adaptados al tema oscuro */
+function useSelectStyles() {
+  return {
+    control: (base: object, state: { isFocused: boolean }) => ({
+      ...base,
+      background: 'var(--bg)',
+      borderColor: state.isFocused ? 'var(--accent)' : 'var(--border)',
+      borderRadius: 'var(--radius-md)',
+      boxShadow: state.isFocused ? '0 0 0 3px var(--accent-10)' : 'none',
+      minHeight: '32px',
+      fontSize: '0.82rem',
+      cursor: 'pointer',
+      '&:hover': { borderColor: 'var(--accent)' },
+    }),
+    valueContainer: (base: object) => ({ ...base, padding: '0 8px' }),
+    singleValue: (base: object) => ({ ...base, color: 'var(--text)' }),
+    placeholder: (base: object) => ({ ...base, color: 'var(--muted)', opacity: 0.7 }),
+    menu: (base: object) => ({
+      ...base,
+      background: 'var(--surface)',
+      border: '1px solid var(--border)',
+      borderRadius: 'var(--radius-md)',
+      boxShadow: 'var(--shadow-md)',
+      zIndex: 50,
+    }),
+    option: (base: object, state: { isSelected: boolean; isFocused: boolean }) => ({
+      ...base,
+      background: state.isSelected
+        ? 'var(--accent-dim)'
+        : state.isFocused
+          ? 'var(--surface-2)'
+          : 'transparent',
+      color: state.isSelected ? 'var(--accent)' : 'var(--text)',
+      fontSize: '0.82rem',
+      cursor: 'pointer',
+      padding: '6px 10px',
+    }),
+    indicatorSeparator: () => ({ display: 'none' }),
+    dropdownIndicator: (base: object) => ({ ...base, color: 'var(--muted)', padding: '0 6px' }),
+    clearIndicator: (base: object) => ({ ...base, color: 'var(--muted)', padding: '0 4px', cursor: 'pointer' }),
+    input: (base: object) => ({ ...base, color: 'var(--text)', margin: 0, padding: 0 }),
+  }
+}
+
+type Props = {
+  entities: NgsiLdEntity[]
+  allCount: number
+  types: string[]
+  typeFilter: string
+  search: string
+  loading: boolean
+  loadCount?: number | null
+  error?: string | null
+  selectedId: string | null
+  onTypeFilterChange: (type: string) => void
+  onSearchChange: (q: string) => void
+  onSelect: (entity: NgsiLdEntity) => void
+  onNewEntity: () => void
+}
+
+function entityLabel(e: NgsiLdEntity): string {
+  const n = e.name
+  if (n && typeof n === 'object' && 'value' in (n as object)) return String((n as { value?: unknown }).value ?? e.id)
+  if (typeof n === 'string' && n) return n
+  return e.id
+}
+
+export function EntityList({
+  entities,
+  allCount,
+  types,
+  typeFilter,
+  search,
+  loading,
+  loadCount = null,
+  error = null,
+  selectedId,
+  onTypeFilterChange,
+  onSearchChange,
+  onSelect,
+  onNewEntity,
+}: Props) {
+  const searchRef = useRef<HTMLInputElement>(null)
+  const selectStyles = useSelectStyles()
+
+  useEffect(() => {
+    const el = searchRef.current
+    if (!el) return
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { onSearchChange(''); el.value = '' }
+    }
+    el.addEventListener('keydown', handler)
+    return () => el.removeEventListener('keydown', handler)
+  }, [onSearchChange])
+
+  const typeOptions: SelectOption[] = types.map(t => ({ value: t, label: t }))
+  const selectedOption = typeFilter ? typeOptions.find(o => o.value === typeFilter) ?? null : null
+
+  const showEmpty = !loading && entities.length === 0
+  const showFooter = !loading && allCount > 0
+
+  return (
+    <div className="entity-list-panel">
+      <div className="entity-list-toolbar">
+        <Select<SelectOption>
+          options={typeOptions}
+          value={selectedOption}
+          onChange={opt => onTypeFilterChange(opt?.value ?? '')}
+          placeholder="— Todos los tipos —"
+          isClearable
+          isSearchable
+          styles={selectStyles as never}
+          noOptionsMessage={() => 'Sin tipos disponibles'}
+        />
+        <input
+          ref={searchRef}
+          type="search"
+          placeholder="Buscar por nombre o ID…"
+          aria-label="Buscar entidades"
+          autoComplete="off"
+          value={search}
+          onChange={e => onSearchChange(e.target.value)}
+        />
+      </div>
+
+      <button type="button" className="btn-new-entity" onClick={onNewEntity}>
+        + Nueva entidad
+      </button>
+
+      <div className="entity-list-scroll">
+        {error && !loading && (
+          <div className="entity-list-error" role="alert">
+            ⚠ {error}
+          </div>
+        )}
+        {loading && (
+          <div className="entity-list-empty">
+            {loadCount != null && loadCount > 0 ? `Cargando… ${loadCount}` : 'Cargando…'}
+          </div>
+        )}
+        {showEmpty && (
+          <div className="entity-list-empty">
+            {search
+              ? `Sin resultados para "${search}".`
+              : allCount > 0
+                ? 'Sin resultados para el filtro.'
+                : 'No hay entidades para el tipo seleccionado.'}
+          </div>
+        )}
+        {!loading && entities.map(entity => {
+          const name = entityLabel(entity)
+          const short = entity.id.split(':').pop() ?? entity.id
+          const type = (entity.type ?? '').split('/').pop() ?? entity.type
+          return (
+            <div
+              key={entity.id}
+              className={`entity-item${selectedId === entity.id ? ' active' : ''}`}
+              onClick={() => onSelect(entity)}
+            >
+              <div className="entity-item-name">{name}</div>
+              <div className="entity-item-id">{short}</div>
+              <span className="type-badge">{type}</span>
+            </div>
+          )
+        })}
+      </div>
+
+      {showFooter && (
+        <div className="entity-list-footer">
+          <span className="entity-list-count">
+            {search
+              ? <><strong>{entities.length}</strong> de <strong>{allCount}</strong> entidades</>
+              : <><strong>{allCount}</strong> entidad{allCount !== 1 ? 'es' : ''}</>
+            }
+          </span>
+        </div>
+      )}
+    </div>
+  )
+}

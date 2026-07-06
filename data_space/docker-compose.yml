@@ -1,0 +1,24 @@
+# Orion-LD + MongoDB para pruebas del espacio de datos E-Therm
+# Broker NGSI-LD disponible en http://localhost:1026
+
+services:
+  mongo:
+    image: mongo:4.4
+    container_name: industrial-oven-mongo
+    command: --nojournal
+    volumes:
+      - mongo-data:/data/db
+
+  orion-ld:
+    image: fiware/orion-ld
+    container_name: industrial-oven-orion
+    links:
+      - mongo
+    ports:
+      - "1026:1026"
+    command: -dbhost mongo
+    depends_on:
+      - mongo
+
+volumes:
+  mongo-data:

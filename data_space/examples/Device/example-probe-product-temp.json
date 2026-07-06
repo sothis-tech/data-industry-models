@@ -1,0 +1,10 @@
+{
+  "id": "urn:ngsi-ld:Device:probe-product-temp",
+  "type": "Device",
+  "name": "Sonda temperatura producto",
+  "description": "Sonda de temperatura insertada en el producto. Modo de control Product Temperature; pasteurización.",
+  "category": ["sensor"],
+  "controlledProperty": ["temperature"],
+  "dataProvider": "https://provider.example.com",
+  "source": "Sistema E-Therm"
+}
