@@ -15,8 +15,10 @@ WORKDIR /app
 # Actualizar pip primero (como sugiere el mensaje de error)
 RUN python -m pip install --upgrade pip
 
-# Copiar requirements (usa requirements.txt para Docker)
-COPY requirements.txt .
+# Variante de PyTorch según la GPU (cu121 = V100/sm_70 ; cu128 = RTX 20xx-50xx/Blackwell)
+ARG TORCH_VARIANT=cu121
+# Copiar el requirements correspondiente a la variante
+COPY requirements-${TORCH_VARIANT}.txt requirements.txt
 
 # Instalar dependencias Python
 RUN pip install --no-cache-dir -r requirements.txt
