@@ -1,11 +1,12 @@
 # =============================================================================
 # Dependencias del backend - versiones fijadas del entorno funcional
 #
-# GPU: Tesla V100-PCIE-16GB (sm_70 / Volta) | Driver: 570.133.20 | CUDA: 12.8
+# GPU: NVIDIA GeForce RTX 5070 (sm_120 / Blackwell) | Driver: 595.71.05 | CUDA: 13.2
 #
 # IMPORTANTE - PyTorch y CUDA:
-#   - Usar cu121 (no cu124/cu128): cu128+ no compila kernels para sm_70 (V100).
-#   - CUDA 12.8 driver es backward compatible con PyTorch compilado para cu121.
+#   - Usar cu128 (no cu121): cu121 no compila kernels para sm_120 (Blackwell/RTX 50xx).
+#   - Las GPU Blackwell (RTX 50xx) requieren PyTorch compilado para cu128 o superior.
+#   - Esta variante NO es compatible con V100/sm_70 (para V100 usar requirements-cu121.txt).
 #   - Si se cambia la GPU, revisar la arquitectura sm_XX y ajustar el sufijo cu*.
 #     Referencia: https://arnon.dk/matching-sm-architectures-arch-and-gencode-for-various-nvidia-cards/
 # =============================================================================
@@ -17,11 +18,11 @@ websockets==14.1
 python-multipart==0.0.12
 pydantic==2.13.3
 
-# --- PyTorch (cu121: compatible con V100/sm_70 y driver CUDA 12.8) ---
---extra-index-url https://download.pytorch.org/whl/cu121
-torch==2.3.1+cu121
-torchvision==0.18.1+cu121
-torchaudio==2.3.1+cu121
+# --- PyTorch (cu128: compatible con RTX 20xx-50xx, incluida Blackwell/sm_120; NO soporta V100/sm_70) ---
+--extra-index-url https://download.pytorch.org/whl/cu128
+torch==2.7.0+cu128
+torchvision==0.22.0+cu128
+torchaudio==2.7.0+cu128
 
 # --- Numérico ---
 numpy==1.26.4
