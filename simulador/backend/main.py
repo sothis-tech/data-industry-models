@@ -36,7 +36,23 @@ def load_state():
             loaded = yaml.safe_load(f)
             if loaded:
                 current_state = loaded
-                
+
+# --- CONFIGURACIÓN DE FIWARE VIA VARIABLES DE ENTORNO ---
+IOTA_BASE_URL = os.getenv("IOTA_URL", "http://iotagent-opcua:4041/iot")
+DEFAULT_TENANT = os.getenv("FIWARE_TENANT", "ibermot")
+FIWARE_SERVICEPATH = os.getenv("FIWARE_SERVICEPATH", "/")
+
+def get_fiware_headers(tenant: str):
+    """
+    Genera dinámicamente las cabeceras requeridas por FIWARE.
+    Encapsularlo aquí evita duplicar código y facilita añadir tokens de seguridad (OAuth2/Keyrock) en el futuro.
+    """
+    return {
+        "fiware-service": tenant,
+        "fiware-servicepath": FIWARE_SERVICEPATH,
+        "Content-Type": "application/json"
+    }
+
 # --- MODELOS DE DATOS ---
 class CreateDevicePayload(BaseModel):
     name: str
@@ -57,7 +73,7 @@ class DeleteNodePayload(BaseModel):
 class FiwareConfig(BaseModel):
     orion_url: str = "http://localhost:1026"
     iota_url: str = "http://localhost:4041"
-    tenant: str = "openiot"
+    tenant: str = "ibermot"
     service_path: str = "/"
     apikey: str = "iot-ibermot"
     context_url: str = "http://context-provider/industrial-oven-context.jsonld"
@@ -505,6 +521,64 @@ def explore_external_opcua(payload: OPCUAConnectPayload):
             client.disconnect()
         except:
             pass
+# --- ENDPOINTS DE GESTIÓN DEL IOT AGENT ---
 
+@app.get("/api/iotagent/devices")
+def get_iotagent_devices(tenant: str = DEFAULT_TENANT):
+    """
+    Obtiene la lista de dispositivos provisionados filtrando por el tenant 
+    recibido como Query Parameter (?tenant=nombre_tenant).
+    """
+    try:
+        response = requests.get(
+            f"{IOTA_BASE_URL}/devices", 
+            headers=get_fiware_headers(tenant), 
+            timeout=5.0
+        )
+        if response.status_code != 200:
+            raise HTTPException(
+                status_code=response.status_code, 
+                detail=f"IoT Agent respondió con error {response.status_code} para el tenant '{tenant}'."
+            )
+        
+        data = response.json()
+        return data.get("devices", [])
+    
+    except requests.exceptions.RequestException as e:
+        raise HTTPException(
+            status_code=503, 
+            detail=f"No se pudo establecer comunicación con el IoT Agent en {IOTA_BASE_URL}: {e}"
+        )
+
+
+@app.delete("/api/iotagent/devices/{device_id}")
+def delete_iotagent_device(device_id: str, tenant: str = DEFAULT_TENANT):
+    """
+    Elimina un dispositivo específico del IoT Agent en el tenant indicado.
+    """
+    try:
+        response = requests.delete(
+            f"{IOTA_BASE_URL}/devices/{device_id}", 
+            headers=get_fiware_headers(tenant), 
+            timeout=5.0
+        )
+        
+        if response.status_code not in (200, 204):
+            raise HTTPException(
+                status_code=response.status_code, 
+                detail=f"El IoT Agent rechazó la eliminación del dispositivo {device_id} en el tenant '{tenant}'."
+            )
+            
+        return {
+            "status": "success", 
+            "message": f"Dispositivo {device_id} eliminado correctamente del tenant '{tenant}'."
+        }
+        
+    except requests.exceptions.RequestException as e:
+        raise HTTPException(
+            status_code=503, 
+            detail=f"Error de red al intentar borrar el dispositivo: {e}"
+        )
+        
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
