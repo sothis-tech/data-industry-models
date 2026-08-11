@@ -16,6 +16,10 @@ The platform is **multitenant**: each factory data model lives in its own tenant
 
 ![Solution architecture](architecture.svg)
 
+## Deployment
+
+Full step-by-step instructions for bringing up the stack on a clean machine — prerequisites, `.env` provisioning, build, Keycloak and Kong configuration, and troubleshooting — are in the **[Deployment Guide](DEPLOYMENT.md)**.
+
 ## Architecture
 
 The system is organized into decoupled containers, orchestrated with Docker Compose and exposed through a common gateway. Client applications never talk to the internal services directly — all traffic is routed and secured through Kong.
@@ -72,6 +76,7 @@ The **OPC-UA Linker — Frontend** (React dashboard served by Nginx, `:8030`) is
 - **Data stores:** MongoDB, CrateDB, PostgreSQL, ChromaDB
 - **Infrastructure:** Docker, Docker Compose, Nginx
 
----
+## Documentation
 
-<!-- Installation, Usage, and Configuration sections to be added next -->
+- **[Deployment Guide](DEPLOYMENT.md)** — prerequisites, installation, build, and configuration on a clean machine.
+- **E3.4 User Guide** — user setup and running the examples.
