@@ -74,3 +74,17 @@ export const exploreExternalOpcua = async (url) => {
   const response = await apiClient.post('/opcua/explore', { url });
   return response.data;
 };
+
+export const getIoTAgentDevices = async (tenant = 'ibermot') => {
+  const response = await fetch(`/api/iotagent/devices?tenant=${encodeURIComponent(tenant)}`);
+  if (!response.ok) throw new Error(`Error al obtener los dispositivos del tenant ${tenant}`);
+  return response.json();
+};
+
+export const deleteIoTAgentDevice = async (deviceId, tenant = 'ibermot') => {
+  const response = await fetch(`/api/iotagent/devices/${deviceId}?tenant=${encodeURIComponent(tenant)}`, {
+    method: 'DELETE',
+  });
+  if (!response.ok) throw new Error(`Error al eliminar el dispositivo del tenant ${tenant}`);
+  return response.json();
+};
