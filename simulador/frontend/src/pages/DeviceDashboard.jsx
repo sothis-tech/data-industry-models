@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { getDeviceTree, addVariableToDevice, deleteOpcuaNode } from "../api/simulatorService";
 import FiwareLinker from "../components/FiwareLinker";
+import IoTAgentManager from "../components/IoTAgentManager";
 
 /**
  * Renders a recursive tree node for industrial machinery hierarchy.
@@ -212,36 +213,20 @@ export default function DeviceDashboard({ deviceName, onBack }) {
           onClick={onBack}
           className="self-start mb-4 flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-blue-600 bg-white dark:bg-slate-800 px-3 py-1.5 rounded-md border border-slate-200 dark:border-slate-700 shadow-sm transition-colors cursor-pointer"
         >
-          Volver al menú
+          Volver al menú principal
         </button>
-        <header className="bg-white dark:bg-slate-800 pt-5 px-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm mb-6 transition-colors flex flex-col gap-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-              {deviceName}
-            </h1>
-            <span className="bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-400 text-xs font-bold px-2 py-0.5 rounded uppercase border border-emerald-200 dark:border-emerald-800">
-              Live Server
-            </span>
+        <header className="bg-white dark:bg-slate-800 pt-5 px-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm mb-6 transition-colors flex justify-between items-center pb-5">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{deviceName}</h1>
+            <p className="text-xs text-slate-500 mt-0.5">Control de señales y simulación en tiempo real del PLC</p>
           </div>
-
-          <div className="flex gap-6 border-b border-slate-200 dark:border-slate-700">
-            <button
-              onClick={() => setActiveTab("telemetry")}
-              className={`pb-3 text-sm font-medium transition-colors border-b-2 ${activeTab === "telemetry" ? "border-blue-600 text-blue-600 dark:text-blue-400" : "border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"}`}
-            >
-              Control y Telemetría
-            </button>
-            <button
-              onClick={() => setActiveTab("fiware")}
-              className={`pb-3 text-sm font-medium transition-colors border-b-2 ${activeTab === "fiware" ? "border-blue-600 text-blue-600 dark:text-blue-400" : "border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"}`}
-            >
-              Vinculación FIWARE
-            </button>
-          </div>
+          <span className="bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-400 text-xs font-bold px-2 py-0.5 rounded uppercase border border-emerald-200 dark:border-emerald-800">
+            Live Server
+          </span>
         </header>
       </div>
 
-      {activeTab === "telemetry" && (
+
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 flex-1 min-h-0 overflow-hidden">
           
           <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm flex flex-col min-h-0">
@@ -359,13 +344,7 @@ export default function DeviceDashboard({ deviceName, onBack }) {
             </div>
           </div>
         </div>
-      )}
-      
-      {activeTab === 'fiware' && (
-        <div className="flex-1 min-h-0 overflow-hidden bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-          <FiwareLinker deviceName={deviceName} />
-        </div>
-      )}
+
     </div>
   );
 }
