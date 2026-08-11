@@ -2,7 +2,7 @@
 
 This guide describes the official procedure for a full deployment of the **Industrial Data Space** platform on a clean machine, starting only from a clone of the repository. It is written so that anyone with basic Docker knowledge can bring the stack up reproducibly, following verifiable steps without relying on implicit knowledge from the development team.
 
-> **Language:** English · Part of the [Industrial Data Space](README.md) documentation.
+> **Language:** English | [Español](DEPLOYMENT.es.md) · Part of the [Industrial Data Space](README.md) documentation.
 
 ## Table of contents
 
