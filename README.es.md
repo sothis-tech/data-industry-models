@@ -79,4 +79,4 @@ El **OPC-UA Linker — Frontend** (dashboard React servido por Nginx, `:8030`) e
 ## Documentación
 
 - **[Guía de Despliegue](DEPLOYMENT.es.md)** — prerrequisitos, instalación, build y configuración en una máquina limpia.
-- **Guía de Uso** — configuración de usuarios y ejecución de los ejemplos.
+- **[Guía de Uso — Primeros pasos](USER_GUIDE.es.md)** — crear un usuario, conceder acceso al tenant y abrir los modelos de datos de ejemplo.

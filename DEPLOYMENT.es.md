@@ -356,7 +356,7 @@ Sustituye `<tenant>` por el tenant del modelo de datos que quieras cargar (p. ej
 
 Para que los usuarios puedan acceder a los tenants de los ejemplos, hay que crear roles de acceso en Keycloak. Los roles se crean en el realm **`fiware`**, uno por tenant, en formato `tenant_<nombre-del-tenant-de-orion-ld>`. Por defecto, crea el rol **`tenant_sdm`** para el tenant `sdm` (usado por defecto). Además, crea **`tenant_ibermot`** y **`tenant_metapan`** para acceder a los ejemplos creados.
 
-La configuración de usuarios y la ejecución de los ejemplos se describen en la **Guía de Uso**.
+La configuración de usuarios y la ejecución de los ejemplos se describen en la **[Guía de Uso](USER_GUIDE.es.md)**.
 
 ## Resolución de problemas
 

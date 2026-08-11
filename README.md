@@ -79,4 +79,4 @@ The **OPC-UA Linker — Frontend** (React dashboard served by Nginx, `:8030`) is
 ## Documentation
 
 - **[Deployment Guide](DEPLOYMENT.md)** — prerequisites, installation, build, and configuration on a clean machine.
-- **User Guide** — user setup and running the examples.
+- **[User Guide — Getting Started](USER_GUIDE.md)** — create a user, grant tenant access, and open the example data models.
