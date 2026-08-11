@@ -356,7 +356,7 @@ Replace `<tenant>` with the tenant of the data model you want to load (e.g. `ibe
 
 For users to access the example tenants, create access roles in Keycloak. Roles are created in the **`fiware`** realm, one per tenant, in the form `tenant_<orion-ld-tenant-name>`. By default, create the role **`tenant_sdm`** for the default `sdm` tenant. Additionally, create **`tenant_ibermot`** and **`tenant_metapan`** to access the created examples.
 
-User configuration and example execution are described in the **E3.4 User Guide**.
+User configuration and example execution are described in the **User Guide**.
 
 ## Troubleshooting
 
