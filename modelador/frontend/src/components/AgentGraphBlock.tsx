@@ -1,16 +1,15 @@
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { ChatGraphEdge, ChatGraphNode } from '../lib/chatBlocks'
-
 type Props = {
   nodes: ChatGraphNode[]
   edges: ChatGraphEdge[]
 }
-
 const W = 280
 const H = 160
 const PAD = 28
-
 export function AgentGraphBlock({ nodes, edges }: Props) {
+  const { t } = useTranslation()
   const layout = useMemo(() => {
     const ids = [...new Set([
       ...nodes.map((n) => n.id),
@@ -31,11 +30,9 @@ export function AgentGraphBlock({ nodes, edges }: Props) {
     const labelById = new Map(nodes.map((n) => [n.id, n.label ?? n.id.split(':').pop() ?? n.id]))
     return { positions, labelById, ids }
   }, [nodes, edges])
-
   if (!layout.ids.length) return null
-
   return (
-    <figure className="agent-block-graph" aria-label="Esquema de relaciones">
+    <figure className="agent-block-graph" aria-label={t('agent.graph.ariaLabel')}>
       <svg viewBox={`0 0 ${W} ${H}`} className="agent-block-graph-svg" role="img">
         {edges.map((edge, i) => {
           const from = layout.positions.get(edge.source)

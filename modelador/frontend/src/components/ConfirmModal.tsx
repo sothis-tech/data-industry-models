@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-
+import { useTranslation } from 'react-i18next'
 type Props = {
   title: string
   message: React.ReactNode
@@ -10,24 +10,22 @@ type Props = {
   onConfirm: () => void
   onCancel: () => void
 }
-
 export function ConfirmModal({
   title,
   message,
   entityId,
-  confirmLabel = 'Confirmar',
+  confirmLabel,
   danger = false,
   loading = false,
   onConfirm,
   onCancel,
 }: Props) {
+  const { t } = useTranslation()
   const cancelRef = useRef<HTMLButtonElement>(null)
-
   useEffect(() => {
-    const t = setTimeout(() => cancelRef.current?.focus(), 50)
-    return () => clearTimeout(t)
+    const tm = setTimeout(() => cancelRef.current?.focus(), 50)
+    return () => clearTimeout(tm)
   }, [])
-
   function onKeyDown(e: React.KeyboardEvent) {
     if (e.key === 'Escape') { onCancel(); return }
     if (e.key !== 'Tab') return
@@ -41,7 +39,6 @@ export function ConfirmModal({
       if (document.activeElement === last) { first?.focus(); e.preventDefault() }
     }
   }
-
   return (
     <div
       className="modal-overlay open"
@@ -56,11 +53,11 @@ export function ConfirmModal({
         <p className="modal-body">
           {message}
           {entityId && <><br /><code>{entityId}</code></>}
-          {danger && <><br /><strong className="modal-danger-note">Esta acción no se puede deshacer.</strong></>}
+          {danger && <><br /><strong className="modal-danger-note">{t('confirmModal.cannotUndo')}</strong></>}
         </p>
         <div className="modal-actions">
           <button ref={cancelRef} type="button" className="secondary" onClick={onCancel} disabled={loading}>
-            Cancelar
+            {t('common.cancel')}
           </button>
           <button
             type="button"
@@ -68,7 +65,7 @@ export function ConfirmModal({
             onClick={onConfirm}
             disabled={loading}
           >
-            {loading ? 'Procesando…' : confirmLabel}
+            {loading ? t('common.processing') : (confirmLabel ?? t('common.confirm'))}
           </button>
         </div>
       </div>

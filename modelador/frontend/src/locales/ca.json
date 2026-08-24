@@ -1,0 +1,107 @@
+{
+  "common": {
+    "cancel": "Cancel·lar",
+    "continue": "Continuar",
+    "confirm": "Confirma",
+    "processing": "Processant…",
+    "save": "Desa",
+    "delete": "Elimina",
+    "edit": "Edita",
+    "close": "Tanca",
+    "add": "Afegeix",
+    "loading": "Carregant…",
+    "error": "Error",
+    "retry": "Reintenta",
+    "search": "Cerca"
+  },
+  "app": { "title": "INN Data Space Modelador" },
+  "nav": {
+    "config": "Configuració",
+    "entities": "Entitats",
+    "visualization": "Visualització"
+  },
+  "errorBoundary": {
+    "title": "Alguna cosa ha anat malament",
+    "message": "S'ha produït un error inesperat a l'aplicació.",
+    "retry": "Torna-ho a provar",
+    "backToConfig": "Torna a Configuració"
+  },
+  "confirmModal": {
+    "cannotUndo": "Aquesta acció no es pot desfer."
+  },
+  "agent": {
+    "panel": {
+      "ariaLabel": "Marvin — Assistent",
+      "resizeAria": "Redimensiona el tauler de l'assistent",
+      "closeAria": "Tanca el tauler de Marvin",
+      "openAria": "Obre el tauler de Marvin",
+      "closeTitle": "Tanca Marvin",
+      "openTitle": "Obre Marvin"
+    },
+    "shell": {
+      "expandAria": "Amplia el tauler",
+      "restoreAria": "Restaura l'amplada del tauler",
+      "restoreTitle": "Restaura l'amplada"
+    },
+    "chat": {
+      "welcome": "Hola! Soc Marvin, el teu assistent. Pots escriure'm o fer servir el micròfon per parlar.",
+      "inputAria": "Missatge per a Marvin",
+      "sendAria": "Envia",
+      "sourceVoice": "🎙 veu",
+      "sourceText": "⌨ text",
+      "lockedError": "Connecta Orion per accedir a Marvin.",
+      "status": {
+        "recording": "Gravant…",
+        "processing": "Processant veu…",
+        "connecting": "Connectant…",
+        "ready": "Veu a punt",
+        "error": "Error de veu",
+        "idle": "En espera"
+      },
+      "placeholder": {
+        "locked": "Connecta Orion per fer servir Marvin",
+        "ready": "Pregunta a Marvin…",
+        "unavailable": "L'assistent de text no està disponible en aquest entorn"
+      },
+      "mic": {
+        "locked": "Connecta Orion per fer servir Marvin",
+        "toggle": "Activa / atura el micròfon",
+        "unavailable": "L'assistent de veu no està disponible en aquest entorn",
+        "stop": "Atura",
+        "label": "Micròfon"
+      },
+      "system": {
+        "tenantChanged": "Connexió o tenant canviat. L'historial del xat s'ha reiniciat.",
+        "noConnection": "Sense connexió activa. L'historial del xat s'ha reiniciat.",
+        "sessionClosed": "Sessió Orion tancada. L'historial del xat s'ha reiniciat.",
+        "sessionExpired": "Sessió Orion caducada. Torna a connectar a Configuració.",
+        "loginFirst": "Inicia sessió en una connexió Orion abans de fer servir Marvin.",
+        "configError": "No s'ha pogut carregar la configuració: {{message}}",
+        "httpError": "Error HTTP {{status}}",
+        "noReply": "Sense resposta."
+      }
+    },
+    "blocks": {
+      "entitiesCount": "Entitats ({{count}})",
+      "type": "Tipus",
+      "identifier": "Identificador",
+      "actions": "Accions",
+      "open": "Obre",
+      "viewRelations": "Mostra les relacions",
+      "copied": "Copiat",
+      "copyJson": "Copia JSON",
+      "openInEditor": "Obre a l'editor",
+      "viewInViz": "Mostra a la visualització"
+    },
+    "graph": {
+      "ariaLabel": "Esquema de relacions"
+    }
+  },
+  "entities": {
+    "selectType": {
+      "title": "Selecciona un tipus",
+      "intro": "Per crear una entitat nova, primer tria el tipus d'entitat.",
+      "label": "Tipus d'entitat"
+    }
+  }
+}
