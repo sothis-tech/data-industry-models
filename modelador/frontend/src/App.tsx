@@ -7,8 +7,11 @@ import { useAppStatus } from './hooks/useAppStatus'
 import { ConfigPage } from './pages/config/ConfigPage'
 import { EntitiesPage } from './pages/entities/EntitiesPage'
 import { VisualizationPage } from './pages/viz/VisualizationPage'
+import { useTranslation } from 'react-i18next'
+import { LanguageSelector } from './components/LanguageSelector'
 
 function Layout() {
+  const { t } = useTranslation()
   // refreshKey se incrementa desde páginas hijas para forzar re-lectura de
   // localStorage en StatusBar y OnboardingCard sin prop drilling profundo.
   const [refreshKey, setRefreshKey] = useState(0)
@@ -22,15 +25,16 @@ function Layout() {
   return (
     <div className="app-shell">
       <header className="topbar">
-        <h1>INN Data Space Modelador</h1>
+        <h1>{t('app.title')}</h1>
+	<LanguageSelector />
         <ThemeToggle />
       </header>
       <nav className="tabs">
         <NavLink to="/" end>
-          Configuración
+          {t('nav.config')}
         </NavLink>
-        <NavLink to="/entidades">Entidades</NavLink>
-        <NavLink to="/visualizacion">Visualización</NavLink>
+        <NavLink to="/entidades">{t('nav.entities')}</NavLink>
+        <NavLink to="/visualizacion">{t('nav.visualization')}</NavLink>
       </nav>
       <StatusBar broker={broker} health={health} model={model} />
       <div className="app-body" ref={appBodyRef}>

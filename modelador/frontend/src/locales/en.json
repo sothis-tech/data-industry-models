@@ -1,0 +1,107 @@
+{
+  "common": {
+    "cancel": "Cancel",
+    "continue": "Continue",
+    "confirm": "Confirm",
+    "processing": "Processing…",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "add": "Add",
+    "loading": "Loading…",
+    "error": "Error",
+    "retry": "Retry",
+    "search": "Search"
+  },
+  "app": { "title": "INN Data Space Modeler" },
+  "nav": {
+    "config": "Configuration",
+    "entities": "Entities",
+    "visualization": "Visualization"
+  },
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "message": "An unexpected error occurred in the application.",
+    "retry": "Try again",
+    "backToConfig": "Back to Configuration"
+  },
+  "confirmModal": {
+    "cannotUndo": "This action cannot be undone."
+  },
+  "agent": {
+    "panel": {
+      "ariaLabel": "Marvin — Assistant",
+      "resizeAria": "Resize assistant panel",
+      "closeAria": "Close Marvin panel",
+      "openAria": "Open Marvin panel",
+      "closeTitle": "Close Marvin",
+      "openTitle": "Open Marvin"
+    },
+    "shell": {
+      "expandAria": "Expand panel",
+      "restoreAria": "Restore panel width",
+      "restoreTitle": "Restore width"
+    },
+    "chat": {
+      "welcome": "Hi! I'm Marvin, your assistant. You can type to me or use the microphone to talk.",
+      "inputAria": "Message for Marvin",
+      "sendAria": "Send",
+      "sourceVoice": "🎙 voice",
+      "sourceText": "⌨ text",
+      "lockedError": "Connect Orion to access Marvin.",
+      "status": {
+        "recording": "Recording…",
+        "processing": "Processing voice…",
+        "connecting": "Connecting…",
+        "ready": "Voice ready",
+        "error": "Voice error",
+        "idle": "Idle"
+      },
+      "placeholder": {
+        "locked": "Connect Orion to use Marvin",
+        "ready": "Ask Marvin…",
+        "unavailable": "The text assistant is not available in this environment"
+      },
+      "mic": {
+        "locked": "Connect Orion to use Marvin",
+        "toggle": "Start / stop microphone",
+        "unavailable": "The voice assistant is not available in this environment",
+        "stop": "Stop",
+        "label": "Microphone"
+      },
+      "system": {
+        "tenantChanged": "Connection or tenant changed. Chat history has been reset.",
+        "noConnection": "No active connection. Chat history has been reset.",
+        "sessionClosed": "Orion session closed. Chat history has been reset.",
+        "sessionExpired": "Orion session expired. Reconnect in Configuration.",
+        "loginFirst": "Log in to an Orion connection before using Marvin.",
+        "configError": "Could not load configuration: {{message}}",
+        "httpError": "HTTP error {{status}}",
+        "noReply": "No reply."
+      }
+    },
+    "blocks": {
+      "entitiesCount": "Entities ({{count}})",
+      "type": "Type",
+      "identifier": "Identifier",
+      "actions": "Actions",
+      "open": "Open",
+      "viewRelations": "View relations",
+      "copied": "Copied",
+      "copyJson": "Copy JSON",
+      "openInEditor": "Open in editor",
+      "viewInViz": "View in visualization"
+    },
+    "graph": {
+      "ariaLabel": "Relationship diagram"
+    }
+  },
+  "entities": {
+    "selectType": {
+      "title": "Select a type",
+      "intro": "To create a new entity, first choose the entity type.",
+      "label": "Entity type"
+    }
+  }
+}

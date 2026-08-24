@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import {
   dispatchAgentApplyEntity,
@@ -113,16 +114,17 @@ function EntityListBlock({
   onGoEntities: () => void
   onGoOrionViz: (entityId: string) => void
 }) {
+  const { t } = useTranslation()
   return (
     <div className="agent-block agent-block--entities">
-      <div className="agent-block-title">Entidades ({entities.length})</div>
+      <div className="agent-block-title">{t('agent.blocks.entitiesCount', { count: entities.length })}</div>
       <div className="agent-block-table-wrap">
         <table className="agent-block-table">
           <thead>
             <tr>
-              <th>Tipo</th>
-              <th>Identificador</th>
-              <th aria-label="Acciones" />
+              <th>{t('agent.blocks.type')}</th>
+              <th>{t('agent.blocks.identifier')}</th>
+              <th aria-label={t('agent.blocks.actions')} />
             </tr>
           </thead>
           <tbody>
@@ -141,7 +143,7 @@ function EntityListBlock({
                       dispatchAgentOpenEntity({ entityId: row.id })
                     }}
                   >
-                    Abrir
+                    {t('agent.blocks.open')}
                   </button>
                   {row.id.startsWith('urn:ngsi-ld:') && (
                     <button
@@ -149,7 +151,7 @@ function EntityListBlock({
                       className="agent-block-link"
                       onClick={() => onGoOrionViz(row.id)}
                     >
-                      Ver relaciones
+                      {t('agent.blocks.viewRelations')}
                     </button>
                   )}
                 </td>
@@ -173,6 +175,7 @@ function JsonBlock({
   onGoEntities: () => void
   onGoOrionViz: (entityId: string) => void
 }) {
+  const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
   const text = useMemo(() => jsonPreview(value), [value])
   const payload = entityPayload(value)
@@ -202,16 +205,16 @@ function JsonBlock({
       <pre className="agent-block-json">{text}</pre>
       <div className="agent-block-actions">
         <button type="button" className="secondary agent-block-btn" onClick={handleCopy}>
-          {copied ? 'Copiado' : 'Copiar JSON'}
+          {copied ? t('agent.blocks.copied') : t('agent.blocks.copyJson')}
         </button>
         {payload && (
           <button type="button" className="agent-block-btn" onClick={handleApply}>
-            Abrir en editor
+            {t('agent.blocks.openInEditor')}
           </button>
         )}
         {entityId && (
           <button type="button" className="secondary agent-block-btn" onClick={() => onGoOrionViz(entityId)}>
-            Ver relaciones
+            {t('agent.blocks.viewRelations')}
           </button>
         )}
       </div>
@@ -228,6 +231,7 @@ function GraphBlock({
   edges: ChatGraphEdge[]
   onGoOrionViz: (entityId: string) => void
 }) {
+  const { t } = useTranslation()
   const focusId = useMemo(() => pickGraphFocusNode(nodes, edges), [nodes, edges])
 
   return (
@@ -236,7 +240,7 @@ function GraphBlock({
       {focusId && (
         <div className="agent-block-actions">
           <button type="button" className="agent-block-btn" onClick={() => onGoOrionViz(focusId)}>
-            Ver en visualización
+            {t('agent.blocks.viewInViz')}
           </button>
         </div>
       )}
