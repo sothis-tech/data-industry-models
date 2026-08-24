@@ -5,6 +5,7 @@ import './index.css'
 import App from './App.tsx'
 import { ErrorBoundary } from './components/ErrorBoundary.tsx'
 import { initTheme } from './lib/theme'
+import './lib/i18n'
 
 initTheme()
 
