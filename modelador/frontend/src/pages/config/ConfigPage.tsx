@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useOutletContext } from 'react-router-dom'
 import { BrokerCard } from './BrokerCard'
 import { ModelCard } from './ModelCard'
@@ -6,14 +7,12 @@ import { OnboardingCard } from './OnboardingCard'
 import { RagCard } from './RagCard'
 import type { BrokerHealthState } from '../../hooks/useAppStatus'
 import type { StoredBroker } from '../../types/broker'
-
 type OutletCtx = {
   broker: StoredBroker | null
   health: BrokerHealthState
   refreshKey: number
   triggerRefresh: () => void
 }
-
 function DocIcon() {
   return (
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -26,11 +25,10 @@ function DocIcon() {
     </svg>
   )
 }
-
 export function ConfigPage() {
+  const { t } = useTranslation()
   const { broker, health, refreshKey, triggerRefresh } = useOutletContext<OutletCtx>()
   const [sidebarOpen, setSidebarOpen] = useState(false)
-
   return (
     <div className="config-layout">
       {/* ── Sidebar RAG (izquierda) ── */}
@@ -40,21 +38,20 @@ export function ConfigPage() {
           className="rag-sidebar-rail"
           onClick={() => setSidebarOpen((o) => !o)}
           aria-expanded={sidebarOpen}
-          aria-label={sidebarOpen ? 'Cerrar panel RAG' : 'Abrir panel RAG'}
+          aria-label={sidebarOpen ? t('config.page.closeRag') : t('config.page.openRag')}
         >
           <DocIcon />
           <span>RAG</span>
         </button>
-
         {/* Panel expandido */}
         <div className="rag-sidebar-panel" aria-hidden={!sidebarOpen}>
           <div className="rag-sidebar-header">
             <DocIcon />
-            <strong>Documentación RAG</strong>
+            <strong>{t('config.page.ragDocs')}</strong>
             <button
               className="rag-sidebar-close"
               onClick={() => setSidebarOpen(false)}
-              aria-label="Cerrar panel RAG"
+              aria-label={t('config.page.closeRag')}
             >
               ✕
             </button>
@@ -69,7 +66,6 @@ export function ConfigPage() {
           </div>
         </div>
       </aside>
-
       {/* ── Contenido principal ── */}
       <div className="config-main">
         <div className="page-inner">
