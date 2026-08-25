@@ -30,6 +30,12 @@
     "model": "Modelo: {{label}}",
     "configure": "Configurar"
   },
+  "theme": {
+    "switchToLight": "Cambiar a tema claro",
+    "switchToDark": "Cambiar a tema oscuro",
+    "light": "Tema claro",
+    "dark": "Tema oscuro"
+  },
   "errorBoundary": {
     "title": "Algo ha ido mal",
     "message": "Se ha producido un error inesperado en la aplicación.",
@@ -40,6 +46,10 @@
     "cannotUndo": "Esta acción no se puede deshacer."
   },
   "errors": {
+    "network": "Error de red",
+    "chat": {
+      "sessionRequired": "Sesión Orion requerida"
+    },
     "validation": {
       "failed": "Error de validación",
       "noConnection": "Sin conexión: {{error}}"
@@ -86,7 +96,8 @@
       "getEntity": "Error obteniendo entidad",
       "deleteEntity": "Error eliminando entidad",
       "preparePayload": "Error preparando payload",
-      "prepareAttrs": "Error preparando atributos"
+      "prepareAttrs": "Error preparando atributos",
+      "noModelTypes": "Sin tipos en el modelo"
     },
     "graph": {
       "buildSchema": "Error construyendo grafo de modelo",
@@ -158,10 +169,17 @@
       "copied": "Copiado",
       "copyJson": "Copiar JSON",
       "openInEditor": "Abrir en editor",
-      "viewInViz": "Ver en visualización"
+      "viewInViz": "Ver en visualización",
+      "entityTitle": "Entidad NGSI-LD",
+      "payloadTitle": "Payload NGSI-LD"
     },
     "graph": {
       "ariaLabel": "Esquema de relaciones"
+    },
+    "voice": {
+      "audioDiscarded": "Audio descartado por el agente.",
+      "wsNotConfigured": "AEA_WS_URL no está configurado en el backend",
+      "connectFailed": "No se pudo conectar con el agente de escucha activa"
     }
   },
   "entities": {
@@ -332,7 +350,23 @@
       "archiveFileHint": "(.zip, .tar.gz, .tar)",
       "orionContextUrl": "URL del contexto para Orion",
       "loadPackage": "Cargar paquete",
-      "clearModel": "Limpiar modelo"
+      "clearModel": "Limpiar modelo",
+      "status": {
+        "loading": "Cargando...",
+        "processing": "Procesando paquete...",
+        "needUrl": "Indica al menos una URL de schema o de contexto.",
+        "selectFile": "Selecciona un archivo comprimido primero.",
+        "loadError": "Error al cargar modelo.",
+        "processError": "Error al procesar el paquete.",
+        "cleared": "Modelo eliminado correctamente.",
+        "loaded": "Modelo cargado: {{details}}",
+        "summarySchemas_one": "{{count}} schema",
+        "summarySchemas_other": "{{count}} schemas",
+        "summaryContext": "contexto",
+        "summaryDescriptor": "descriptor",
+        "summaryExamples_one": "{{count}} ejemplo",
+        "summaryExamples_other": "{{count}} ejemplos"
+      }
     },
     "broker": {
       "title": "Conexión Orion (tenant)",
@@ -358,7 +392,23 @@
       "tenantLabel": "tenant: {{tenant}}",
       "use": "Usar",
       "logout": "Cerrar sesión",
-      "deleteTitle": "Eliminar conexión \"{{name}}\""
+      "deleteTitle": "Eliminar conexión \"{{name}}\"",
+      "status": {
+        "needUrl": "Indica la URL base de Kong.",
+        "needCredentials": "Introduce usuario y contraseña para conectar.",
+        "checking": "Comprobando credenciales y conexión...",
+        "authFailed": "Autenticación fallida. {{detail}}",
+        "loginFailed": "No se pudo iniciar sesión: {{error}}",
+        "connected": "Conexión y sesión correctas.",
+        "connectError": "Error de conexión: {{error}}",
+        "loggedOut": "Sesión cerrada.",
+        "logoutFailed": "No se pudo cerrar sesión: {{error}}",
+        "saved": "Conexión Orion guardada: {{name}}",
+        "activeConnection": "Conexión activa: {{name}}",
+        "deactivated": "Conexión activa desactivada.",
+        "confirmDelete": "¿Eliminar la conexión \"{{name}}\"?",
+        "deleted": "Conexión eliminada: {{name}}"
+      }
     },
     "onboarding": {
       "title": "Primeros pasos ({{completed}}/3)",

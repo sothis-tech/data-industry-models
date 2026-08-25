@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { AeaServerMessage, AeaStatus } from '../types/chat'
 
 const TARGET_SAMPLE_RATE = 16_000
@@ -61,6 +62,7 @@ function playBase64Wav(base64: string): void {
 }
 
 export function useAeaVoiceChat({ wsUrl, onTranscript, onResponse, onStatus }: UseAeaVoiceChatOptions) {
+  const { t } = useTranslation()
   const [status, setStatus] = useState<AeaStatus>('idle')
   const [error, setError] = useState<string | null>(null)
   const [isRecording, setIsRecording] = useState(false)
@@ -112,7 +114,7 @@ export function useAeaVoiceChat({ wsUrl, onTranscript, onResponse, onStatus }: U
     }
 
     if (message.event === 'ignored_noise') {
-      onStatus(message.message || 'Audio descartado por el agente.')
+      onStatus(message.message || t('agent.voice.audioDiscarded'))
       return
     }
 
@@ -139,11 +141,11 @@ export function useAeaVoiceChat({ wsUrl, onTranscript, onResponse, onStatus }: U
     if (message.audio) {
       playBase64Wav(message.audio)
     }
-  }, [onResponse, onStatus, onTranscript])
+  }, [onResponse, onStatus, onTranscript, t])
 
   const ensureSocket = useCallback(async (): Promise<WebSocket> => {
     if (!wsUrl) {
-      throw new Error('AEA_WS_URL no está configurado en el backend')
+      throw new Error(t('agent.voice.wsNotConfigured'))
     }
 
     const existing = wsRef.current
@@ -163,14 +165,14 @@ export function useAeaVoiceChat({ wsUrl, onTranscript, onResponse, onStatus }: U
       }
       ws.onmessage = handleServerMessage
       ws.onerror = () => {
-        reject(new Error('No se pudo conectar con el agente de escucha activa'))
+        reject(new Error(t('agent.voice.connectFailed')))
       }
       ws.onclose = () => {
         if (isRecording) stopAudioGraph()
         setStatus((current) => (current === 'error' ? current : 'idle'))
       }
     })
-  }, [handleServerMessage, isRecording, stopAudioGraph, wsUrl])
+  }, [handleServerMessage, isRecording, stopAudioGraph, wsUrl, t])
 
   const flushPendingFrames = useCallback((ws: WebSocket) => {
     const pending = pending16Ref.current

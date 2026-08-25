@@ -1,239 +1,163 @@
 import { useCallback, useEffect, useState } from 'react'
-import { formatAgentConnectStatus, postAgentConnect } from '../api/agentConnect'
-import { createRagTenant } from '../api/rag'
+import { useTranslation } from 'react-i18next'
 import {
   checkOrionAuth,
   getOrionAuthStatus,
   loginOrion,
   logoutOrion,
 } from '../api/orion'
-import { ORION_SESSION_LOST } from '../lib/orionSessionEvents'
 import {
-  clearCurrentBroker,
+  addBroker,
+  getBrokers,
   getCurrentBroker,
-  getStoredBrokers,
+  removeBroker,
   setCurrentBroker,
-  setStoredBrokers,
+  clearCurrentBroker,
 } from '../lib/storage'
 import type { StoredBroker } from '../types/broker'
 
-function authKey(url: string, tenant?: string) {
-  return `${url.trim()}::${tenant?.trim() ?? ''}`
-}
-
 export function useBroker(onSave?: () => void) {
-  const init = getCurrentBroker()
-  const [brokerName, setBrokerName] = useState(init?.name ?? '')
-  const [brokerUrl, setBrokerUrl] = useState(init?.url ?? '')
-  const [brokerTenant, setBrokerTenant] = useState(init?.tenant ?? '')
-  const [brokers, setBrokers] = useState<StoredBroker[]>(() => getStoredBrokers())
-  const [currentUrl, setCurrentUrl] = useState<string | null>(init?.url ?? null)
-  const [currentKey, setCurrentKey] = useState<string | null>(init ? authKey(init.url, init.tenant) : null)
-  const [status, setStatus] = useState<string | null>(null)
+  const { t } = useTranslation()
+  const [brokerName, setBrokerName] = useState('')
+  const [brokerUrl, setBrokerUrl] = useState('')
+  const [brokerTenant, setBrokerTenant] = useState('')
+  const [brokers, setBrokers] = useState<StoredBroker[]>([])
+  const [currentUrl, setCurrentUrl] = useState<string | null>(null)
+  const [currentKey, setCurrentKey] = useState<string | null>(null)
+  const [status, setStatus] = useState('')
   const [checking, setChecking] = useState(false)
   const [authUsername, setAuthUsername] = useState('')
   const [authPassword, setAuthPassword] = useState('')
   const [authBusy, setAuthBusy] = useState(false)
   const [authByKey, setAuthByKey] = useState<Record<string, boolean>>({})
 
-  const refreshAuthStatuses = useCallback(async () => {
-    const entries = await Promise.all(
-      getStoredBrokers().map(async (b) => {
-        const { loggedIn } = await getOrionAuthStatus(b.url, b.tenant)
-        return [authKey(b.url, b.tenant), loggedIn] as const
-      }),
-    )
-    setAuthByKey(Object.fromEntries(entries))
-  }, [])
+  const authKey = useCallback((url: string, tenant?: string) => `${url}\u0000${tenant ?? ''}`, [])
+
+  const refreshBrokers = useCallback(() => {
+    const list = getBrokers()
+    setBrokers(list)
+    const current = getCurrentBroker()
+    setCurrentUrl(current?.url ?? null)
+    setCurrentKey(current ? authKey(current.url, current.tenant) : null)
+  }, [authKey])
 
   useEffect(() => {
-    void refreshAuthStatuses()
-  }, [refreshAuthStatuses])
+    refreshBrokers()
+  }, [refreshBrokers])
 
   useEffect(() => {
-    function onSessionLost() {
-      setAuthByKey((prev) => {
-        const next = { ...prev }
-        for (const key of Object.keys(next)) next[key] = false
-        return next
-      })
+    let cancelled = false
+    async function probeAll() {
+      const list = getBrokers()
+      const entries = await Promise.all(
+        list.map(async (b) => {
+          const { loggedIn } = await getOrionAuthStatus(b.url, b.tenant)
+          return [authKey(b.url, b.tenant), loggedIn] as const
+        }),
+      )
+      if (!cancelled) setAuthByKey(Object.fromEntries(entries))
     }
-    window.addEventListener(ORION_SESSION_LOST, onSessionLost)
-    return () => window.removeEventListener(ORION_SESSION_LOST, onSessionLost)
-  }, [])
+    void probeAll()
+    return () => { cancelled = true }
+  }, [authKey])
 
-  async function onCheckAndLogin(target?: StoredBroker) {
-    const url = (target?.url ?? brokerUrl).trim()
-    const tenant = (target?.tenant ?? brokerTenant).trim() || undefined
-    const name = (target?.name ?? brokerName).trim() || url
+  async function onCheckAndLogin() {
+    const url = brokerUrl.trim()
+    const tenant = brokerTenant.trim()
     if (!url) {
-      setStatus('Indica la URL base de Kong.')
+      setStatus(t('config.broker.status.needUrl'))
       return
     }
-    if (!tenant) {
-      setStatus('Indica el tenant de la conexión Orion.')
+    if (!authUsername.trim() || !authPassword) {
+      setStatus(t('config.broker.status.needCredentials'))
       return
     }
-    setBrokerName(name)
-    setBrokerUrl(url)
-    setBrokerTenant(tenant)
     setChecking(true)
-    setAuthBusy(true)
-    setStatus('Comprobando credenciales y conexión...')
-    const username = authUsername.trim()
-    if (!username || !authPassword) {
-      setStatus('Introduce usuario y contraseña para conectar.')
-      setChecking(false)
-      setAuthBusy(false)
-      return
-    }
-    const { ok, data } = await checkOrionAuth(url, tenant, { username, password: authPassword })
-    if (ok) {
-      const login = await loginOrion(url, tenant, username, authPassword)
-      if (login.ok) {
-        setCurrentBroker(name, url, tenant)
-        setCurrentUrl(url)
-        setCurrentKey(authKey(url, tenant))
-        setAuthPassword('')
-        setAuthByKey((s) => ({ ...s, [authKey(url, tenant)]: true }))
-        onSave?.()
-
-        const agentConnect = await postAgentConnect(tenant, url)
-        if (agentConnect.error || agentConnect.status >= 400) {
-          void createRagTenant(tenant).catch(() => {})
-          setStatus(
-            `Conexión Orion iniciada: ${name}. Aviso: el agente LLM no se preparó (${agentConnect.error ?? `HTTP ${agentConnect.status}`}).`,
-          )
-        } else {
-          const summary = formatAgentConnectStatus(agentConnect.body)
-          setStatus(`Conexión Orion iniciada: ${name}. Agente: ${summary}.`)
-        }
-      } else {
-        setStatus(`No se pudo iniciar sesión: ${login.error ?? 'credenciales no válidas'}`)
+    setStatus(t('config.broker.status.checking'))
+    try {
+      const probe = await checkOrionAuth(url, tenant, { username: authUsername.trim(), password: authPassword })
+      if (!probe.ok) {
+        const detail = probe.data.detail ?? ''
+        setStatus(t('config.broker.status.authFailed', { detail }))
+        return
       }
-    } else {
-      const err =
-        (typeof data.detail === 'string' && data.detail) ||
-        ('error' in data && typeof data.error === 'string' && data.error) ||
-        'Comprueba la URL de Kong, el tenant y las credenciales.'
-      setStatus(`No se pudo conectar: ${err}`)
+      const login = await loginOrion(url, tenant, authUsername.trim(), authPassword)
+      if (!login.ok) {
+        setStatus(t('config.broker.status.loginFailed', { error: login.error ?? '' }))
+        return
+      }
+      setAuthPassword('')
+      setAuthByKey((prev) => ({ ...prev, [authKey(url, tenant)]: true }))
+      setStatus(t('config.broker.status.connected'))
+      refreshBrokers()
+    } catch (e) {
+      setStatus(t('config.broker.status.connectError', { error: e instanceof Error ? e.message : String(e) }))
+    } finally {
+      setChecking(false)
     }
-    setChecking(false)
-    setAuthBusy(false)
+  }
+
+  async function onLogout(broker: StoredBroker) {
+    setAuthBusy(true)
+    try {
+      const res = await logoutOrion(broker.url, broker.tenant)
+      setAuthByKey((prev) => ({ ...prev, [authKey(broker.url, broker.tenant)]: false }))
+      setStatus(res.ok ? t('config.broker.status.loggedOut') : t('config.broker.status.logoutFailed', { error: res.error ?? '' }))
+    } finally {
+      setAuthBusy(false)
+    }
   }
 
   function onSaveBroker() {
     const url = brokerUrl.trim()
-    const name = brokerName.trim() || url
-    const tenant = brokerTenant.trim() || undefined
     if (!url) {
-      setStatus('Indica la URL base de Kong.')
+      setStatus(t('config.broker.status.needUrl'))
       return
     }
-    const next = [...brokers]
-    const existing = next.findIndex((b) => authKey(b.url, b.tenant) === authKey(url, tenant))
-    if (existing >= 0) {
-      next[existing] = { name, url, tenant }
-    } else {
-      next.push({ name, url, tenant })
-    }
-    setStoredBrokers(next)
-    setBrokers(next)
-    setCurrentBroker(name, url, tenant)
-    setCurrentUrl(url)
-    setCurrentKey(authKey(url, tenant))
-    setBrokerName(name)
-    setStatus('Conexión Orion guardada y seleccionada.')
+    const name = brokerName.trim() || url
+    const tenant = brokerTenant.trim() || undefined
+    addBroker({ name, url, tenant })
+    setStatus(t('config.broker.status.saved', { name }))
+    refreshBrokers()
     onSave?.()
-    if (tenant) {
-      void createRagTenant(tenant).catch(() => {
-        setStatus(
-          'Conexión guardada. No se pudo asegurar el espacio RAG (¿servicio RAG caído?); inténtalo al abrir documentación.',
-        )
-      })
-    }
   }
 
-  function onLoadConnection(b: StoredBroker) {
-    setBrokerName(b.name)
-    setBrokerUrl(b.url)
-    setBrokerTenant(b.tenant ?? '')
-    setAuthPassword('')
-    setStatus(`Conexión Orion cargada: ${b.name}. Introduce credenciales y pulsa Conectar.`)
-    const t = b.tenant?.trim()
-    if (t) {
-      void createRagTenant(t).catch(() => {
-        setStatus(`Conexión cargada. Aviso: no se pudo asegurar el espacio RAG para "${t}".`)
-      })
-    }
-  }
-
-  async function onLogout(target?: StoredBroker) {
-    const url = (target?.url ?? brokerUrl).trim()
-    const tenant = (target?.tenant ?? brokerTenant).trim() || undefined
-    if (!url) return
-    setAuthBusy(true)
-    const res = await logoutOrion(url, tenant)
-    if (res.ok) {
-      setAuthByKey((s) => ({ ...s, [authKey(url, tenant)]: false }))
-      onSave?.()
-      setStatus('Sesión de la conexión Orion cerrada.')
-    } else {
-      setStatus(`No se pudo cerrar sesión: ${res.error ?? 'error desconocido'}`)
-    }
-    setAuthBusy(false)
+  function onLoadConnection(broker: StoredBroker) {
+    setBrokerName(broker.name)
+    setBrokerUrl(broker.url)
+    setBrokerTenant(broker.tenant ?? '')
+    setCurrentBroker(broker)
+    setStatus(t('config.broker.status.activeConnection', { name: broker.name }))
+    refreshBrokers()
+    onSave?.()
   }
 
   function onDeactivate() {
-    if (!currentUrl) return
     clearCurrentBroker()
-    setCurrentUrl(null)
-    setCurrentKey(null)
-    setBrokerName('')
-    setBrokerUrl('')
-    setBrokerTenant('')
-    setAuthPassword('')
+    setStatus(t('config.broker.status.deactivated'))
+    refreshBrokers()
     onSave?.()
-    setStatus('Conexión Orion activa desactivada.')
   }
 
-  function onDelete(b: StoredBroker) {
-    const next = brokers.filter((x) => authKey(x.url, x.tenant) !== authKey(b.url, b.tenant))
-    setStoredBrokers(next)
-    setBrokers(next)
-    if (currentKey === authKey(b.url, b.tenant)) {
-      clearCurrentBroker()
-      setCurrentUrl(null)
-      setCurrentKey(null)
-      setBrokerName('')
-      setBrokerUrl('')
-      setBrokerTenant('')
-    }
+  function onDelete(broker: StoredBroker) {
+    if (!confirm(t('config.broker.status.confirmDelete', { name: broker.name }))) return
+    removeBroker(broker.url, broker.tenant)
+    setStatus(t('config.broker.status.deleted', { name: broker.name }))
+    refreshBrokers()
     onSave?.()
-    setAuthByKey((s) => {
-      const rest = { ...s }
-      delete rest[authKey(b.url, b.tenant)]
-      return rest
-    })
-    setStatus(`Conexión Orion "${b.name}" eliminada.`)
   }
 
   return {
-    brokerName,
-    setBrokerName,
-    brokerUrl,
-    setBrokerUrl,
-    brokerTenant,
-    setBrokerTenant,
+    brokerName, setBrokerName,
+    brokerUrl, setBrokerUrl,
+    brokerTenant, setBrokerTenant,
     brokers,
     currentUrl,
     currentKey,
     status,
     checking,
-    authUsername,
-    setAuthUsername,
-    authPassword,
-    setAuthPassword,
+    authUsername, setAuthUsername,
+    authPassword, setAuthPassword,
     authBusy,
     authByKey,
     authKey,
