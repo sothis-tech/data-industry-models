@@ -1,5 +1,5 @@
+import i18n from '../lib/i18n'
 import type { ValidationResult } from '../types/entity'
-
 /** Extrae un mensaje legible del campo `detail` que Pydantic puede devolver como string o array */
 function detailToString(detail: unknown, fallback: string): string {
   if (!detail) return fallback
@@ -14,7 +14,6 @@ function detailToString(detail: unknown, fallback: string): string {
   }
   return fallback
 }
-
 export async function validateEntityPayload(
   payload: unknown,
   schemaDoc: unknown,
@@ -28,14 +27,13 @@ export async function validateEntityPayload(
     })
     const data = await res.json().catch(() => ({})) as ValidationResult & { detail?: unknown }
     if (!res.ok) {
-      return { valid: false, errors: [{ path: '', message: detailToString(data.detail, 'Error de validación') }] }
+      return { valid: false, errors: [{ path: '', message: detailToString(data.detail, i18n.t('errors.validation.failed')) }] }
     }
     return data
   } catch (e) {
-    return { valid: false, errors: [{ path: '', message: 'Sin conexión: ' + String(e) }] }
+    return { valid: false, errors: [{ path: '', message: i18n.t('errors.validation.noConnection', { error: String(e) }) }] }
   }
 }
-
 export async function validateAttrsPayload(attrsPayload: unknown): Promise<ValidationResult> {
   try {
     const res = await fetch('/api/validate/attrs', {
@@ -45,42 +43,43 @@ export async function validateAttrsPayload(attrsPayload: unknown): Promise<Valid
     })
     const data = await res.json().catch(() => ({})) as ValidationResult & { detail?: unknown }
     if (!res.ok) {
-      return { valid: false, errors: [{ path: '', message: detailToString(data.detail, 'Error de validación') }] }
+      return { valid: false, errors: [{ path: '', message: detailToString(data.detail, i18n.t('errors.validation.failed')) }] }
     }
     return data
   } catch (e) {
-    return { valid: false, errors: [{ path: '', message: 'Sin conexión: ' + String(e) }] }
+    return { valid: false, errors: [{ path: '', message: i18n.t('errors.validation.noConnection', { error: String(e) }) }] }
   }
 }
-
 export function humanizeSchemaError({ path, message }: { path: string; message: unknown }): string {
   // `message` puede llegar como objeto en runtime aunque el tipo diga string
   const msg = typeof message === 'string' ? message : JSON.stringify(message)
-  const field = path && path !== '/' ? `Campo "${path.replace(/^\//, '')}"` : 'Payload'
-
+  const field = path && path !== '/' ? i18n.t('errors.schema.fieldNamed', { field: path.replace(/^\//, '') }) : i18n.t('errors.schema.payload')
   if (/is not one of/i.test(msg)) {
     const got = (msg.match(/'([^']+)' is not/) ?? [])[1] ?? ''
     const allowed = (msg.match(/\[([^\]]+)\]/) ?? [])[1] ?? ''
     if (path === '/type') {
       const expected = (msg.match(/\['([^\]]+)'\]/) ?? [])[1] ?? ''
-      return `${field}: el tipo '${got}' no es válido para este schema (se esperaba '${expected}'). Revisa que el tipo seleccionado coincide con el payload.`
+      return i18n.t('errors.schema.typeNotValid', { field, got, expected })
     }
     const hint =
       path.replace(/^\//, '').startsWith('category') && got
-        ? ` El valor '${got}' no pertenece al enum de categorías de edificio (Building); a veces Marvin mezcla categorías de Device (p. ej. manufacturingPlant).`
+        ? i18n.t('errors.schema.categoryHint', { got })
         : ''
-    return `${field}: el valor '${got}' no está permitido por el schema.${hint}${allowed ? ` Valores válidos (extracto): [${allowed.length > 120 ? `${allowed.slice(0, 120)}…` : allowed}].` : ''}`
+    const allowedText = allowed
+      ? i18n.t('errors.schema.allowedValues', { allowed: allowed.length > 120 ? `${allowed.slice(0, 120)}…` : allowed })
+      : ''
+    return i18n.t('errors.schema.valueNotAllowed', { field, got, hint, allowedText })
   }
   if (/is a required property/i.test(msg)) {
     const prop = (msg.match(/'([^']+)' is a required/) ?? [])[1] ?? ''
-    return `Campo requerido faltante: "${prop}". Añádelo al JSON antes de crear.`
+    return i18n.t('errors.schema.requiredMissing', { prop })
   }
   if (/is not of type/i.test(msg)) {
     const expected = (msg.match(/of type '([^']+)'/) ?? [])[1] ?? ''
-    return `${field}: se esperaba un valor de tipo ${expected}.`
+    return i18n.t('errors.schema.wrongType', { field, expected })
   }
   if (/is not valid under any of the given schemas/i.test(msg)) {
-    return `${field}: la estructura del valor no es válida según el schema. Comprueba que el formato (p. ej. GeoJSON para location) es correcto.`
+    return i18n.t('errors.schema.invalidStructure', { field })
   }
-  return `${field}: ${msg}`
+  return i18n.t('errors.schema.generic', { field, msg })
 }
