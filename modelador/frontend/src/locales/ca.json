@@ -30,6 +30,12 @@
     "model": "Model: {{label}}",
     "configure": "Configura"
   },
+  "theme": {
+    "switchToLight": "Canvia al tema clar",
+    "switchToDark": "Canvia al tema fosc",
+    "light": "Tema clar",
+    "dark": "Tema fosc"
+  },
   "errorBoundary": {
     "title": "Alguna cosa ha anat malament",
     "message": "S'ha produït un error inesperat a l'aplicació.",
@@ -40,6 +46,10 @@
     "cannotUndo": "Aquesta acció no es pot desfer."
   },
   "errors": {
+    "network": "Error de xarxa",
+    "chat": {
+      "sessionRequired": "Sessió Orion requerida"
+    },
     "validation": {
       "failed": "Error de validació",
       "noConnection": "Sense connexió: {{error}}"
@@ -86,7 +96,8 @@
       "getEntity": "Error obtenint l'entitat",
       "deleteEntity": "Error eliminant l'entitat",
       "preparePayload": "Error preparant el payload",
-      "prepareAttrs": "Error preparant els atributs"
+      "prepareAttrs": "Error preparant els atributs",
+      "noModelTypes": "Sense tipus al model"
     },
     "graph": {
       "buildSchema": "Error construint el graf del model",
@@ -94,6 +105,11 @@
       "typeView": "Error obtenint la vista del tipus",
       "entityView": "Error obtenint la vista de l'entitat",
       "noConnection": "Sense connexió: {{error}}"
+    },
+    "voice": {
+      "audioDiscarded": "Àudio descartat per l'agent.",
+      "wsNotConfigured": "AEA_WS_URL no està configurat al backend",
+      "connectFailed": "No s'ha pogut connectar amb l'agent d'escolta activa"
     }
   },
   "agent": {
@@ -158,7 +174,9 @@
       "copied": "Copiat",
       "copyJson": "Copia JSON",
       "openInEditor": "Obre a l'editor",
-      "viewInViz": "Mostra a la visualització"
+      "viewInViz": "Mostra a la visualització",
+      "entityTitle": "Entitat NGSI-LD",
+      "payloadTitle": "Payload NGSI-LD"
     },
     "graph": {
       "ariaLabel": "Esquema de relacions"
@@ -332,7 +350,23 @@
       "archiveFileHint": "(.zip, .tar.gz, .tar)",
       "orionContextUrl": "URL del context per a Orion",
       "loadPackage": "Carrega el paquet",
-      "clearModel": "Neteja el model"
+      "clearModel": "Neteja el model",
+      "status": {
+        "loading": "Carregant...",
+        "processing": "Processant el paquet...",
+        "needUrl": "Indica com a mínim una URL d'schema o de context.",
+        "selectFile": "Selecciona primer un fitxer comprimit.",
+        "loadError": "Error en carregar el model.",
+        "processError": "Error en processar el paquet.",
+        "cleared": "Model eliminat correctament.",
+        "loaded": "Model carregat: {{details}}",
+        "summarySchemas_one": "{{count}} schema",
+        "summarySchemas_other": "{{count}} schemas",
+        "summaryContext": "context",
+        "summaryDescriptor": "descriptor",
+        "summaryExamples_one": "{{count}} exemple",
+        "summaryExamples_other": "{{count}} exemples"
+      }
     },
     "broker": {
       "title": "Connexió Orion (tenant)",
@@ -358,7 +392,23 @@
       "tenantLabel": "tenant: {{tenant}}",
       "use": "Utilitza",
       "logout": "Tanca la sessió",
-      "deleteTitle": "Elimina la connexió \"{{name}}\""
+      "deleteTitle": "Elimina la connexió \"{{name}}\"",
+      "status": {
+        "needUrl": "Indica l'URL base de Kong.",
+        "needCredentials": "Introdueix usuari i contrasenya per connectar.",
+        "checking": "Comprovant les credencials i la connexió...",
+        "authFailed": "Autenticació fallida. {{detail}}",
+        "loginFailed": "No s'ha pogut iniciar la sessió: {{error}}",
+        "connected": "Connexió i sessió correctes.",
+        "connectError": "Error de connexió: {{error}}",
+        "loggedOut": "Sessió tancada.",
+        "logoutFailed": "No s'ha pogut tancar la sessió: {{error}}",
+        "saved": "Connexió Orion desada: {{name}}",
+        "activeConnection": "Connexió activa: {{name}}",
+        "deactivated": "Connexió activa desactivada.",
+        "confirmDelete": "Vols eliminar la connexió \"{{name}}\"?",
+        "deleted": "Connexió eliminada: {{name}}"
+      }
     },
     "onboarding": {
       "title": "Primers passos ({{completed}}/3)",

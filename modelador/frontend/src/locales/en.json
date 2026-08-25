@@ -30,6 +30,12 @@
     "model": "Model: {{label}}",
     "configure": "Configure"
   },
+  "theme": {
+    "switchToLight": "Switch to light theme",
+    "switchToDark": "Switch to dark theme",
+    "light": "Light theme",
+    "dark": "Dark theme"
+  },
   "errorBoundary": {
     "title": "Something went wrong",
     "message": "An unexpected error occurred in the application.",
@@ -40,6 +46,10 @@
     "cannotUndo": "This action cannot be undone."
   },
   "errors": {
+    "network": "Network error",
+    "chat": {
+      "sessionRequired": "Orion session required"
+    },
     "validation": {
       "failed": "Validation error",
       "noConnection": "No connection: {{error}}"
@@ -86,7 +96,8 @@
       "getEntity": "Error getting entity",
       "deleteEntity": "Error deleting entity",
       "preparePayload": "Error preparing payload",
-      "prepareAttrs": "Error preparing attributes"
+      "prepareAttrs": "Error preparing attributes",
+      "noModelTypes": "No types in the model"
     },
     "graph": {
       "buildSchema": "Error building model graph",
@@ -158,10 +169,17 @@
       "copied": "Copied",
       "copyJson": "Copy JSON",
       "openInEditor": "Open in editor",
-      "viewInViz": "View in visualization"
+      "viewInViz": "View in visualization",
+      "entityTitle": "NGSI-LD Entity",
+      "payloadTitle": "NGSI-LD Payload"
     },
     "graph": {
       "ariaLabel": "Relationship diagram"
+    },
+    "voice": {
+      "audioDiscarded": "Audio discarded by the agent.",
+      "wsNotConfigured": "AEA_WS_URL is not configured in the backend",
+      "connectFailed": "Could not connect to the active listening agent"
     }
   },
   "entities": {
@@ -332,7 +350,23 @@
       "archiveFileHint": "(.zip, .tar.gz, .tar)",
       "orionContextUrl": "Orion context URL",
       "loadPackage": "Load package",
-      "clearModel": "Clear model"
+      "clearModel": "Clear model",
+      "status": {
+        "loading": "Loading...",
+        "processing": "Processing package...",
+        "needUrl": "Provide at least one schema or context URL.",
+        "selectFile": "Select a compressed file first.",
+        "loadError": "Error loading model.",
+        "processError": "Error processing the package.",
+        "cleared": "Model cleared successfully.",
+        "loaded": "Model loaded: {{details}}",
+        "summarySchemas_one": "{{count}} schema",
+        "summarySchemas_other": "{{count}} schemas",
+        "summaryContext": "context",
+        "summaryDescriptor": "descriptor",
+        "summaryExamples_one": "{{count}} example",
+        "summaryExamples_other": "{{count}} examples"
+      }
     },
     "broker": {
       "title": "Orion connection (tenant)",
@@ -358,7 +392,23 @@
       "tenantLabel": "tenant: {{tenant}}",
       "use": "Use",
       "logout": "Log out",
-      "deleteTitle": "Delete connection \"{{name}}\""
+      "deleteTitle": "Delete connection \"{{name}}\"",
+      "status": {
+        "needUrl": "Provide the Kong base URL.",
+        "needCredentials": "Enter username and password to connect.",
+        "checking": "Checking credentials and connection...",
+        "authFailed": "Authentication failed. {{detail}}",
+        "loginFailed": "Could not log in: {{error}}",
+        "connected": "Connection and session OK.",
+        "connectError": "Connection error: {{error}}",
+        "loggedOut": "Session closed.",
+        "logoutFailed": "Could not log out: {{error}}",
+        "saved": "Orion connection saved: {{name}}",
+        "activeConnection": "Active connection: {{name}}",
+        "deactivated": "Active connection deactivated.",
+        "confirmDelete": "Delete the connection \"{{name}}\"?",
+        "deleted": "Connection deleted: {{name}}"
+      }
     },
     "onboarding": {
       "title": "Getting started ({{completed}}/3)",

@@ -1,5 +1,5 @@
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '../hooks/useTheme'
-
 function SunIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -13,7 +13,6 @@ function SunIcon() {
     </svg>
   )
 }
-
 function MoonIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -26,12 +25,11 @@ function MoonIcon() {
     </svg>
   )
 }
-
 export function ThemeToggle() {
+  const { t } = useTranslation()
   const { theme, toggleTheme } = useTheme()
   const isDark = theme === 'dark'
-  const label = isDark ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'
-
+  const label = isDark ? t('theme.switchToLight') : t('theme.switchToDark')
   return (
     <button
       type="button"
@@ -41,7 +39,7 @@ export function ThemeToggle() {
       title={label}
     >
       {isDark ? <SunIcon /> : <MoonIcon />}
-      <span className="theme-toggle-label">{isDark ? 'Tema claro' : 'Tema oscuro'}</span>
+      <span className="theme-toggle-label">{isDark ? t('theme.light') : t('theme.dark')}</span>
     </button>
   )
 }
