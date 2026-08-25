@@ -39,6 +39,63 @@
   "confirmModal": {
     "cannotUndo": "Esta acción no se puede deshacer."
   },
+  "errors": {
+    "validation": {
+      "failed": "Error de validación",
+      "noConnection": "Sin conexión: {{error}}"
+    },
+    "schema": {
+      "fieldNamed": "Campo \"{{field}}\"",
+      "payload": "Payload",
+      "typeNotValid": "{{field}}: el tipo '{{got}}' no es válido para este schema (se esperaba '{{expected}}'). Revisa que el tipo seleccionado coincide con el payload.",
+      "categoryHint": " El valor '{{got}}' no pertenece al enum de categorías de edificio (Building); a veces Marvin mezcla categorías de Device (p. ej. manufacturingPlant).",
+      "allowedValues": " Valores válidos (extracto): [{{allowed}}].",
+      "valueNotAllowed": "{{field}}: el valor '{{got}}' no está permitido por el schema.{{hint}}{{allowedText}}",
+      "requiredMissing": "Campo requerido faltante: \"{{prop}}\". Añádelo al JSON antes de crear.",
+      "wrongType": "{{field}}: se esperaba un valor de tipo {{expected}}.",
+      "invalidStructure": "{{field}}: la estructura del valor no es válida según el schema. Comprueba que el formato (p. ej. GeoJSON para location) es correcto.",
+      "generic": "{{field}}: {{msg}}"
+    },
+    "rag": {
+      "config": "Error config RAG: {{status}}",
+      "listTenants": "Error listando tenants: {{status}}",
+      "createTenant": "Error creando tenant: {{status}}",
+      "deleteTenant": "Error eliminando tenant: {{status}}",
+      "listDocuments": "Error listando documentos: {{status}}",
+      "deleteDocument": "Error eliminando documento: {{status}}",
+      "vectorize": "Error vectorizando: {{status}}",
+      "clear": "Error vaciando índice: {{status}}",
+      "uploadNetwork": "Error de red al subir el documento"
+    },
+    "model": {
+      "loadUrl": "Error cargando URL: {{message}}",
+      "loadUrls": "Error cargando URLs: {{message}}",
+      "invalidProxyResponse": "Respuesta inválida del proxy",
+      "urlFailed": "{{url}} falló",
+      "processPackage": "Error al procesar el paquete",
+      "uploadPackage": "Error subiendo paquete: {{message}}"
+    },
+    "orion": {
+      "apiError": "Error de API",
+      "keycloakFailed": "No se pudo conectar con Keycloak",
+      "logoutFailed": "No se pudo cerrar sesión",
+      "emptyBrokerUrl": "URL del broker vacía",
+      "connectFailed": "Error al conectar con Orion",
+      "noConnection": "Sin conexión: {{message}}",
+      "paramsRequired": "Parámetros requeridos",
+      "getEntity": "Error obteniendo entidad",
+      "deleteEntity": "Error eliminando entidad",
+      "preparePayload": "Error preparando payload",
+      "prepareAttrs": "Error preparando atributos"
+    },
+    "graph": {
+      "buildSchema": "Error construyendo grafo de modelo",
+      "buildOrion": "Error construyendo grafo Orion",
+      "typeView": "Error obteniendo vista de tipo",
+      "entityView": "Error obteniendo vista de entidad",
+      "noConnection": "Sin conexión: {{error}}"
+    }
+  },
   "agent": {
     "panel": {
       "ariaLabel": "Marvin — Asistente",

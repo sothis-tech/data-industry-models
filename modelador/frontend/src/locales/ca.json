@@ -39,6 +39,63 @@
   "confirmModal": {
     "cannotUndo": "Aquesta acció no es pot desfer."
   },
+  "errors": {
+    "validation": {
+      "failed": "Error de validació",
+      "noConnection": "Sense connexió: {{error}}"
+    },
+    "schema": {
+      "fieldNamed": "Camp \"{{field}}\"",
+      "payload": "Payload",
+      "typeNotValid": "{{field}}: el tipus '{{got}}' no és vàlid per a aquest schema (s'esperava '{{expected}}'). Revisa que el tipus seleccionat coincideix amb el payload.",
+      "categoryHint": " El valor '{{got}}' no pertany a l'enum de categories d'edifici (Building); de vegades Marvin barreja categories de Device (p. ex. manufacturingPlant).",
+      "allowedValues": " Valors vàlids (extracte): [{{allowed}}].",
+      "valueNotAllowed": "{{field}}: el valor '{{got}}' no està permès pel schema.{{hint}}{{allowedText}}",
+      "requiredMissing": "Camp requerit que falta: \"{{prop}}\". Afegeix-lo al JSON abans de crear.",
+      "wrongType": "{{field}}: s'esperava un valor de tipus {{expected}}.",
+      "invalidStructure": "{{field}}: l'estructura del valor no és vàlida segons el schema. Comprova que el format (p. ex. GeoJSON per a location) és correcte.",
+      "generic": "{{field}}: {{msg}}"
+    },
+    "rag": {
+      "config": "Error de configuració RAG: {{status}}",
+      "listTenants": "Error llistant els tenants: {{status}}",
+      "createTenant": "Error creant el tenant: {{status}}",
+      "deleteTenant": "Error eliminant el tenant: {{status}}",
+      "listDocuments": "Error llistant els documents: {{status}}",
+      "deleteDocument": "Error eliminant el document: {{status}}",
+      "vectorize": "Error vectoritzant: {{status}}",
+      "clear": "Error buidant l'índex: {{status}}",
+      "uploadNetwork": "Error de xarxa en pujar el document"
+    },
+    "model": {
+      "loadUrl": "Error carregant l'URL: {{message}}",
+      "loadUrls": "Error carregant els URLs: {{message}}",
+      "invalidProxyResponse": "Resposta no vàlida del proxy",
+      "urlFailed": "{{url}} ha fallat",
+      "processPackage": "Error en processar el paquet",
+      "uploadPackage": "Error pujant el paquet: {{message}}"
+    },
+    "orion": {
+      "apiError": "Error d'API",
+      "keycloakFailed": "No s'ha pogut connectar amb Keycloak",
+      "logoutFailed": "No s'ha pogut tancar la sessió",
+      "emptyBrokerUrl": "URL del broker buida",
+      "connectFailed": "Error en connectar amb Orion",
+      "noConnection": "Sense connexió: {{message}}",
+      "paramsRequired": "Paràmetres requerits",
+      "getEntity": "Error obtenint l'entitat",
+      "deleteEntity": "Error eliminant l'entitat",
+      "preparePayload": "Error preparant el payload",
+      "prepareAttrs": "Error preparant els atributs"
+    },
+    "graph": {
+      "buildSchema": "Error construint el graf del model",
+      "buildOrion": "Error construint el graf Orion",
+      "typeView": "Error obtenint la vista del tipus",
+      "entityView": "Error obtenint la vista de l'entitat",
+      "noConnection": "Sense connexió: {{error}}"
+    }
+  },
   "agent": {
     "panel": {
       "ariaLabel": "Marvin — Assistent",

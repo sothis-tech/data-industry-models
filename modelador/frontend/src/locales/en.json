@@ -39,6 +39,63 @@
   "confirmModal": {
     "cannotUndo": "This action cannot be undone."
   },
+  "errors": {
+    "validation": {
+      "failed": "Validation error",
+      "noConnection": "No connection: {{error}}"
+    },
+    "schema": {
+      "fieldNamed": "Field \"{{field}}\"",
+      "payload": "Payload",
+      "typeNotValid": "{{field}}: type '{{got}}' is not valid for this schema (expected '{{expected}}'). Check that the selected type matches the payload.",
+      "categoryHint": " The value '{{got}}' does not belong to the building category enum (Building); Marvin sometimes mixes in Device categories (e.g. manufacturingPlant).",
+      "allowedValues": " Valid values (excerpt): [{{allowed}}].",
+      "valueNotAllowed": "{{field}}: the value '{{got}}' is not allowed by the schema.{{hint}}{{allowedText}}",
+      "requiredMissing": "Missing required field: \"{{prop}}\". Add it to the JSON before creating.",
+      "wrongType": "{{field}}: a value of type {{expected}} was expected.",
+      "invalidStructure": "{{field}}: the value structure is not valid according to the schema. Check that the format (e.g. GeoJSON for location) is correct.",
+      "generic": "{{field}}: {{msg}}"
+    },
+    "rag": {
+      "config": "RAG config error: {{status}}",
+      "listTenants": "Error listing tenants: {{status}}",
+      "createTenant": "Error creating tenant: {{status}}",
+      "deleteTenant": "Error deleting tenant: {{status}}",
+      "listDocuments": "Error listing documents: {{status}}",
+      "deleteDocument": "Error deleting document: {{status}}",
+      "vectorize": "Error vectorizing: {{status}}",
+      "clear": "Error clearing index: {{status}}",
+      "uploadNetwork": "Network error uploading the document"
+    },
+    "model": {
+      "loadUrl": "Error loading URL: {{message}}",
+      "loadUrls": "Error loading URLs: {{message}}",
+      "invalidProxyResponse": "Invalid proxy response",
+      "urlFailed": "{{url}} failed",
+      "processPackage": "Error processing the package",
+      "uploadPackage": "Error uploading package: {{message}}"
+    },
+    "orion": {
+      "apiError": "API error",
+      "keycloakFailed": "Could not connect to Keycloak",
+      "logoutFailed": "Could not log out",
+      "emptyBrokerUrl": "Empty broker URL",
+      "connectFailed": "Error connecting to Orion",
+      "noConnection": "No connection: {{message}}",
+      "paramsRequired": "Required parameters",
+      "getEntity": "Error getting entity",
+      "deleteEntity": "Error deleting entity",
+      "preparePayload": "Error preparing payload",
+      "prepareAttrs": "Error preparing attributes"
+    },
+    "graph": {
+      "buildSchema": "Error building model graph",
+      "buildOrion": "Error building Orion graph",
+      "typeView": "Error getting type view",
+      "entityView": "Error getting entity view",
+      "noConnection": "No connection: {{error}}"
+    }
+  },
   "agent": {
     "panel": {
       "ariaLabel": "Marvin — Assistant",

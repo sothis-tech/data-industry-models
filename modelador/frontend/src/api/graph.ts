@@ -1,3 +1,4 @@
+import i18n from '../lib/i18n'
 import { API_BASE } from '../lib/http'
 import { log } from '../lib/logger'
 import type { Relationship } from '../lib/model-parser'
@@ -21,7 +22,7 @@ export async function buildSchemaGraph(
       detail?: string
     }
     if (!res.ok) {
-      const err = data.detail ?? data.error ?? 'Error construyendo grafo de modelo'
+      const err = data.detail ?? data.error ?? i18n.t('errors.graph.buildSchema')
       log.warn('buildSchemaGraph: respuesta no OK', {
         event: 'graph_schema_build_http_error',
         httpStatus: res.status,
@@ -35,7 +36,7 @@ export async function buildSchemaGraph(
       event: 'graph_schema_build_failed',
       error: String(e),
     })
-    return { nodes: [], links: [], error: 'Sin conexión: ' + String(e) }
+    return { nodes: [], links: [], error: i18n.t('errors.graph.noConnection', { error: String(e) }) }
   }
 }
 
@@ -55,7 +56,7 @@ export async function buildSchemaTypeView(
       detail?: string
     }
     if (!res.ok) {
-      const err = data.detail ?? data.error ?? 'Error obteniendo vista de tipo'
+      const err = data.detail ?? data.error ?? i18n.t('errors.graph.typeView')
       log.warn('buildSchemaTypeView: respuesta no OK', {
         event: 'graph_type_view_http_error',
         httpStatus: res.status,
@@ -69,7 +70,7 @@ export async function buildSchemaTypeView(
       event: 'graph_type_view_failed',
       error: String(e),
     })
-    return { view: null, error: 'Sin conexión: ' + String(e) }
+    return { view: null, error: i18n.t('errors.graph.noConnection', { error: String(e) }) }
   }
 }
 
@@ -88,7 +89,7 @@ export async function buildOrionGraph(
       detail?: string
     }
     if (!res.ok) {
-      const err = data.detail ?? data.error ?? 'Error construyendo grafo Orion'
+      const err = data.detail ?? data.error ?? i18n.t('errors.graph.buildOrion')
       log.warn('buildOrionGraph: respuesta no OK', {
         event: 'graph_orion_build_http_error',
         httpStatus: res.status,
@@ -102,7 +103,7 @@ export async function buildOrionGraph(
       event: 'graph_orion_build_failed',
       error: String(e),
     })
-    return { nodes: [], links: [], error: 'Sin conexión: ' + String(e) }
+    return { nodes: [], links: [], error: i18n.t('errors.graph.noConnection', { error: String(e) }) }
   }
 }
 
@@ -123,7 +124,7 @@ export async function getEntityView(
       detail?: string
     }
     if (!res.ok) {
-      const err = data.detail ?? data.error ?? 'Error obteniendo vista de entidad'
+      const err = data.detail ?? data.error ?? i18n.t('errors.graph.entityView')
       log.warn('getEntityView: respuesta no OK', {
         event: 'graph_entity_view_http_error',
         httpStatus: res.status,
@@ -137,6 +138,6 @@ export async function getEntityView(
       event: 'graph_entity_view_failed',
       error: String(e),
     })
-    return { view: null, error: 'Sin conexión: ' + String(e) }
+    return { view: null, error: i18n.t('errors.graph.noConnection', { error: String(e) }) }
   }
 }
