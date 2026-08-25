@@ -1,9 +1,11 @@
+import { useTranslation } from 'react-i18next'
 import { StatusMessage } from '../../components/StatusMessage'
 import { useBroker } from '../../hooks/useBroker'
 
 type Props = { onSave?: () => void }
 
 export function BrokerCard({ onSave }: Props) {
+  const { t } = useTranslation()
   const {
     brokerName,
     setBrokerName,
@@ -38,11 +40,11 @@ export function BrokerCard({ onSave }: Props) {
 
   return (
     <div className="config-card">
-      <h2>Conexión Orion (tenant)</h2>
+      <h2>{t('config.broker.title')}</h2>
 
       <div className="form-grid">
         <label>
-          Nombre de la conexión
+          {t('config.broker.connName')}
           <input
             value={brokerName}
             onChange={(e) => setBrokerName(e.target.value)}
@@ -50,7 +52,7 @@ export function BrokerCard({ onSave }: Props) {
           />
         </label>
         <label>
-          URL base Kong
+          {t('config.broker.kongUrl')}
           <input
             value={brokerUrl}
             onChange={(e) => setBrokerUrl(e.target.value)}
@@ -58,10 +60,10 @@ export function BrokerCard({ onSave }: Props) {
           />
         </label>
         <label>
-          Tenant / NGSILD-Tenant
+          {t('config.broker.tenant')}
           <span className="label-hint">
             {' '}
-            — espacio NGSI-LD autorizado por el rol tenant_* en Keycloak
+            {t('config.broker.tenantHint')}
           </span>
           <input
             value={brokerTenant}
@@ -72,13 +74,13 @@ export function BrokerCard({ onSave }: Props) {
       </div>
 
       <form className="broker-connect-form" onSubmit={handleConnectSubmit}>
-        <h3>Credenciales Keycloak</h3>
+        <h3>{t('config.broker.keycloakCreds')}</h3>
         <p className="helper">
-          Usuario y contraseña solo se usan para conectar; no se guardan en el navegador.
+          {t('config.broker.credsHelper')}
         </p>
         <div className="form-grid">
           <label>
-            Usuario
+            {t('config.broker.username')}
             <input
               value={authUsername}
               onChange={(e) => setAuthUsername(e.target.value)}
@@ -87,11 +89,11 @@ export function BrokerCard({ onSave }: Props) {
             />
           </label>
           <label>
-            Contraseña
+            {t('config.broker.password')}
             <input
               value={authPassword}
               onChange={(e) => setAuthPassword(e.target.value)}
-              placeholder="Contraseña Keycloak"
+              placeholder={t('config.broker.passwordPlaceholder')}
               type="password"
               autoComplete="current-password"
             />
@@ -100,27 +102,27 @@ export function BrokerCard({ onSave }: Props) {
 
         <div className="actions-row">
           <button type="submit" disabled={checking || authBusy}>
-            {checking || authBusy ? 'Conectando…' : 'Conectar'}
+            {checking || authBusy ? t('config.broker.connecting') : t('config.broker.connect')}
           </button>
-          <button type="button" onClick={onSaveBroker} title="Guardar URL, nombre y tenant sin credenciales">
-            Guardar
+          <button type="button" onClick={onSaveBroker} title={t('config.broker.saveTitle')}>
+            {t('common.save')}
           </button>
           <button
             type="button"
             onClick={onDeactivate}
             disabled={!currentUrl}
-            title="Quitar la conexión activa sin borrar las guardadas"
+            title={t('config.broker.deactivateTitle')}
           >
-            Desactivar
+            {t('config.broker.deactivate')}
           </button>
         </div>
       </form>
 
       {status ? <StatusMessage message={status} /> : null}
 
-      <h3>Conexiones guardadas</h3>
+      <h3>{t('config.broker.savedConnections')}</h3>
       {!brokers.length ? (
-        <p className="helper">No hay conexiones Orion guardadas.</p>
+        <p className="helper">{t('config.broker.noConnections')}</p>
       ) : (
         <ul className="broker-list">
           {brokers.map((b) => {
@@ -131,31 +133,31 @@ export function BrokerCard({ onSave }: Props) {
                 <div className="broker-info">
                   <div className="broker-title-row">
                     <strong>{b.name}</strong>
-                    {currentKey === key ? <span className="active-pill">activa</span> : null}
+                    {currentKey === key ? <span className="active-pill">{t('config.broker.active')}</span> : null}
                     {loggedIn ? (
-                      <span className="active-pill">sesión iniciada</span>
+                      <span className="active-pill">{t('config.broker.loggedIn')}</span>
                     ) : (
-                      <span className="active-pill active-pill--muted">sin sesión</span>
+                      <span className="active-pill active-pill--muted">{t('config.broker.noSession')}</span>
                     )}
                   </div>
                   <p className="broker-url">{b.url}</p>
-                  {b.tenant ? <p className="broker-tenant">tenant: {b.tenant}</p> : null}
+                  {b.tenant ? <p className="broker-tenant">{t('config.broker.tenantLabel', { tenant: b.tenant })}</p> : null}
                 </div>
                 <div className="broker-actions broker-actions--split">
                   <button type="button" onClick={() => onLoadConnection(b)} disabled={authBusy}>
-                    Usar
+                    {t('config.broker.use')}
                   </button>
                   <div className="broker-actions-right">
                     <button type="button" onClick={() => void onLogout(b)} disabled={authBusy || !loggedIn}>
-                      Cerrar sesión
+                      {t('config.broker.logout')}
                     </button>
                     <button
                       type="button"
                       className="danger"
-                      title={`Eliminar conexión "${b.name}"`}
+                      title={t('config.broker.deleteTitle', { name: b.name })}
                       onClick={() => onDelete(b)}
                     >
-                      Eliminar
+                      {t('common.delete')}
                     </button>
                   </div>
                 </div>
