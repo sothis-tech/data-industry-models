@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type * as d3 from 'd3'
 import type { OrionGraphNode } from '../../types/graph'
 import { resolveTypeColor, typeKeyFromFullType } from '../../lib/graph-utils'
@@ -36,20 +37,21 @@ export function OrionSidePanel({
   onTypeFilterChange,
   typeFilterDisabled = false,
 }: Props) {
+  const { t } = useTranslation()
   const q = search.trim()
   const showClear = search.length > 0
 
   const searchBlock = (
     <div className="orion-search">
       <label className="orion-search-label" htmlFor="orion-entity-search">
-        Buscar instancia
+        {t('viz.orionPanel.searchLabel')}
       </label>
       <div className="orion-search-field">
         <input
           id="orion-entity-search"
           type="text"
           className="orion-search-input"
-          placeholder="ID, nombre o tipo…"
+          placeholder={t('viz.orionPanel.searchPlaceholder')}
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           onKeyDown={(e) => {
@@ -71,8 +73,8 @@ export function OrionSidePanel({
               e.preventDefault()
               onClearSearch()
             }}
-            aria-label="Limpiar búsqueda y mostrar todo el grafo"
-            title="Limpiar búsqueda"
+            aria-label={t('viz.orionPanel.clearAria')}
+            title={t('viz.orionPanel.clearTitle')}
           >
             ×
           </button>
@@ -81,8 +83,8 @@ export function OrionSidePanel({
       {q && (
         <p className="orion-search-meta">
           {searchHits.length === 0
-            ? 'Sin coincidencias en el grafo cargado'
-            : `${searchHits.length} coincidencia${searchHits.length === 1 ? '' : 's'}`}
+            ? t('viz.orionPanel.noMatches')
+            : t('viz.orionPanel.matches', { count: searchHits.length })}
         </p>
       )}
       <ul id="orion-search-hits" className="orion-search-hits" aria-live="polite">
@@ -119,16 +121,16 @@ export function OrionSidePanel({
     <aside
       id={id}
       className={`orion-side-panel${compact ? ' orion-side-panel--drawer' : ''}`}
-      aria-label="Filtros y búsqueda de instancias"
+      aria-label={t('viz.orionPanel.ariaLabel')}
     >
       {compact && (
         <div className="orion-side-panel-drawer-head">
-          <span className="orion-side-panel-drawer-title">Filtros y búsqueda</span>
+          <span className="orion-side-panel-drawer-title">{t('viz.orionPanel.drawerTitle')}</span>
           <button
             type="button"
             className="orion-side-panel-drawer-close"
             onClick={onClose}
-            aria-label="Cerrar filtros"
+            aria-label={t('viz.orionPanel.closeFiltersAria')}
           >
             ✕
           </button>
@@ -148,7 +150,7 @@ export function OrionSidePanel({
         <div className="orion-side-panel-drawer-body">
           {typeFilterDisabled && (
             <p className="orion-filter-hint">
-              Mientras escribes, el grafo muestra coincidencias. Elige una instancia o limpia la búsqueda para volver al filtro por tipos.
+              {t('viz.orionPanel.searchHint')}
             </p>
           )}
           {searchBlock}
@@ -157,7 +159,7 @@ export function OrionSidePanel({
         <>
           {typeFilterDisabled && (
             <p className="orion-filter-hint">
-              Mientras escribes, el grafo muestra coincidencias. Elige una instancia o limpia la búsqueda para volver al filtro por tipos.
+              {t('viz.orionPanel.searchHint')}
             </p>
           )}
           {searchBlock}

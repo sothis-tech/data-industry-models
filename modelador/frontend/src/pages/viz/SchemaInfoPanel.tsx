@@ -1,4 +1,5 @@
 import { useRef } from 'react'
+import { useTranslation, Trans } from 'react-i18next'
 import type * as d3 from 'd3'
 import type { Relationship } from '../../lib/model-parser'
 
@@ -12,6 +13,7 @@ type Props = {
 }
 
 export function SchemaInfoPanel({ open, height, types, relationships, colorScale, onHeightChange }: Props) {
+  const { t: tr } = useTranslation()
   const resizingRef = useRef(false)
   const startYRef = useRef(0)
   const startHRef = useRef(0)
@@ -45,7 +47,7 @@ export function SchemaInfoPanel({ open, height, types, relationships, colorScale
     <>
       <div
         className={`viz-resize-handle${open ? ' visible' : ''}`}
-        title="Arrastra para cambiar la altura del panel"
+        title={tr('viz.schemaInfo.resizeTitle')}
         onMouseDown={onResizeMouseDown}
       />
       <div
@@ -54,7 +56,7 @@ export function SchemaInfoPanel({ open, height, types, relationships, colorScale
       >
         <div className="viz-info-inner">
           <div>
-            <h3>Tipos detectados</h3>
+            <h3>{tr('viz.schemaInfo.typesDetected')}</h3>
             {types.length ? (
               <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: '0.82rem' }}>
                 {types.map((t) => (
@@ -75,25 +77,25 @@ export function SchemaInfoPanel({ open, height, types, relationships, colorScale
                 ))}
               </ul>
             ) : (
-              <p style={{ color: 'var(--muted)', margin: 0 }}>Sin tipos cargados.</p>
+              <p style={{ color: 'var(--muted)', margin: 0 }}>{tr('viz.schemaInfo.noTypes')}</p>
             )}
           </div>
           <div>
-            <h3>Relaciones</h3>
+            <h3>{tr('viz.schemaInfo.relations')}</h3>
             {relationships.length ? (
               <>
                 {hasImplicit && (
                   <p style={{ fontSize: '0.75rem', color: 'var(--muted)', margin: '0 0 0.4rem' }}>
                     <span style={{ borderBottom: '2px dashed var(--implicit-line)', paddingBottom: 1 }}>─ ─</span>{' '}
-                    Derivada de ejemplos del paquete
+                    {tr('viz.schemaInfo.derivedFromExamples')}
                   </p>
                 )}
                 <table className="rel-table">
                   <thead>
                     <tr>
-                      <th>Origen</th>
-                      <th>Propiedad</th>
-                      <th>Destino</th>
+                      <th>{tr('viz.schemaInfo.origin')}</th>
+                      <th>{tr('viz.schemaInfo.property')}</th>
+                      <th>{tr('viz.schemaInfo.destination')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -110,7 +112,7 @@ export function SchemaInfoPanel({ open, height, types, relationships, colorScale
                           <td>
                             <code style={{ fontSize: '0.75rem' }}>{r.property}</code>
                             {r.implicit && (
-                              <span title="Derivada de ejemplos" style={{ color: 'var(--muted)', fontSize: '0.7rem' }}>
+                              <span title={tr('viz.schemaInfo.derivedShort')} style={{ color: 'var(--muted)', fontSize: '0.7rem' }}>
                                 {' ~'}
                               </span>
                             )}
@@ -128,10 +130,7 @@ export function SchemaInfoPanel({ open, height, types, relationships, colorScale
               </>
             ) : (
               <p style={{ color: 'var(--muted)', fontSize: '0.82rem', margin: 0 }}>
-                Sin relaciones detectadas. Para mostrarlas, incluye un{' '}
-                <code>descriptor.json</code> con la sección{' '}
-                <code>&ldquo;relationships&rdquo;</code> y/o ejemplos en la carpeta{' '}
-                <code>examples/</code>.
+                <Trans i18nKey="viz.schemaInfo.noRelations" components={{ code: <code /> }} />
               </p>
             )}
           </div>
