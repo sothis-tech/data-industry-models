@@ -20,6 +20,16 @@
     "entities": "Entitats",
     "visualization": "Visualització"
   },
+  "status": {
+    "loggedIn": "sessió iniciada",
+    "noSession": "sense sessió",
+    "unavailable": "estat no disponible",
+    "checking": "comprovant la sessió",
+    "noConnection": "Sense connexió Orion",
+    "modelNotLoaded": "Model no carregat",
+    "model": "Model: {{label}}",
+    "configure": "Configura"
+  },
   "errorBoundary": {
     "title": "Alguna cosa ha anat malament",
     "message": "S'ha produït un error inesperat a l'aplicació.",

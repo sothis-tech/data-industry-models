@@ -20,6 +20,16 @@
     "entities": "Entities",
     "visualization": "Visualization"
   },
+  "status": {
+    "loggedIn": "logged in",
+    "noSession": "no session",
+    "unavailable": "status unavailable",
+    "checking": "checking session",
+    "noConnection": "No Orion connection",
+    "modelNotLoaded": "Model not loaded",
+    "model": "Model: {{label}}",
+    "configure": "Configure"
+  },
   "errorBoundary": {
     "title": "Something went wrong",
     "message": "An unexpected error occurred in the application.",

@@ -20,6 +20,16 @@
     "entities": "Entidades",
     "visualization": "Visualización"
   },
+  "status": {
+    "loggedIn": "sesión iniciada",
+    "noSession": "sin sesión",
+    "unavailable": "estado no disponible",
+    "checking": "comprobando sesión",
+    "noConnection": "Sin conexión Orion",
+    "modelNotLoaded": "Modelo no cargado",
+    "model": "Modelo: {{label}}",
+    "configure": "Configurar"
+  },
   "errorBoundary": {
     "title": "Algo ha ido mal",
     "message": "Se ha producido un error inesperado en la aplicación.",
