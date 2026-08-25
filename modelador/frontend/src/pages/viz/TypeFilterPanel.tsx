@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import type * as d3 from 'd3'
 import { resolveTypeColor } from '../../lib/graph-utils'
-
 type Props = {
   typeKeys: string[]
   activeKeys: string[]
@@ -9,12 +9,11 @@ type Props = {
   onChange: (newKeys: string[]) => void
   disabled?: boolean
 }
-
 export function TypeFilterPanel({ typeKeys, activeKeys, colorScale, onChange, disabled = false }: Props) {
+  const { t } = useTranslation()
   const masterId = useId()
   const masterRef = useRef<HTMLInputElement>(null)
   const activeSet = new Set(activeKeys)
-
   useEffect(() => {
     const cb = masterRef.current
     if (!cb) return
@@ -30,12 +29,10 @@ export function TypeFilterPanel({ typeKeys, activeKeys, colorScale, onChange, di
       cb.checked = false
     }
   }, [activeKeys, typeKeys.length])
-
   function handleMasterChange(e: React.ChangeEvent<HTMLInputElement>) {
     if (disabled) return
     onChange(e.target.checked ? [...typeKeys] : [])
   }
-
   function handleRowChange(key: string, checked: boolean) {
     if (disabled) return
     if (checked) {
@@ -44,27 +41,25 @@ export function TypeFilterPanel({ typeKeys, activeKeys, colorScale, onChange, di
       onChange(activeKeys.filter((k) => k !== key))
     }
   }
-
   const allOn  = activeKeys.length === typeKeys.length
   const allOff = activeKeys.length === 0
-
   return (
     <div className={`orion-type-filter${disabled ? ' is-disabled' : ''}`} aria-disabled={disabled || undefined}>
       <div className="orion-type-filter-head">
-        <label className="orion-type-filter-master" title="Seleccionar o deseleccionar todos">
+        <label className="orion-type-filter-master" title={t('viz.typeFilter.toggleAllTitle')}>
           <input
             ref={masterRef}
             type="checkbox"
             id={masterId}
-            aria-label="Seleccionar o deseleccionar todos los tipos"
+            aria-label={t('viz.typeFilter.toggleAllAria')}
             disabled={disabled}
             onChange={handleMasterChange}
           />
         </label>
         <div className="orion-type-filter-title">
-          Tipos
+          {t('viz.typeFilter.title')}
           <span className="orion-type-filter-count">
-            {allOn ? 'todos' : allOff ? 'ninguno' : `${activeKeys.length}/${typeKeys.length}`}
+            {allOn ? t('viz.typeFilter.all') : allOff ? t('viz.typeFilter.none') : `${activeKeys.length}/${typeKeys.length}`}
           </span>
         </div>
       </div>
@@ -76,7 +71,7 @@ export function TypeFilterPanel({ typeKeys, activeKeys, colorScale, onChange, di
             <label
               key={k}
               className={`orion-type-filter-row${isActive ? '' : ' dimmed'}`}
-              title={disabled ? 'Desactivado mientras buscas' : k}
+              title={disabled ? t('viz.typeFilter.disabledWhileSearching') : k}
             >
               <input
                 type="checkbox"
