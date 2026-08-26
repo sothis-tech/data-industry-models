@@ -1,3 +1,4 @@
+import i18n from '../lib/i18n'
 import { API_BASE, networkError, parseProxyEnvelope, readJson } from '../lib/http'
 import { reportOrionAuthFailure } from '../lib/orionSessionEvents'
 import type { PrepareAttrsResult, PreparePayloadResult } from '../types/entity'
@@ -23,7 +24,7 @@ function extractDetailMsg(raw: Record<string, unknown>, fallback: string): strin
   return fallback
 }
 
-function extractApiError(data: unknown, fallback = 'Error de API'): string {
+function extractApiError(data: unknown, fallback = i18n.t('errors.orion.apiError')): string {
   if (!data) return fallback
   if (typeof data === 'string') return data
 
@@ -128,7 +129,7 @@ export async function loginOrion(
       }),
     })
     const data = await readJson<Record<string, unknown>>(res, {})
-    if (!res.ok) return { ok: false, error: extractApiError(data, 'No se pudo conectar con Keycloak') }
+    if (!res.ok) return { ok: false, error: extractApiError(data, i18n.t('errors.orion.keycloakFailed')) }
     return { ok: true }
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : String(e) }
@@ -146,7 +147,7 @@ export async function logoutOrion(
       credentials: 'include',
     })
     const data = await readJson<Record<string, unknown>>(res, {})
-    if (!res.ok) return { ok: false, error: extractApiError(data, 'No se pudo cerrar sesión') }
+    if (!res.ok) return { ok: false, error: extractApiError(data, i18n.t('errors.orion.logoutFailed')) }
     return { ok: true }
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : String(e) }
@@ -217,7 +218,7 @@ export async function getEntities(
   opts: { type?: string; id?: string; limit?: number; offset?: number; tenant?: string } = {},
 ): Promise<ApiResult<{ body: Record<string, unknown>[] }>> {
   if (!brokerBaseUrl || !brokerBaseUrl.trim()) {
-    return { status: 400, body: [], error: 'URL del broker vacía' }
+    return { status: 400, body: [], error: i18n.t('errors.orion.emptyBrokerUrl') }
   }
   const params = withTenant(new URLSearchParams({ broker_base_url: brokerBaseUrl.trim() }), opts.tenant)
   if (opts.type) params.set('type', opts.type)
@@ -243,14 +244,14 @@ export async function getEntities(
       data.error && typeof data.error === 'string'
         ? data.error
         : !res.ok
-          ? extractApiError(data, 'Error al conectar con Orion')
+          ? extractApiError(data, i18n.t('errors.orion.connectFailed'))
           : null
     const status = envelopeStatus(data, res.status)
     reportOrionAuthFailure(status, data, error)
     return { status, body, error }
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e)
-    return { status: 0, body: [], error: `Sin conexión: ${message}` }
+    return { status: 0, body: [], error: i18n.t('errors.orion.noConnection', { message }) }
   }
 }
 
@@ -259,7 +260,7 @@ export async function getEntityById(
   entityId: string,
   tenant?: string,
 ): Promise<ApiResult<{ body: Record<string, unknown> | null }>> {
-  if (!brokerBaseUrl || !entityId) return { status: 400, body: null, error: 'Parámetros requeridos' }
+  if (!brokerBaseUrl || !entityId) return { status: 400, body: null, error: i18n.t('errors.orion.paramsRequired') }
   const params = withTenant(new URLSearchParams({ broker_base_url: brokerBaseUrl.trim() }), tenant)
   try {
     const res = await fetch(`${API_BASE}/api/proxy/entities/${encodeURIComponent(entityId)}?${params}`, {
@@ -267,7 +268,7 @@ export async function getEntityById(
     })
     const data = await readJson<Record<string, unknown>>(res, {})
     const status = envelopeStatus(data as { status?: number }, res.status)
-    const error = data.error ? String(data.error) : res.ok ? null : extractApiError(data, 'Error obteniendo entidad')
+    const error = data.error ? String(data.error) : res.ok ? null : extractApiError(data, i18n.t('errors.orion.getEntity'))
     reportOrionAuthFailure(status, data, error)
     return {
       status,
@@ -318,7 +319,7 @@ export async function deleteEntity(
     return {
       status: envelopeStatus(data as { status?: number }, res.status),
       body: null,
-      error: res.ok ? null : extractApiError(data, 'Error eliminando entidad'),
+      error: res.ok ? null : extractApiError(data, i18n.t('errors.orion.deleteEntity')),
     }
   } catch (e) {
     return networkError(e instanceof Error ? e.message : String(e), null)
@@ -339,7 +340,7 @@ export async function prepareEntityPayload(
     // El backend devuelve snake_case: payload_for_validation, payload_to_send, input_mode
     const raw = await res.json().catch(() => ({})) as Record<string, unknown>
     if (!res.ok) {
-      return { error: extractDetailMsg(raw, 'Error preparando payload'), inputMode: 'plain', payloadForValidation: {}, payloadToSend: {} }
+      return { error: extractDetailMsg(raw, i18n.t('errors.orion.preparePayload')), inputMode: 'plain', payloadForValidation: {}, payloadToSend: {} }
     }
     return {
       error: null,
@@ -348,7 +349,7 @@ export async function prepareEntityPayload(
       payloadToSend: (raw.payload_to_send as Record<string, unknown>) ?? {},
     }
   } catch (e) {
-    return { error: 'Sin conexión: ' + String(e), inputMode: 'plain', payloadForValidation: {}, payloadToSend: {} }
+    return { error: i18n.t('errors.orion.noConnection', { message: String(e) }), inputMode: 'plain', payloadForValidation: {}, payloadToSend: {} }
   }
 }
 
@@ -364,13 +365,13 @@ export async function prepareAttrsPayload(
     // El backend devuelve snake_case: attrs_payload_to_send
     const raw = await res.json().catch(() => ({})) as Record<string, unknown>
     if (!res.ok) {
-      return { error: extractDetailMsg(raw, 'Error preparando atributos'), attrsPayloadToSend: {} }
+      return { error: extractDetailMsg(raw, i18n.t('errors.orion.prepareAttrs')), attrsPayloadToSend: {} }
     }
     return {
       error: null,
       attrsPayloadToSend: (raw.attrs_payload_to_send as Record<string, unknown>) ?? {},
     }
   } catch (e) {
-    return { error: 'Sin conexión: ' + String(e), attrsPayloadToSend: {} }
+    return { error: i18n.t('errors.orion.noConnection', { message: String(e) }), attrsPayloadToSend: {} }
   }
 }

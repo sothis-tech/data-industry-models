@@ -1,7 +1,7 @@
+import { useTranslation } from 'react-i18next'
 import type { StoredBroker } from '../types/broker'
 import { AgentChat } from './AgentChat'
 import { HeadsetIcon } from './AgentIcons'
-
 type Props = {
   broker: StoredBroker | null
   isOrionAuthenticated: boolean
@@ -10,7 +10,6 @@ type Props = {
   onClose: () => void
   onToggleExpand: () => void
 }
-
 function ExpandIcon({ expanded }: { expanded: boolean }) {
   if (expanded) {
     return (
@@ -31,7 +30,6 @@ function ExpandIcon({ expanded }: { expanded: boolean }) {
     </svg>
   )
 }
-
 export function AgentPanelShell({
   broker,
   isOrionAuthenticated,
@@ -40,6 +38,7 @@ export function AgentPanelShell({
   onClose,
   onToggleExpand,
 }: Props) {
+  const { t } = useTranslation()
   return (
     <div className="agent-panel-shell">
       <header className="agent-panel-header">
@@ -55,17 +54,16 @@ export function AgentPanelShell({
             className="agent-panel-icon-btn"
             onClick={onToggleExpand}
             aria-pressed={isExpanded}
-            aria-label={isExpanded ? 'Restaurar ancho del panel' : 'Ampliar panel'}
-            title={isExpanded ? 'Restaurar ancho' : 'Ampliar panel'}
+            aria-label={isExpanded ? t('agent.shell.restoreAria') : t('agent.shell.expandAria')}
+            title={isExpanded ? t('agent.shell.restoreTitle') : t('agent.shell.expandAria')}
           >
             <ExpandIcon expanded={isExpanded} />
           </button>
-          <button type="button" className="agent-panel-close" onClick={onClose} aria-label="Cerrar panel de Marvin">
+          <button type="button" className="agent-panel-close" onClick={onClose} aria-label={t('agent.panel.closeAria')}>
             ✕
           </button>
         </div>
       </header>
-
       <AgentChat
         broker={broker}
         isOrionAuthenticated={isOrionAuthenticated}

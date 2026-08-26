@@ -1,5 +1,5 @@
+import i18n from '../lib/i18n'
 import { API_BASE, readJson } from '../lib/http'
-
 export async function fetchViaProxy(url: string): Promise<unknown> {
   try {
     const res = await fetch(`${API_BASE}/api/proxy/fetch`, {
@@ -14,10 +14,9 @@ export async function fetchViaProxy(url: string): Promise<unknown> {
     return readJson<unknown>(res, null)
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e)
-    throw new Error(`Error cargando URL: ${message}`)
+    throw new Error(i18n.t('errors.model.loadUrl', { message }))
   }
 }
-
 export async function fetchManyViaProxy(urls: string[]): Promise<unknown[]> {
   try {
     const res = await fetch(`${API_BASE}/api/proxy/fetch`, {
@@ -30,19 +29,18 @@ export async function fetchManyViaProxy(urls: string[]): Promise<unknown[]> {
       results?: Array<{ ok: boolean; error?: string; url?: string; content?: unknown }>
     }>(res, {})
     if (!res.ok) throw new Error(data.detail || res.statusText)
-    if (!data.results) throw new Error('Respuesta inválida del proxy')
+    if (!data.results) throw new Error(i18n.t('errors.model.invalidProxyResponse'))
     const out: unknown[] = []
     for (const r of data.results) {
-      if (!r.ok) throw new Error((r.error || `${r.url} falló`) + (r.url ? ` (${r.url})` : ''))
+      if (!r.ok) throw new Error((r.error || i18n.t('errors.model.urlFailed', { url: r.url })) + (r.url ? ` (${r.url})` : ''))
       out.push(r.content)
     }
     return out
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e)
-    throw new Error(`Error cargando URLs: ${message}`)
+    throw new Error(i18n.t('errors.model.loadUrls', { message }))
   }
 }
-
 export async function uploadModelPackage(file: File): Promise<{
   schemas?: unknown[]
   context?: unknown
@@ -64,7 +62,7 @@ export async function uploadModelPackage(file: File): Promise<{
       body: formData,
     })
     const data = await readJson<{ detail?: string } & Record<string, unknown>>(res, {})
-    if (!res.ok) throw new Error(data.detail || 'Error al procesar el paquete')
+    if (!res.ok) throw new Error(data.detail || i18n.t('errors.model.processPackage'))
     return data as {
       schemas?: unknown[]
       context?: unknown
@@ -80,6 +78,6 @@ export async function uploadModelPackage(file: File): Promise<{
     }
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e)
-    throw new Error(`Error subiendo paquete: ${message}`)
+    throw new Error(i18n.t('errors.model.uploadPackage', { message }))
   }
 }

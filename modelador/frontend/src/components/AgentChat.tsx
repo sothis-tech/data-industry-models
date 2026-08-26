@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { getChatConfig, sendChatText } from '../api/chat'
 import { parseChatBlocks } from '../lib/chatBlocks'
 import { useAeaVoiceChat } from '../hooks/useAeaVoiceChat'
@@ -18,23 +20,13 @@ function newMessage(
   return { id: crypto.randomUUID(), role, text, source, createdAt: Date.now(), blocks }
 }
 
-const CHAT_WELCOME = newMessage(
-  'assistant',
-  '¡Hola! Soy Marvin, tu asistente. Puedes escribirme o usar el micrófono para hablar.',
-  'status',
-)
-
-function initialChatMessages(): ChatMessage[] {
-  return [CHAT_WELCOME]
-}
-
-function statusLabel(status: string): string {
-  if (status === 'recording') return '● Grabando…'
-  if (status === 'processing') return '◌ Procesando voz…'
-  if (status === 'connecting') return '◌ Conectando…'
-  if (status === 'ready') return '● Voz lista'
-  if (status === 'error') return '✕ Error de voz'
-  return 'En espera'
+function statusLabel(status: string, t: TFunction): string {
+  if (status === 'recording') return `● ${t('agent.chat.status.recording')}`
+  if (status === 'processing') return `◌ ${t('agent.chat.status.processing')}`
+  if (status === 'connecting') return `◌ ${t('agent.chat.status.connecting')}`
+  if (status === 'ready') return `● ${t('agent.chat.status.ready')}`
+  if (status === 'error') return `✕ ${t('agent.chat.status.error')}`
+  return t('agent.chat.status.idle')
 }
 
 function MicIcon() {
@@ -76,10 +68,18 @@ type Props = {
 }
 
 export function AgentChat({ broker, isOrionAuthenticated, isPanelOpen }: Props) {
+  const { t } = useTranslation()
   const [input, setInput] = useState('')
   const [isSending, setIsSending] = useState(false)
   const [config, setConfig] = useState<ChatConfig>({ aea_ws_url: '', text_chat_enabled: false })
-  const [messages, setMessages] = useState<ChatMessage[]>(initialChatMessages)
+
+  const initialChatMessages = useCallback((): ChatMessage[] => {
+    return [newMessage('assistant', t('agent.chat.welcome'), 'status')]
+  }, [t])
+
+  const [messages, setMessages] = useState<ChatMessage[]>(() => [
+    newMessage('assistant', t('agent.chat.welcome'), 'status'),
+  ])
   const sessionIdRef = useRef<string>(crypto.randomUUID())
   const bodyRef = useRef<HTMLDivElement | null>(null)
   const inputRef = useRef<HTMLTextAreaElement | null>(null)
@@ -125,7 +125,7 @@ export function AgentChat({ broker, isOrionAuthenticated, isPanelOpen }: Props) 
         ? [...initialChatMessages(), newMessage('system', systemNote, 'status')]
         : initialChatMessages(),
     )
-  }, [voice])
+  }, [voice, initialChatMessages])
 
   // Reiniciar historial al cerrar sesión Orion o al cambiar de tenant/conexión.
   useEffect(() => {
@@ -133,17 +133,17 @@ export function AgentChat({ broker, isOrionAuthenticated, isPanelOpen }: Props) 
     if (hadTenant && tenantKey !== prevTenantKeyRef.current) {
       resetChatHistoryStable(
         tenantKey
-          ? 'Conexión o tenant cambiado. El historial del chat se ha reiniciado.'
-          : 'Sin conexión activa. El historial del chat se ha reiniciado.',
+          ? t('agent.chat.system.tenantChanged')
+          : t('agent.chat.system.noConnection'),
       )
     }
     prevTenantKeyRef.current = tenantKey
 
     if (prevAuthedRef.current === true && !isOrionAuthenticated) {
-      resetChatHistoryStable('Sesión Orion cerrada. El historial del chat se ha reiniciado.')
+      resetChatHistoryStable(t('agent.chat.system.sessionClosed'))
     }
     prevAuthedRef.current = isOrionAuthenticated
-  }, [tenantKey, isOrionAuthenticated, resetChatHistoryStable])
+  }, [tenantKey, isOrionAuthenticated, resetChatHistoryStable, t])
 
   useEffect(() => {
     let cancelled = false
@@ -151,10 +151,10 @@ export function AgentChat({ broker, isOrionAuthenticated, isPanelOpen }: Props) 
       .then((nextConfig) => { if (!cancelled) setConfig(nextConfig) })
       .catch((e) => {
         const message = e instanceof Error ? e.message : String(e)
-        if (!cancelled) appendMessage('system', `No se pudo cargar la configuración: ${message}`, 'status')
+        if (!cancelled) appendMessage('system', t('agent.chat.system.configError', { message }), 'status')
       })
     return () => { cancelled = true }
-  }, [appendMessage])
+  }, [appendMessage, t])
 
   useEffect(() => {
     if (!isPanelOpen) return
@@ -166,14 +166,14 @@ export function AgentChat({ broker, isOrionAuthenticated, isPanelOpen }: Props) 
     [config.text_chat_enabled, input, isOrionAuthenticated, isSending],
   )
 
-  const voiceStatus = statusLabel(voice.status)
+  const voiceStatus = statusLabel(voice.status, t)
   const isVoiceActive = voice.status === 'ready' || voice.status === 'recording' || voice.status === 'processing'
   const chatLocked = !isOrionAuthenticated
   const inputPlaceholder = chatLocked
-    ? 'Conecta Orion para usar Marvin'
+    ? t('agent.chat.placeholder.locked')
     : config.text_chat_enabled
-      ? 'Pregúntale a Marvin…'
-      : 'El asistente de texto no está disponible en este entorno'
+      ? t('agent.chat.placeholder.ready')
+      : t('agent.chat.placeholder.unavailable')
 
   // Tras responder Marvin, el textarea vuelve a estar habilitado; recuperar foco para seguir escribiendo.
   useEffect(() => {
@@ -190,7 +190,7 @@ export function AgentChat({ broker, isOrionAuthenticated, isPanelOpen }: Props) 
     const text = input.trim()
     if (!text || isSending) return
     if (!isOrionAuthenticated || !broker?.url || !broker.tenant) {
-      appendMessage('system', 'Inicia sesión en una conexión Orion antes de usar Marvin.', 'status')
+      appendMessage('system', t('agent.chat.system.loginFirst'), 'status')
       return
     }
     setInput('')
@@ -203,17 +203,17 @@ export function AgentChat({ broker, isOrionAuthenticated, isPanelOpen }: Props) 
       broker.tenant,
     )
     if (result.error || result.status >= 400) {
-      const msg = result.error || `Error HTTP ${result.status}`
+      const msg = result.error || t('agent.chat.system.httpError', { status: result.status })
       appendMessage('system', msg, 'status')
       if (result.status === 401) {
-        resetChatHistoryStable('Sesión Orion expirada. Vuelve a conectar en Configuración.')
+        resetChatHistoryStable(t('agent.chat.system.sessionExpired'))
       }
     } else {
       if (result.body.session_id) sessionIdRef.current = String(result.body.session_id)
       const reply =
         (result.body.text || '').trim() ||
         (result.body.speech || '').trim() ||
-        'Sin respuesta.'
+        t('agent.chat.system.noReply')
       const data = result.body.data
       appendAssistant(reply, 'text', data && typeof data === 'object' ? data : undefined)
     }
@@ -248,7 +248,7 @@ export function AgentChat({ broker, isOrionAuthenticated, isPanelOpen }: Props) 
                 <AgentMessageBlocks blocks={message.blocks} />
               )}
               {message.role !== 'system' && (
-                <small>{message.source === 'voice' ? '🎙 voz' : '⌨ texto'}</small>
+                <small>{message.source === 'voice' ? t('agent.chat.sourceVoice') : t('agent.chat.sourceText')}</small>
               )}
             </div>
           </article>
@@ -271,9 +271,9 @@ export function AgentChat({ broker, isOrionAuthenticated, isPanelOpen }: Props) 
           }}
           placeholder={inputPlaceholder}
           disabled={chatLocked || !config.text_chat_enabled || isSending}
-          aria-label="Mensaje para Marvin"
+          aria-label={t('agent.chat.inputAria')}
         />
-        <button type="submit" disabled={!canSendText} className="chatbot-send" aria-label="Enviar">
+        <button type="submit" disabled={!canSendText} className="chatbot-send" aria-label={t('agent.chat.sendAria')}>
           <SendIcon />
         </button>
       </form>
@@ -287,16 +287,16 @@ export function AgentChat({ broker, isOrionAuthenticated, isPanelOpen }: Props) 
           aria-pressed={voice.isRecording}
           title={
             chatLocked
-              ? 'Conecta Orion para usar Marvin'
+              ? t('agent.chat.mic.locked')
               : voice.isConfigured
-                ? 'Activar / detener micrófono'
-                : 'El asistente de voz no está disponible en este entorno'
+                ? t('agent.chat.mic.toggle')
+                : t('agent.chat.mic.unavailable')
           }
         >
           <MicIcon />
-          <span>{voice.isRecording ? 'Detener' : 'Micrófono'}</span>
+          <span>{voice.isRecording ? t('agent.chat.mic.stop') : t('agent.chat.mic.label')}</span>
         </button>
-        {chatLocked && <span className="chatbot-error">Conecta Orion para acceder a Marvin.</span>}
+        {chatLocked && <span className="chatbot-error">{t('agent.chat.lockedError')}</span>}
         {voice.error && <span className="chatbot-error">{voice.error}</span>}
       </div>
     </div>

@@ -1,11 +1,11 @@
 import { useCallback, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   fetchAllOrionEntities,
   fetchAllOrionEntitiesByTypes,
 } from '../lib/orion-entities'
 import { getTypeUri } from '../lib/model-parser'
 import type { NgsiLdEntity } from '../types/entity'
-
 export function useEntityList(
   brokerUrl: string | null,
   typeFilter: string,
@@ -13,12 +13,12 @@ export function useEntityList(
   knownTypes: string[],
   brokerTenant?: string,
 ) {
+  const { t } = useTranslation()
   const [allEntities, setAllEntities] = useState<NgsiLdEntity[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loadCount, setLoadCount] = useState<number | null>(null)
   const [search, setSearch] = useState('')
-
   const typeFilteredEntities = useMemo(() => {
     if (!typeFilter) return allEntities
     const typeUri = getTypeUri(typeFilter, modelJson)
@@ -29,7 +29,6 @@ export function useEntityList(
       return t === typeUri || local === short || t.endsWith(`/${typeFilter}`)
     })
   }, [allEntities, typeFilter, modelJson])
-
   const filteredEntities = useMemo(() => {
     const q = search.trim().toLowerCase()
     if (!q) return typeFilteredEntities
@@ -45,16 +44,13 @@ export function useEntityList(
       return name.includes(q) || id.includes(q) || type.includes(q)
     })
   }, [typeFilteredEntities, search])
-
   const fetchEntities = useCallback(async () => {
     if (!brokerUrl) return
     setLoading(true)
     setError(null)
     setSearch('')
     setLoadCount(0)
-
     const onProgress = (n: number) => setLoadCount(n)
-
     try {
       const global = await fetchAllOrionEntities(brokerUrl, { tenant: brokerTenant, onProgress })
       if (!global.error || global.entities.length > 0) {
@@ -79,13 +75,12 @@ export function useEntityList(
         if (byType.error) setError(byType.error)
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Error de red')
+      setError(e instanceof Error ? e.message : t('errors.network'))
     } finally {
       setLoading(false)
       setLoadCount(null)
     }
-  }, [brokerUrl, modelJson, knownTypes, brokerTenant])
-
+  }, [brokerUrl, modelJson, knownTypes, brokerTenant, t])
   return {
     allEntities,
     typeFilteredEntities,

@@ -1,9 +1,9 @@
+import { useTranslation } from 'react-i18next'
 import { StatusMessage } from '../../components/StatusMessage'
 import { useModel } from '../../hooks/useModel'
-
 type Props = { onSave?: () => void }
-
 export function ModelCard({ onSave }: Props) {
+  const { t } = useTranslation()
   const {
     schemaUrls,
     setSchemaUrls,
@@ -23,14 +23,12 @@ export function ModelCard({ onSave }: Props) {
     onUploadPackage,
     onClear,
   } = useModel(onSave)
-
   return (
     <div className="config-card">
-      <h2>Modelo NGSI-LD</h2>
-
+      <h2>{t('config.model.title')}</h2>
       <div className="form-grid">
         <label>
-          URLs de JSON Schemas <span className="label-hint">(una por línea)</span>
+          {t('config.model.schemaUrls')} <span className="label-hint">{t('config.model.schemaUrlsHint')}</span>
           <textarea
             rows={3}
             value={schemaUrls}
@@ -39,7 +37,7 @@ export function ModelCard({ onSave }: Props) {
           />
         </label>
         <label>
-          URL del contexto JSON-LD <span className="label-hint">(@context)</span>
+          {t('config.model.contextUrl')} <span className="label-hint">{t('config.model.contextUrlHint')}</span>
           <input
             value={contextUrl}
             onChange={(e) => setContextUrl(e.target.value)}
@@ -47,7 +45,7 @@ export function ModelCard({ onSave }: Props) {
           />
         </label>
         <label>
-          URL del descriptor <span className="label-hint">(opcional)</span>
+          {t('config.model.descriptorUrl')} <span className="label-hint">{t('config.model.optional')}</span>
           <input
             value={descriptorUrl}
             onChange={(e) => setDescriptorUrl(e.target.value)}
@@ -55,7 +53,7 @@ export function ModelCard({ onSave }: Props) {
           />
         </label>
         <label>
-          URLs de ejemplos <span className="label-hint">(opcional, una por línea)</span>
+          {t('config.model.exampleUrls')} <span className="label-hint">{t('config.model.exampleUrlsHint')}</span>
           <textarea
             rows={2}
             value={exampleUrls}
@@ -64,18 +62,15 @@ export function ModelCard({ onSave }: Props) {
           />
         </label>
       </div>
-
       <div className="actions-row">
         <button onClick={onLoadUrls} disabled={loadingUrls}>
-          {loadingUrls ? 'Cargando…' : 'Cargar desde URLs'}
+          {loadingUrls ? t('common.loading') : t('config.model.loadFromUrls')}
         </button>
       </div>
-
-      <div className="section-note">— o carga un paquete —</div>
-
+      <div className="section-note">{t('config.model.orLoadPackage')}</div>
       <div className="form-grid">
         <label>
-          Archivo comprimido <span className="label-hint">(.zip, .tar.gz, .tar)</span>
+          {t('config.model.archiveFile')} <span className="label-hint">{t('config.model.archiveFileHint')}</span>
           <input
             type="file"
             accept=".zip,.tar.gz,.tgz,.tar"
@@ -83,7 +78,7 @@ export function ModelCard({ onSave }: Props) {
           />
         </label>
         <label>
-          URL del contexto para Orion <span className="label-hint">(opcional)</span>
+          {t('config.model.orionContextUrl')} <span className="label-hint">{t('config.model.optional')}</span>
           <input
             value={packageContextUrl}
             onChange={(e) => setPackageContextUrl(e.target.value)}
@@ -91,16 +86,14 @@ export function ModelCard({ onSave }: Props) {
           />
         </label>
       </div>
-
       <div className="actions-row">
         <button onClick={onUploadPackage} disabled={loadingPackage}>
-          {loadingPackage ? 'Procesando…' : 'Cargar paquete'}
+          {loadingPackage ? t('common.processing') : t('config.model.loadPackage')}
         </button>
         <button onClick={onClear} className="secondary">
-          Limpiar modelo
+          {t('config.model.clearModel')}
         </button>
       </div>
-
       {modelStatus ? <StatusMessage message={modelStatus} /> : null}
     </div>
   )

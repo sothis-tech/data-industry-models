@@ -1,91 +1,87 @@
 import { useState } from 'react'
-import { fetchManyViaProxy, fetchViaProxy, uploadModelPackage } from '../api/model'
-import type { NgsiModel } from '../types/model'
+import { useTranslation } from 'react-i18next'
+import { fetchManyViaProxy, uploadModelPackage } from '../api/model'
 
-const MODEL_KEY = 'ngsi_model'
-
-function readStoredModel(): Partial<NgsiModel> | null {
-  try {
-    const raw = localStorage.getItem(MODEL_KEY)
-    return raw ? (JSON.parse(raw) as Partial<NgsiModel>) : null
-  } catch {
-    return null
+type ModelSummary = {
+  schemas?: unknown[]
+  context?: unknown
+  descriptor?: unknown
+  examples?: Record<string, unknown>
+  summary: {
+    schemas: number
+    context: boolean
+    descriptor: boolean
+    examples: number
+    unrecognized?: unknown[]
   }
 }
 
-function exampleKeyFromUrl(url: string, parsed: unknown): string | null {
-  if (parsed && typeof parsed === 'object' && 'type' in parsed) {
-    const t = (parsed as { type?: unknown }).type
-    if (typeof t === 'string') {
-      const last = t.split('/').pop()
-      if (last && /^[A-Z]/.test(last)) return last
-    }
-  }
-  try {
-    const parts = new URL(url).pathname.split('/').filter(Boolean)
-    if (parts.length >= 2) {
-      const parent = parts[parts.length - 2]
-      if (/^[A-Z]/.test(parent)) return parent
-    }
-    return parts[parts.length - 1].replace(/\.json$/i, '')
-  } catch {
-    return null
-  }
+function persistModel(model: ModelSummary): void {
+  localStorage.setItem('ngsi_model', JSON.stringify(model))
+  window.dispatchEvent(new Event('ngsi-model-updated'))
 }
 
 export function useModel(onSave?: () => void) {
-  const stored = readStoredModel()
-  const [schemaUrls, setSchemaUrls] = useState(stored?.schemaUrls?.join('\n') ?? '')
-  const [contextUrl, setContextUrl] = useState(stored?.contextUrl ?? '')
-  const [descriptorUrl, setDescriptorUrl] = useState(stored?.descriptorUrl ?? '')
-  const [exampleUrls, setExampleUrls] = useState(stored?.exampleUrls?.join('\n') ?? '')
+  const { t } = useTranslation()
+  const [schemaUrls, setSchemaUrls] = useState('')
+  const [contextUrl, setContextUrl] = useState('')
+  const [descriptorUrl, setDescriptorUrl] = useState('')
+  const [exampleUrls, setExampleUrls] = useState('')
   const [packageContextUrl, setPackageContextUrl] = useState('')
   const [modelFile, setModelFile] = useState<File | null>(null)
-  const [modelStatus, setModelStatus] = useState<string | null>(null)
+  const [modelStatus, setModelStatus] = useState('')
   const [loadingUrls, setLoadingUrls] = useState(false)
   const [loadingPackage, setLoadingPackage] = useState(false)
 
+  function summaryText(model: ModelSummary): string {
+    const parts: string[] = []
+    if (model.summary.schemas) parts.push(t('config.model.status.summarySchemas', { count: model.summary.schemas }))
+    if (model.summary.context) parts.push(t('config.model.status.summaryContext'))
+    if (model.summary.descriptor) parts.push(t('config.model.status.summaryDescriptor'))
+    if (model.summary.examples) parts.push(t('config.model.status.summaryExamples', { count: model.summary.examples }))
+    return t('config.model.status.loaded', { details: parts.join(', ') })
+  }
+
   async function onLoadUrls() {
-    const urls = schemaUrls.trim().split(/\n+/).filter(Boolean)
-    const ctx = contextUrl.trim()
-    const desc = descriptorUrl.trim()
-    const exUrls = exampleUrls.trim().split(/\n+/).filter(Boolean)
-    if (!urls.length && !ctx && !desc && !exUrls.length) {
-      setModelStatus('Indica al menos una URL (schema, contexto, descriptor o ejemplos).')
+    const schemas = schemaUrls.split('\n').map((s) => s.trim()).filter(Boolean)
+    const context = contextUrl.trim()
+    const descriptor = descriptorUrl.trim()
+    const examples = exampleUrls.split('\n').map((s) => s.trim()).filter(Boolean)
+    if (!schemas.length && !context) {
+      setModelStatus(t('config.model.status.needUrl'))
       return
     }
     setLoadingUrls(true)
-    setModelStatus('Cargando...')
+    setModelStatus(t('config.model.status.loading'))
     try {
-      const loaded: NgsiModel = {
-        schemas: [],
-        context: null,
-        descriptor: null,
-        examples: {},
-        schemaUrls: urls,
-        contextUrl: ctx || null,
-        descriptorUrl: desc || null,
-        exampleUrls: exUrls,
+      const [schemaResults, contextResult, descriptorResult, exampleResults] = await Promise.all([
+        schemas.length ? fetchManyViaProxy(schemas) : Promise.resolve([]),
+        context ? fetchManyViaProxy([context]).then((r) => r[0]) : Promise.resolve(null),
+        descriptor ? fetchManyViaProxy([descriptor]).then((r) => r[0]) : Promise.resolve(null),
+        examples.length ? fetchManyViaProxy(examples) : Promise.resolve([]),
+      ])
+      const examplesMap: Record<string, unknown> = {}
+      examples.forEach((url, i) => {
+        const name = url.split('/').slice(-2).join('/')
+        examplesMap[name] = exampleResults[i]
+      })
+      const model: ModelSummary = {
+        schemas: schemaResults,
+        context: contextResult,
+        descriptor: descriptorResult,
+        examples: examplesMap,
+        summary: {
+          schemas: schemaResults.length,
+          context: !!contextResult,
+          descriptor: !!descriptorResult,
+          examples: Object.keys(examplesMap).length,
+        },
       }
-      if (urls.length) loaded.schemas = await fetchManyViaProxy(urls)
-      if (ctx) loaded.context = await fetchViaProxy(ctx)
-      if (desc) loaded.descriptor = await fetchViaProxy(desc)
-      for (const exUrl of exUrls) {
-        try {
-          const exJson = await fetchViaProxy(exUrl)
-          const key = exampleKeyFromUrl(exUrl, exJson)
-          if (key && !(key in loaded.examples)) loaded.examples[key] = exJson
-        } catch {
-          // ignora ejemplos individuales inválidos, mismo comportamiento que legacy
-        }
-      }
-      localStorage.setItem(MODEL_KEY, JSON.stringify(loaded))
-      setModelStatus(
-        `Modelo cargado — ${loaded.schemas.length} schemas, contexto: ${loaded.context ? 'sí' : 'no'}, descriptor: ${loaded.descriptor ? 'sí' : 'no'}, ${Object.keys(loaded.examples).length} ejemplos`,
-      )
+      persistModel(model)
+      setModelStatus(summaryText(model))
       onSave?.()
     } catch (e) {
-      setModelStatus(e instanceof Error ? e.message : 'Error al cargar modelo.')
+      setModelStatus(e instanceof Error ? e.message : t('config.model.status.loadError'))
     } finally {
       setLoadingUrls(false)
     }
@@ -93,61 +89,46 @@ export function useModel(onSave?: () => void) {
 
   async function onUploadPackage() {
     if (!modelFile) {
-      setModelStatus('Selecciona un archivo comprimido primero.')
+      setModelStatus(t('config.model.status.selectFile'))
       return
     }
     setLoadingPackage(true)
-    setModelStatus(`Procesando ${modelFile.name}...`)
+    setModelStatus(t('config.model.status.processing'))
     try {
-      const result = await uploadModelPackage(modelFile)
-      const loaded: NgsiModel = {
-        schemas: result.schemas ?? [],
-        context: result.context ?? null,
-        descriptor: result.descriptor ?? null,
-        examples: result.examples ?? {},
-        schemaUrls: [],
-        contextUrl: packageContextUrl.trim() || null,
-        descriptorUrl: null,
-        exampleUrls: [],
-        packageName: modelFile.name,
+      const model = await uploadModelPackage(modelFile)
+      if (packageContextUrl.trim()) {
+        model.context = packageContextUrl.trim()
       }
-      localStorage.setItem(MODEL_KEY, JSON.stringify(loaded))
+      persistModel(model)
+      setModelStatus(summaryText(model))
       onSave?.()
-      const s = result.summary
-      setModelStatus(
-        `Paquete cargado — ${s.schemas} schemas, contexto: ${s.context ? 'sí' : 'no'}, descriptor: ${s.descriptor ? 'sí' : 'no'}, ${s.examples} ejemplos`,
-      )
     } catch (e) {
-      setModelStatus(e instanceof Error ? e.message : 'Error al procesar el paquete.')
+      setModelStatus(e instanceof Error ? e.message : t('config.model.status.processError'))
     } finally {
       setLoadingPackage(false)
     }
   }
 
   function onClear() {
-    localStorage.removeItem(MODEL_KEY)
+    localStorage.removeItem('ngsi_model')
+    window.dispatchEvent(new Event('ngsi-model-updated'))
     setSchemaUrls('')
     setContextUrl('')
     setDescriptorUrl('')
     setExampleUrls('')
     setPackageContextUrl('')
     setModelFile(null)
-    setModelStatus('Modelo eliminado correctamente.')
+    setModelStatus(t('config.model.status.cleared'))
+    onSave?.()
   }
 
   return {
-    schemaUrls,
-    setSchemaUrls,
-    contextUrl,
-    setContextUrl,
-    descriptorUrl,
-    setDescriptorUrl,
-    exampleUrls,
-    setExampleUrls,
-    packageContextUrl,
-    setPackageContextUrl,
-    modelFile,
-    setModelFile,
+    schemaUrls, setSchemaUrls,
+    contextUrl, setContextUrl,
+    descriptorUrl, setDescriptorUrl,
+    exampleUrls, setExampleUrls,
+    packageContextUrl, setPackageContextUrl,
+    modelFile, setModelFile,
     modelStatus,
     loadingUrls,
     loadingPackage,

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 type Props = {
   types: string[]
@@ -7,6 +8,7 @@ type Props = {
 }
 
 export function SelectTypeModal({ types, onConfirm, onClose }: Props) {
+  const { t } = useTranslation()
   const [selected, setSelected] = useState(types[0] ?? '')
   const selectRef = useRef<HTMLSelectElement>(null)
 
@@ -29,10 +31,10 @@ export function SelectTypeModal({ types, onConfirm, onClose }: Props) {
       onKeyDown={onKeyDown}
     >
       <div className="modal-box">
-        <h3 id="select-type-modal-title" className="modal-title">Selecciona un tipo</h3>
-        <p className="modal-body">Para crear una entidad nueva, primero elige el tipo de entidad.</p>
+        <h3 id="select-type-modal-title" className="modal-title">{t('entities.selectType.title')}</h3>
+        <p className="modal-body">{t('entities.selectType.intro')}</p>
         <div className="form-group" style={{ marginBottom: '1rem' }}>
-          <label htmlFor="create-type-select">Tipo de entidad</label>
+          <label htmlFor="create-type-select">{t('entities.selectType.label')}</label>
           <select
             id="create-type-select"
             ref={selectRef}
@@ -45,13 +47,13 @@ export function SelectTypeModal({ types, onConfirm, onClose }: Props) {
           </select>
         </div>
         <div className="modal-actions">
-          <button type="button" className="secondary" onClick={onClose}>Cancelar</button>
+          <button type="button" className="secondary" onClick={onClose}>{t('common.cancel')}</button>
           <button
             type="button"
             disabled={!selected}
             onClick={() => { if (selected) onConfirm(selected) }}
           >
-            Continuar
+            {t('common.continue')}
           </button>
         </div>
       </div>
