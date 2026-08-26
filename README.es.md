@@ -1,4 +1,4 @@
-# Espacio de Datos Industrial
+# Modelo de Datos Inteligente para Industria
 
 Plataforma para la integración, el modelado y la explotación de datos industriales, que conecta la capa de operaciones (OT) con la de información (IT) sobre un espacio de datos basado en NGSI-LD. El sistema combina la adquisición de datos por OPC-UA, un modelo de datos compartido, la orquestación segura de servicios, el histórico de series temporales y un conjunto de agentes de IA para el control y la interacción en lenguaje natural.
 
