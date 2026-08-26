@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { useTranslation, Trans } from 'react-i18next'
 import Select from 'react-select'
 import type { NgsiLdEntity } from '../../types/entity'
 
@@ -86,6 +87,7 @@ export function EntityList({
   onSelect,
   onNewEntity,
 }: Props) {
+  const { t } = useTranslation()
   const searchRef = useRef<HTMLInputElement>(null)
   const selectStyles = useSelectStyles()
 
@@ -112,17 +114,17 @@ export function EntityList({
           options={typeOptions}
           value={selectedOption}
           onChange={opt => onTypeFilterChange(opt?.value ?? '')}
-          placeholder="— Todos los tipos —"
+          placeholder={t('entities.list.allTypes')}
           isClearable
           isSearchable
           styles={selectStyles as never}
-          noOptionsMessage={() => 'Sin tipos disponibles'}
+          noOptionsMessage={() => t('entities.list.noTypes')}
         />
         <input
           ref={searchRef}
           type="search"
-          placeholder="Buscar por nombre o ID…"
-          aria-label="Buscar entidades"
+          placeholder={t('entities.list.searchPlaceholder')}
+          aria-label={t('entities.list.searchAria')}
           autoComplete="off"
           value={search}
           onChange={e => onSearchChange(e.target.value)}
@@ -130,7 +132,7 @@ export function EntityList({
       </div>
 
       <button type="button" className="btn-new-entity" onClick={onNewEntity}>
-        + Nueva entidad
+        {t('entities.list.newEntity')}
       </button>
 
       <div className="entity-list-scroll">
@@ -141,16 +143,16 @@ export function EntityList({
         )}
         {loading && (
           <div className="entity-list-empty">
-            {loadCount != null && loadCount > 0 ? `Cargando… ${loadCount}` : 'Cargando…'}
+            {loadCount != null && loadCount > 0 ? t('entities.list.loadingCount', { count: loadCount }) : t('common.loading')}
           </div>
         )}
         {showEmpty && (
           <div className="entity-list-empty">
             {search
-              ? `Sin resultados para "${search}".`
+              ? t('entities.list.noSearchResults', { search })
               : allCount > 0
-                ? 'Sin resultados para el filtro.'
-                : 'No hay entidades para el tipo seleccionado.'}
+                ? t('entities.list.noFilterResults')
+                : t('entities.list.noEntities')}
           </div>
         )}
         {!loading && entities.map(entity => {
@@ -175,8 +177,8 @@ export function EntityList({
         <div className="entity-list-footer">
           <span className="entity-list-count">
             {search
-              ? <><strong>{entities.length}</strong> de <strong>{allCount}</strong> entidades</>
-              : <><strong>{allCount}</strong> entidad{allCount !== 1 ? 'es' : ''}</>
+              ? <Trans i18nKey="entities.list.countFiltered" values={{ shown: entities.length, total: allCount }} components={{ strong: <strong /> }} />
+              : <Trans i18nKey="entities.list.countTotal" values={{ count: allCount }} count={allCount} components={{ strong: <strong /> }} />
             }
           </span>
         </div>

@@ -26,8 +26,10 @@ function Layout() {
     <div className="app-shell">
       <header className="topbar">
         <h1>{t('app.title')}</h1>
-	<LanguageSelector />
+	<div className="topbar-actions">
+          <LanguageSelector />
         <ThemeToggle />
+        </div>
       </header>
       <nav className="tabs">
         <NavLink to="/" end>
