@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation, Trans } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { deleteEntity, getEntityById } from '../../api/orion'
 import {
@@ -44,6 +45,7 @@ function entityIdFromJsonDraft(draft?: string): string | null {
 }
 
 export function EntitiesPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const modelJson = readModelJson()
   const { types } = parseModel(modelJson)
@@ -76,10 +78,10 @@ export function EntitiesPage() {
   const entityList = useEntityList(broker?.url ?? null, typeFilter, modelJson, types, broker?.tenant)
 
   const guardDirty = useCallback((action: () => void) => {
-    if (dirty && !confirm('Tienes cambios sin guardar. ¿Deseas descartarlos?')) return
+    if (dirty && !confirm(t('entities.page.discardChanges'))) return
     setDirty(false)
     action()
-  }, [dirty])
+  }, [dirty, t])
 
   useEffect(() => {
     localStorage.setItem('ngsi_onboarding_step3_done', '1')
@@ -111,8 +113,8 @@ export function EntitiesPage() {
             if (body?.id) target = body as NgsiLdEntity
           }
           if (target) {
-            const t = String(target.type ?? '').split('/').pop() ?? ''
-            if (t) setTypeFilter(t)
+            const tt = String(target.type ?? '').split('/').pop() ?? ''
+            if (tt) setTypeFilter(tt)
             handleSelectEntity(target)
           }
         })()
@@ -173,7 +175,7 @@ export function EntitiesPage() {
     guardDirty(() => {
       const type = typeFilter
       if (!type) {
-        if (!types.length) { alert('No hay tipos disponibles. Carga un modelo en Configuración.'); return }
+        if (!types.length) { alert(t('entities.page.noTypesAlert')); return }
         setShowTypeModal(true)
         return
       }
@@ -222,7 +224,7 @@ export function EntitiesPage() {
       focusListPane()
       await entityList.fetchEntities()
     } else {
-      alert(`Error al eliminar (${status}): ${error ?? 'Error desconocido'}`)
+      alert(t('entities.page.deleteError', { status, error: error ?? t('entities.page.unknownError') }))
     }
   }
 
@@ -330,7 +332,7 @@ export function EntitiesPage() {
         className="entities-resizer"
         role="separator"
         aria-orientation="vertical"
-        aria-label="Redimensionar panel de lista"
+        aria-label={t('entities.page.resizeListAria')}
         tabIndex={0}
         {...resizerProps}
       />
@@ -343,12 +345,12 @@ export function EntitiesPage() {
                 type="button"
                 className="secondary entities-back-btn"
                 onClick={() => focusListPane()}
-                aria-label="Volver a la lista de entidades"
+                aria-label={t('entities.page.backToListAria')}
               >
-                ← Lista
+                {t('entities.page.backToList')}
               </button>
             )}
-            <h2>{panel === 'empty' ? 'Entidades' : panel === 'create' ? 'Nueva entidad' : titleEntity}</h2>
+            <h2>{panel === 'empty' ? t('entities.page.titleEmpty') : panel === 'create' ? t('entities.page.titleNew') : titleEntity}</h2>
             {titleType && panel !== 'empty' && (
               <span className="type-badge">{titleType}</span>
             )}
@@ -361,7 +363,7 @@ export function EntitiesPage() {
                 style={{ fontSize: '0.78rem' }}
                 onClick={handleOpenInVisualization}
               >
-                Ver en visualización
+                {t('entities.page.openInViz')}
               </button>
             )}
             {panel === 'edit' && (
@@ -371,7 +373,7 @@ export function EntitiesPage() {
                 style={{ fontSize: '0.78rem' }}
                 onClick={handleDuplicate}
               >
-                Duplicar
+                {t('entities.page.duplicate')}
               </button>
             )}
           </div>
@@ -383,7 +385,7 @@ export function EntitiesPage() {
               <rect x="3" y="3" width="18" height="18" rx="3" />
               <path d="M3 9h18M9 21V9" />
             </svg>
-            <p>Selecciona una entidad para editarla<br />o crea una nueva.</p>
+            <p><Trans i18nKey="entities.page.emptyHint" components={{ br: <br /> }} /></p>
           </div>
         )}
 
@@ -423,10 +425,10 @@ export function EntitiesPage() {
 
       {showDeleteModal && selectedEntity && (
         <ConfirmModal
-          title="¿Eliminar entidad?"
-          message="Se eliminará permanentemente la entidad"
+          title={t('entities.page.deleteTitle')}
+          message={t('entities.page.deleteMessage')}
           entityId={selectedEntity.id}
-          confirmLabel="Eliminar"
+          confirmLabel={t('common.delete')}
           danger
           loading={deleting}
           onConfirm={handleDeleteConfirm}
