@@ -1,4 +1,4 @@
-# Industrial Data Space
+# Smart Data Models for Industry
 
 A platform for the integration, modeling, and exploitation of industrial data, bridging the operational (OT) and information (IT) layers over an NGSI-LD data space. The system combines OPC-UA data acquisition, a shared data model, secured service orchestration, time-series history, and a set of AI agents for control and natural-language interaction.
 
