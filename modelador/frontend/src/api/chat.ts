@@ -1,18 +1,16 @@
+import i18n from '../lib/i18n'
 import { API_BASE, networkError, parseProxyEnvelope, readJson } from '../lib/http'
 import { reportOrionAuthFailure } from '../lib/orionSessionEvents'
 import type { ChatConfig, ChatTextResult } from '../types/chat'
-
 function extractChatAuthError(data: Record<string, unknown>): string {
   if (typeof data.detail === 'string') return data.detail
   if (typeof data.error === 'string') return data.error
-  return 'Sesión Orion requerida'
+  return i18n.t('errors.chat.sessionRequired')
 }
-
 export async function getChatConfig(): Promise<ChatConfig> {
   const res = await fetch(`${API_BASE}/api/chat/config`)
   return readJson<ChatConfig>(res, { aea_ws_url: '', text_chat_enabled: false })
 }
-
 export async function sendChatText(
   message: string,
   sessionId?: string,

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { getEntities, postEntity, postSubscription, prepareEntityPayload } from '../../api/orion'
 import { humanizeSchemaError, validateEntityPayload } from '../../api/validation'
 import { buildCreateBasePayload, getSchemaForType } from '../../lib/model-parser'
@@ -22,6 +23,7 @@ function formatJsonSafe(text: string): string {
 }
 
 export function EntityCreate({ type, modelJson, brokerUrl, brokerTenant, initialPayload, onDirty, onCreated, onJsonDraftChange }: Props) {
+  const { t } = useTranslation()
   const [json, setJson] = useState('')
   const [templateSource, setTemplateSource] = useState<TemplateSource>(null)
   const [validation, setValidation] = useState<ValidationResult | null>(null)
@@ -61,9 +63,9 @@ export function EntityCreate({ type, modelJson, brokerUrl, brokerTenant, initial
   async function handleValidate() {
     let payload: Record<string, unknown>
     try { payload = JSON.parse(json || '{}') as Record<string, unknown> }
-    catch (e) { setValidation({ valid: false, errors: [{ path: '', message: 'JSON inválido: ' + String(e) }] }); return }
+    catch (e) { setValidation({ valid: false, errors: [{ path: '', message: t('entities.create.errInvalidJson', { error: String(e) }) }] }); return }
     const schema = getSchemaForType(type, modelJson)
-    if (!schema) { setValidation({ valid: false, errors: [{ path: '', message: 'Sin schema para el tipo ' + type }] }); return }
+    if (!schema) { setValidation({ valid: false, errors: [{ path: '', message: t('entities.create.errNoSchema', { type }) }] }); return }
     const prep = await prepareEntityPayload(payload, type, null)
     if (prep.error) { setValidation({ valid: false, errors: [{ path: '', message: prep.error }] }); return }
     const vr = await validateEntityPayload(prep.payloadForValidation, schema, prep.inputMode)
@@ -74,7 +76,7 @@ export function EntityCreate({ type, modelJson, brokerUrl, brokerTenant, initial
     if (!type) return
     let payload: Record<string, unknown>
     try { payload = JSON.parse(json || '{}') as Record<string, unknown> }
-    catch (e) { setValidation({ valid: false, errors: [{ path: '', message: 'JSON inválido: ' + String(e) }] }); return }
+    catch (e) { setValidation({ valid: false, errors: [{ path: '', message: t('entities.create.errInvalidJson', { error: String(e) }) }] }); return }
 
     setBusy(true)
     try {
@@ -92,7 +94,7 @@ export function EntityCreate({ type, modelJson, brokerUrl, brokerTenant, initial
 
       const existing = await getEntities(brokerUrl, { id: (payloadToSend.id as string) ?? '', limit: 1, tenant: brokerTenant })
       if (!existing.error && existing.body.length > 0) {
-        setValidation({ valid: false, errors: [{ path: '', message: 'Ya existe una entidad con ID: ' + payloadToSend.id }] })
+        setValidation({ valid: false, errors: [{ path: '', message: t('entities.create.errDuplicate', { id: payloadToSend.id }) }] })
         return
       }
 
@@ -137,7 +139,7 @@ export function EntityCreate({ type, modelJson, brokerUrl, brokerTenant, initial
         onCreated({ id: payloadToSend.id as string, type, ...payloadToSend } as NgsiLdEntity)
       } else {
         const msg = error ?? (body && (body as Record<string, unknown>).title) ?? JSON.stringify(body)
-        setValidation({ valid: false, errors: [{ path: '', message: `Error ${status}: ${msg}` }] })
+        setValidation({ valid: false, errors: [{ path: '', message: t('entities.create.errCreate', { status: String(status), msg: String(msg) }) }] })
       }
     } finally {
       setBusy(false)
@@ -146,7 +148,7 @@ export function EntityCreate({ type, modelJson, brokerUrl, brokerTenant, initial
 
   const validationText = validation
     ? validation.valid
-      ? 'Validación OK'
+      ? t('entities.create.validationOk')
       : validation.errors.map(humanizeSchemaError).join('\n')
     : ''
 
@@ -154,10 +156,10 @@ export function EntityCreate({ type, modelJson, brokerUrl, brokerTenant, initial
     <div className="detail-body">
       <div className="form-group form-group--grow">
         <label htmlFor="create-json">
-          Payload JSON
+          {t('entities.create.payloadLabel')}
           {templateSource && (
             <span className={`template-source ${templateSource === 'example' ? 'ok' : 'muted'}`}>
-              {templateSource === 'example' ? '✓ ejemplo del paquete' : 'base mínima generada'}
+              {templateSource === 'example' ? t('entities.create.sourceExample') : t('entities.create.sourceBase')}
             </span>
           )}
         </label>
@@ -178,26 +180,26 @@ export function EntityCreate({ type, modelJson, brokerUrl, brokerTenant, initial
             checked={subscribeToQuantumLeap}
             onChange={e => setSubscribeToQuantumLeap(e.target.checked)}
           />
-          Notificar a QuantumLeap
+          {t('entities.create.notifyQuantumLeap')}
         </label>
       </div>
       <div className="btn-row">
         <button type="button" className="secondary" onClick={() => loadTemplate()}>
-          Recargar base
+          {t('entities.create.reloadBase')}
         </button>
         <button
           type="button"
           className="secondary"
-          title="Formatear JSON (Alt+Shift+F)"
+          title={t('entities.create.formatTitle')}
           onClick={handleFormat}
         >
           {'{ }'}
         </button>
         <button type="button" className="secondary" onClick={handleValidate} disabled={busy}>
-          Validar
+          {t('entities.create.validate')}
         </button>
         <button id="btn-create-save" type="button" onClick={handleCreate} disabled={busy}>
-          {busy ? 'Creando…' : 'Crear entidad'}
+          {busy ? t('entities.create.creating') : t('entities.create.create')}
         </button>
       </div>
       {validation && (

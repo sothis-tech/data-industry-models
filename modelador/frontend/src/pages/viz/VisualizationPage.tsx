@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation, Trans } from 'react-i18next'
 import { useVizCanvasCompact } from '../../hooks/useVizCanvasCompact'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 import { buildOrionGraph, buildSchemaGraph, buildSchemaTypeView, getEntityView } from '../../api/graph'
@@ -52,6 +53,7 @@ type OrionDetail =
 type OutletCtx = { refreshKey: number }
 
 export function VisualizationPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { refreshKey } = useOutletContext<OutletCtx>()
 
@@ -337,28 +339,28 @@ export function VisualizationPage() {
       setSchemaDetail({ state: 'loading', typeId })
       const result = await buildSchemaTypeView(typeId, relationships)
       if (result.error || !result.view) {
-        setSchemaDetail({ state: 'error', typeId, error: result.error ?? 'Error cargando detalle' })
+        setSchemaDetail({ state: 'error', typeId, error: result.error ?? t('viz.page.errLoadDetail') })
       } else {
         setSchemaDetail({ state: 'ready', typeId, view: result.view })
       }
     },
-    [relationships],
+    [relationships, t],
   )
 
   const loadOrionEntityDetail = useCallback(async (node: OrionGraphNode) => {
     setOrionDetail({ state: 'loading', node })
     const broker = getCurrentBroker()
     if (!broker) {
-      setOrionDetail({ state: 'error', node, error: 'Sin conexión Orion configurada' })
+      setOrionDetail({ state: 'error', node, error: t('viz.page.errNoBrokerConfigured') })
       return
     }
     const result = await getEntityView(broker.url, node.id, broker.tenant)
     if (result.error || !result.view) {
-      setOrionDetail({ state: 'error', node, error: result.error ?? 'No se pudo cargar la entidad' })
+      setOrionDetail({ state: 'error', node, error: result.error ?? t('viz.page.errLoadEntity') })
     } else {
       setOrionDetail({ state: 'ready', node, view: result.view })
     }
-  }, [])
+  }, [t])
 
   /** Selección de instancia: buscador, clic en nodo o llegada desde Entidades / Marvin. */
   const selectOrionEntity = useCallback(
@@ -542,13 +544,13 @@ export function VisualizationPage() {
 
     const { from_rels, to_rels } = schemaDetail.view
     if (!from_rels.length && !to_rels.length)
-      return <p style={{ color: 'var(--muted)', fontSize: '0.82rem' }}>Sin relaciones definidas para este tipo.</p>
+      return <p style={{ color: 'var(--muted)', fontSize: '0.82rem' }}>{t('viz.page.noRelationsForType')}</p>
 
     return (
       <>
         {from_rels.length > 0 && (
           <div className="viz-detail-section">
-            <div className="viz-detail-section-title">Apunta a →</div>
+            <div className="viz-detail-section-title">{t('viz.page.pointsTo')}</div>
             {from_rels.map((r, i) => {
               const ct = colorScale(r.to ?? '')
               const ps = r.property_short || r.property
@@ -557,7 +559,7 @@ export function VisualizationPage() {
                 <div key={i} className="viz-attr-row" style={r.implicit ? { opacity: 0.7 } : undefined}>
                   <span className="viz-attr-key" title={r.property}>
                     {ps}
-                    {r.implicit && <span title="Derivada de ejemplos" style={{ color: 'var(--muted)', fontSize: '0.68rem', marginLeft: '0.2rem' }}>~ejemplo</span>}
+                    {r.implicit && <span title={t('viz.page.derivedFromExamples')} style={{ color: 'var(--muted)', fontSize: '0.68rem', marginLeft: '0.2rem' }}>{t('viz.page.exampleTag')}</span>}
                   </span>
                   <span style={{ flex: 1, display: 'flex', alignItems: 'baseline', gap: '0.3rem', flexWrap: 'wrap' }}>
                     {pns && (
@@ -578,7 +580,7 @@ export function VisualizationPage() {
         )}
         {to_rels.length > 0 && (
           <div className="viz-detail-section">
-            <div className="viz-detail-section-title">← Referenciado por</div>
+            <div className="viz-detail-section-title">{t('viz.page.referencedBy')}</div>
             {to_rels.map((r, i) => {
               const cf = colorScale(r.from ?? '')
               const ps = r.property_short || r.property
@@ -587,7 +589,7 @@ export function VisualizationPage() {
                 <div key={i} className="viz-attr-row" style={r.implicit ? { opacity: 0.7 } : undefined}>
                   <span className="viz-attr-key" title={r.property}>
                     {ps}
-                    {r.implicit && <span title="Derivada de ejemplos" style={{ color: 'var(--muted)', fontSize: '0.68rem', marginLeft: '0.2rem' }}>~ejemplo</span>}
+                    {r.implicit && <span title={t('viz.page.derivedFromExamples')} style={{ color: 'var(--muted)', fontSize: '0.68rem', marginLeft: '0.2rem' }}>{t('viz.page.exampleTag')}</span>}
                   </span>
                   <span style={{ flex: 1, display: 'flex', alignItems: 'baseline', gap: '0.3rem', flexWrap: 'wrap' }}>
                     {pns && (
@@ -626,7 +628,7 @@ export function VisualizationPage() {
       return (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', gap: '0.5rem', color: 'var(--muted)' }}>
           <div className="viz-spinner" />
-          Cargando atributos…
+          {t('viz.page.loadingAttrs')}
         </div>
       )
     if (orionDetail.state === 'error')
@@ -643,7 +645,7 @@ export function VisualizationPage() {
         <div className="viz-detail-id">{view.id}</div>
         {view.attrs.length > 0 ? (
           <div className="viz-detail-section">
-            <div className="viz-detail-section-title">Atributos</div>
+            <div className="viz-detail-section-title">{t('viz.page.attributes')}</div>
             {view.attrs.map((attr, i) => (
               <div key={i} className="viz-attr-row">
                 <span className="viz-attr-key" title={attr.key}>{attr.short || attr.key}</span>
@@ -660,7 +662,7 @@ export function VisualizationPage() {
             ))}
           </div>
         ) : (
-          <p style={{ color: 'var(--muted)', fontSize: '0.82rem' }}>Sin atributos adicionales.</p>
+          <p style={{ color: 'var(--muted)', fontSize: '0.82rem' }}>{t('viz.page.noExtraAttrs')}</p>
         )}
       </>
     )
@@ -671,29 +673,25 @@ export function VisualizationPage() {
     if (orionError === 'no-broker')
       return (
         <div className="viz-empty-state">
-          Selecciona un broker en{' '}
-          <button className="link-btn" onClick={() => navigate('/')}>Configuración</button>{' '}
-          para visualizar instancias.
+          <Trans i18nKey="viz.page.emptyNoBroker" components={{ cfg: <button className="link-btn" onClick={() => navigate('/')} /> }} />
         </div>
       )
     if (orionError)
       return (
         <div className="viz-empty-state">
-          Error al conectar con el broker: <em>{orionError}</em>
-          {' · '}
-          <button className="link-btn" onClick={() => navigate('/')}>Revisar Configuración</button>
+          <Trans i18nKey="viz.page.emptyBrokerError" values={{ error: orionError }} components={{ em: <em />, cfg: <button className="link-btn" onClick={() => navigate('/')} /> }} />
         </div>
       )
     if (orionLoaded && orionNodes.length === 0)
-      return <div className="viz-empty-state">No hay entidades en el broker.</div>
+      return <div className="viz-empty-state">{t('viz.page.emptyNoEntities')}</div>
     if (orionLoaded && orionVisibleIds.size === 0)
       return (
         <div className="viz-empty-state">
           {orionSearchFiltering
-            ? 'Ninguna instancia coincide con la búsqueda.'
+            ? t('viz.page.emptyNoSearchMatch')
             : orionFocusedNodeId
-              ? 'La instancia seleccionada no está en el grafo cargado o no tiene vecinos visibles con el filtro actual.'
-              : 'No hay nodos para los tipos seleccionados.'}
+              ? t('viz.page.emptySelectedNoNeighbors')
+              : t('viz.page.emptyNoTypeNodes')}
         </div>
       )
     return null
@@ -703,6 +701,8 @@ export function VisualizationPage() {
   const orionOpen = orionDetail !== null
   const orionDetailEntityId = orionDetail?.state === 'ready' ? orionDetail.view.id : orionDetail?.node.id ?? ''
   const orionTypeShort = orionDetail ? typeKeyFromFullType(orionDetail.node.type || '') : ''
+
+  const labelToggleTitle = graphLabelPlacement === 'below' ? t('viz.page.labelsInside') : t('viz.page.labelsBelow')
 
   return (
     <div className="viz-page">
@@ -714,7 +714,7 @@ export function VisualizationPage() {
           aria-selected={activeTab === 'schema'}
           onClick={() => handleTabChange('schema')}
         >
-          Modelo abstracto
+          {t('viz.page.tabSchema')}
           {types.length > 0 && (
             <span className="tab-count">{types.length}</span>
           )}
@@ -725,7 +725,7 @@ export function VisualizationPage() {
           aria-selected={activeTab === 'orion'}
           onClick={() => handleTabChange('orion')}
         >
-          Instancias Orion-LD
+          {t('viz.page.tabOrion')}
           {orionEntityCount > 0 && (
             <span className="tab-count">{orionEntityCount}</span>
           )}
@@ -740,18 +740,15 @@ export function VisualizationPage() {
         >
           {!types.length && (
             <div className="viz-empty-state">
-              Carga el modelo en{' '}
-              <button className="link-btn" onClick={() => navigate('/')}>Configuración</button>{' '}
-              para ver el grafo de tipos.
+              <Trans i18nKey="viz.page.emptyLoadModel" components={{ cfg: <button className="link-btn" onClick={() => navigate('/')} /> }} />
               <span style={{ fontSize: '0.78rem', color: 'var(--muted)', marginTop: '0.4rem', display: 'block' }}>
-                Con solo <strong>schemas + contexto</strong> se muestran los tipos sin relaciones.
-                Añade un <strong>descriptor.json</strong> o ejemplos en <code>examples/</code> para ver también las relaciones.
+                <Trans i18nKey="viz.page.emptyLoadModelHint" components={{ strong: <strong />, code: <code /> }} />
               </span>
             </div>
           )}
           {schemaGraphError && (
             <div className="viz-empty-state" style={{ color: 'var(--error)' }}>
-              Error al construir el grafo de modelo: <em>{schemaGraphError}</em>
+              <Trans i18nKey="viz.page.schemaGraphError" values={{ error: schemaGraphError }} components={{ em: <em /> }} />
             </div>
           )}
           {schemaGraphData && !schemaGraphError && (
@@ -768,15 +765,15 @@ export function VisualizationPage() {
           {/* Zoom controls */}
           {schemaGraphData && (
             <div className="viz-controls">
-              <button className="viz-ctrl-btn" onClick={() => schemaGraphRef.current?.zoomIn()} title="Zoom +" aria-label="Acercar">+</button>
-              <button className="viz-ctrl-btn" onClick={() => schemaGraphRef.current?.zoomOut()} title="Zoom −" aria-label="Alejar">−</button>
-              <button className="viz-ctrl-btn" onClick={() => schemaGraphRef.current?.fit()} title="Encuadrar" aria-label="Encuadrar grafo" style={{ fontSize: '0.8rem' }}>⤢</button>
+              <button className="viz-ctrl-btn" onClick={() => schemaGraphRef.current?.zoomIn()} title={t('viz.page.zoomIn')} aria-label={t('viz.page.zoomInAria')}>+</button>
+              <button className="viz-ctrl-btn" onClick={() => schemaGraphRef.current?.zoomOut()} title={t('viz.page.zoomOut')} aria-label={t('viz.page.zoomOutAria')}>−</button>
+              <button className="viz-ctrl-btn" onClick={() => schemaGraphRef.current?.fit()} title={t('viz.page.fit')} aria-label={t('viz.page.fitAria')} style={{ fontSize: '0.8rem' }}>⤢</button>
               <div className="viz-ctrl-sep" />
               <button
                 className={`viz-ctrl-btn${graphLabelPlacement === 'inside' ? ' active' : ''}`}
                 onClick={toggleGraphLabelPlacement}
-                title={graphLabelPlacement === 'below' ? 'Mostrar nombres dentro del nodo' : 'Mostrar nombres debajo del nodo'}
-                aria-label={graphLabelPlacement === 'below' ? 'Mostrar nombres dentro del nodo' : 'Mostrar nombres debajo del nodo'}
+                title={labelToggleTitle}
+                aria-label={labelToggleTitle}
                 aria-pressed={graphLabelPlacement === 'inside'}
                 style={{ fontSize: '0.72rem' }}
               >
@@ -786,8 +783,8 @@ export function VisualizationPage() {
               <button
                 className={`viz-ctrl-btn${infoPanelOpen ? ' active' : ''}`}
                 onClick={() => setInfoPanelOpen((v) => !v)}
-                title="Tipos y relaciones"
-                aria-label="Tipos y relaciones"
+                title={t('viz.page.typesAndRelations')}
+                aria-label={t('viz.page.typesAndRelations')}
                 aria-expanded={infoPanelOpen}
                 aria-controls="schema-info-panel"
               >
@@ -796,7 +793,7 @@ export function VisualizationPage() {
             </div>
           )}
 
-          <div className="viz-hint">Rueda: zoom · Arrastrar: mover · Click: detalle</div>
+          <div className="viz-hint">{t('viz.page.hint')}</div>
 
           {/* Schema detail panel */}
           <NodeDetailPanel
@@ -814,7 +811,7 @@ export function VisualizationPage() {
                   }
                 }}
               >
-                Ver entidades de este tipo →
+                {t('viz.page.viewEntitiesOfType')}
               </a>
             }
           >
@@ -849,7 +846,7 @@ export function VisualizationPage() {
             <button
               type="button"
               className="viz-drawer-backdrop"
-              aria-label="Cerrar filtros"
+              aria-label={t('viz.orionPanel.closeFiltersAria')}
               onClick={closeOrionFilters}
             />
           )}
@@ -858,8 +855,8 @@ export function VisualizationPage() {
             <div className="viz-spinner" />
             <span>
               {orionLoadCount != null && orionLoadCount > 0
-                ? `Cargando entidades… ${orionLoadCount}`
-                : 'Cargando entidades…'}
+                ? t('viz.page.loadingEntitiesCount', { count: orionLoadCount })
+                : t('viz.page.loadingEntities')}
             </span>
           </div>
 
@@ -884,21 +881,21 @@ export function VisualizationPage() {
             <button
               className="viz-ctrl-btn"
               onClick={() => { setOrionLoaded(false); void loadOrionGraph() }}
-              title="Recargar"
-              aria-label="Recargar instancias"
+              title={t('viz.page.reload')}
+              aria-label={t('viz.page.reloadAria')}
             >
               ↺
             </button>
             <div className="viz-ctrl-sep" />
-            <button className="viz-ctrl-btn" onClick={() => orionGraphRef.current?.zoomIn()} title="Zoom +" aria-label="Acercar">+</button>
-            <button className="viz-ctrl-btn" onClick={() => orionGraphRef.current?.zoomOut()} title="Zoom −" aria-label="Alejar">−</button>
-            <button className="viz-ctrl-btn" onClick={() => orionGraphRef.current?.fit()} title="Encuadrar" aria-label="Encuadrar grafo" style={{ fontSize: '0.8rem' }}>⤢</button>
+            <button className="viz-ctrl-btn" onClick={() => orionGraphRef.current?.zoomIn()} title={t('viz.page.zoomIn')} aria-label={t('viz.page.zoomInAria')}>+</button>
+            <button className="viz-ctrl-btn" onClick={() => orionGraphRef.current?.zoomOut()} title={t('viz.page.zoomOut')} aria-label={t('viz.page.zoomOutAria')}>−</button>
+            <button className="viz-ctrl-btn" onClick={() => orionGraphRef.current?.fit()} title={t('viz.page.fit')} aria-label={t('viz.page.fitAria')} style={{ fontSize: '0.8rem' }}>⤢</button>
             <div className="viz-ctrl-sep" />
             <button
               className={`viz-ctrl-btn${graphLabelPlacement === 'inside' ? ' active' : ''}`}
               onClick={toggleGraphLabelPlacement}
-              title={graphLabelPlacement === 'below' ? 'Mostrar nombres dentro del nodo' : 'Mostrar nombres debajo del nodo'}
-              aria-label={graphLabelPlacement === 'below' ? 'Mostrar nombres dentro del nodo' : 'Mostrar nombres debajo del nodo'}
+              title={labelToggleTitle}
+              aria-label={labelToggleTitle}
               aria-pressed={graphLabelPlacement === 'inside'}
               style={{ fontSize: '0.72rem' }}
             >
@@ -914,7 +911,7 @@ export function VisualizationPage() {
               aria-controls="orion-side-panel"
               onClick={() => setOrionFiltersOpen((o) => !o)}
             >
-              Filtros
+              {t('viz.page.filters')}
             </button>
           )}
 
@@ -941,14 +938,14 @@ export function VisualizationPage() {
           {orionLoaded && orionEntityCount > 0 && (
             <div className="viz-status-bar">
               <span className="viz-status-text">
-                {orionEntityCount} entidad{orionEntityCount !== 1 ? 'es' : ''}
+                {t('viz.page.statusEntities', { count: orionEntityCount })}
                 {' · '}
-                {orionLinkCount} relación{orionLinkCount !== 1 ? 'es' : ''}
+                {t('viz.page.statusRelations', { count: orionLinkCount })}
               </span>
             </div>
           )}
 
-          <div className="viz-hint">Rueda: zoom · Arrastrar: mover · Click: detalle</div>
+          <div className="viz-hint">{t('viz.page.hint')}</div>
 
           {/* Orion detail panel */}
           <NodeDetailPanel
@@ -961,6 +958,7 @@ export function VisualizationPage() {
             }}
             footer={
               <>
+                
                 <a
                   href="#"
                   onClick={(e) => {
@@ -972,7 +970,7 @@ export function VisualizationPage() {
                     }
                   }}
                 >
-                  Editar en Entidades →
+                  {t('viz.page.editInEntities')}
                 </a>
                 <button
                   style={{
@@ -987,7 +985,7 @@ export function VisualizationPage() {
                   }}
                   onClick={() => openDeleteModal(orionDetailEntityId)}
                 >
-                  Eliminar
+                  {t('common.delete')}
                 </button>
               </>
             }
@@ -1000,15 +998,13 @@ export function VisualizationPage() {
       {/* Delete confirmation modal */}
       {deleteModal.open && (
         <ConfirmModal
-          title="¿Eliminar entidad?"
+          title={t('viz.page.deleteTitle')}
           message={
-            <>
-              Se eliminará permanentemente la entidad <code>{deleteModal.entityId}</code>.
-            </>
+            <Trans i18nKey="viz.page.deleteMessage" values={{ id: deleteModal.entityId }} components={{ code: <code /> }} />
           }
           danger
           loading={deleteModal.loading}
-          confirmLabel="Eliminar"
+          confirmLabel={t('common.delete')}
           onConfirm={() => void handleDeleteConfirm()}
           onCancel={() => setDeleteModal({ open: false, entityId: '', loading: false })}
         />

@@ -1,16 +1,16 @@
 import type { RefObject } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAgentPanelResize } from '../hooks/useAgentPanelResize'
 import type { StoredBroker } from '../types/broker'
 import { AgentPanelShell } from './AgentPanelShell'
 import { HeadsetIcon } from './AgentIcons'
-
 type Props = {
   bodyRef: RefObject<HTMLDivElement | null>
   broker: StoredBroker | null
   isOrionAuthenticated: boolean
 }
-
 export function AgentPanel({ bodyRef, broker, isOrionAuthenticated }: Props) {
+  const { t } = useTranslation()
   const {
     isOpen,
     isExpanded,
@@ -21,19 +21,18 @@ export function AgentPanel({ bodyRef, broker, isOrionAuthenticated }: Props) {
     asideWidth,
     resizerProps,
   } = useAgentPanelResize(bodyRef)
-
   return (
     <aside
       className={`agent-panel${isOpen ? ' agent-panel--open' : ''}${isExpanded ? ' agent-panel--expanded' : ''}`}
       style={{ width: asideWidth }}
-      aria-label="Marvin — Asistente"
+      aria-label={t('agent.panel.ariaLabel')}
     >
       {!isExpanded && isOpen && (
         <div
           className="agent-panel-resizer"
           role="separator"
           aria-orientation="vertical"
-          aria-label="Redimensionar panel del asistente"
+          aria-label={t('agent.panel.resizeAria')}
           tabIndex={0}
           {...resizerProps}
         />
@@ -52,14 +51,13 @@ export function AgentPanel({ bodyRef, broker, isOrionAuthenticated }: Props) {
           onToggleExpand={toggleExpanded}
         />
       </div>
-
       <button
         type="button"
         className="agent-panel-rail"
         onClick={togglePanel}
         aria-expanded={isOpen}
-        aria-label={isOpen ? 'Cerrar panel de Marvin' : 'Abrir panel de Marvin'}
-        title={isOpen ? 'Cerrar Marvin' : 'Abrir Marvin'}
+        aria-label={isOpen ? t('agent.panel.closeAria') : t('agent.panel.openAria')}
+        title={isOpen ? t('agent.panel.closeTitle') : t('agent.panel.openTitle')}
       >
         <HeadsetIcon size={16} />
         <span>Marvin</span>

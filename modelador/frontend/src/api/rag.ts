@@ -1,14 +1,15 @@
+import i18n from '../lib/i18n'
 import type { RagConfig, RagUploadResult, RagDocuments } from '../types/rag'
 
 export async function getRagConfig(): Promise<RagConfig> {
   const res = await fetch('/api/rag/config')
-  if (!res.ok) throw new Error(`Error config RAG: ${res.status}`)
+  if (!res.ok) throw new Error(i18n.t('errors.rag.config', { status: res.status }))
   return res.json() as Promise<RagConfig>
 }
 
 export async function listRagTenants(): Promise<{ tenants: string[] }> {
   const res = await fetch('/api/rag/tenants')
-  if (!res.ok) throw new Error(`Error listando tenants: ${res.status}`)
+  if (!res.ok) throw new Error(i18n.t('errors.rag.listTenants', { status: res.status }))
   return res.json() as Promise<{ tenants: string[] }>
 }
 
@@ -18,12 +19,12 @@ export async function createRagTenant(name: string): Promise<void> {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name }),
   })
-  if (!res.ok) throw new Error(`Error creando tenant: ${res.status}`)
+  if (!res.ok) throw new Error(i18n.t('errors.rag.createTenant', { status: res.status }))
 }
 
 export async function deleteRagTenant(tenant: string): Promise<void> {
   const res = await fetch(`/api/rag/tenants/${encodeURIComponent(tenant)}`, { method: 'DELETE' })
-  if (!res.ok) throw new Error(`Error eliminando tenant: ${res.status}`)
+  if (!res.ok) throw new Error(i18n.t('errors.rag.deleteTenant', { status: res.status }))
 }
 
 function authedTenantParams(tenant: string, brokerBaseUrl: string, orionTenant = tenant): string {
@@ -37,7 +38,7 @@ function authedTenantParams(tenant: string, brokerBaseUrl: string, orionTenant =
 
 export async function listRagDocuments(tenant: string, brokerBaseUrl: string, orionTenant?: string): Promise<RagDocuments> {
   const res = await fetch(`/api/rag/documents?${authedTenantParams(tenant, brokerBaseUrl, orionTenant)}`)
-  if (!res.ok) throw new Error(`Error listando documentos: ${res.status}`)
+  if (!res.ok) throw new Error(i18n.t('errors.rag.listDocuments', { status: res.status }))
   return res.json() as Promise<RagDocuments>
 }
 
@@ -56,7 +57,7 @@ export async function deleteRagDocument(
   })
   const url = `/api/rag/documents/${encodeURIComponent(filename)}?${params.toString()}`
   const res = await fetch(url, { method: 'DELETE' })
-  if (!res.ok) throw new Error(`Error eliminando documento: ${res.status}`)
+  if (!res.ok) throw new Error(i18n.t('errors.rag.deleteDocument', { status: res.status }))
 }
 
 export async function vectorizeRagTenant(
@@ -65,13 +66,13 @@ export async function vectorizeRagTenant(
   orionTenant?: string,
 ): Promise<{ processed: number }> {
   const res = await fetch(`/api/rag/vectorize?${authedTenantParams(tenant, brokerBaseUrl, orionTenant)}`, { method: 'POST' })
-  if (!res.ok) throw new Error(`Error vectorizando: ${res.status}`)
+  if (!res.ok) throw new Error(i18n.t('errors.rag.vectorize', { status: res.status }))
   return res.json() as Promise<{ processed: number }>
 }
 
 export async function clearRagIndex(tenant: string, brokerBaseUrl: string, orionTenant?: string): Promise<void> {
   const res = await fetch(`/api/rag/clear?${authedTenantParams(tenant, brokerBaseUrl, orionTenant)}`, { method: 'DELETE' })
-  if (!res.ok) throw new Error(`Error vaciando índice: ${res.status}`)
+  if (!res.ok) throw new Error(i18n.t('errors.rag.clear', { status: res.status }))
 }
 
 export async function uploadRagDocument(
@@ -104,7 +105,7 @@ export async function uploadRagDocument(
         resolve({ ok: false, status: xhr.status, filename: file.name, error: xhr.responseText.slice(0, 300) })
       }
     }
-    xhr.onerror = () => reject(new Error('Error de red al subir el documento'))
+    xhr.onerror = () => reject(new Error(i18n.t('errors.rag.uploadNetwork')))
     xhr.send(formData)
   })
 }

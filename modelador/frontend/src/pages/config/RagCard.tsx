@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type DragEvent } from 'react'
+import { useTranslation, Trans } from 'react-i18next'
 import {
   getRagConfig,
   createRagTenant,
@@ -28,6 +29,7 @@ export function RagCard({
   isOrionAuthenticated = false,
   ragPanelOpen = true,
 }: Props) {
+  const { t } = useTranslation()
   const [config, setConfig]                     = useState<RagConfig | null>(null)
   const [docs, setDocs]                         = useState<RagDocuments | null>(null)
   const [docsLoading, setDocsLoading]           = useState(false)
@@ -135,12 +137,14 @@ export function RagCard({
   // ── Handlers ──────────────────────────────────────────────────────────────
   const handleDeleteDoc = async (filename: string, fromDisk: boolean) => {
     const msg = fromDisk
-      ? `¿Eliminar "${filename}" del índice y del disco?`
-      : `¿Quitar "${filename}" del índice? El archivo se conserva en disco.`
+      ? t('config.rag.confirmDeleteDisk', { filename })
+      : t('config.rag.confirmRemoveIndex', { filename })
     if (!window.confirm(msg)) return
     try {
       await deleteRagDocument(ragSpaceId, brokerBaseUrl, filename, fromDisk, fiwareTenant)
-      flash(`"${filename}" ${fromDisk ? 'eliminado' : 'quitado del índice'}`, true)
+      flash(fromDisk
+        ? t('config.rag.flashDeleted', { filename })
+        : t('config.rag.flashRemoved', { filename }), true)
       loadDocs()
     } catch (e) {
       flash(String(e), false)
@@ -151,7 +155,7 @@ export function RagCard({
     setVectorizing(true)
     try {
       const res = await vectorizeRagTenant(ragSpaceId, brokerBaseUrl, fiwareTenant)
-      flash(`Vectorizados ${res.processed} documentos`, true)
+      flash(t('config.rag.flashVectorized', { count: res.processed }), true)
       loadDocs()
     } catch (e) {
       flash(String(e), false)
@@ -166,7 +170,7 @@ export function RagCard({
     setConfirmClear(false)
     try {
       await clearRagIndex(ragSpaceId, brokerBaseUrl, fiwareTenant)
-      flash('Índice vaciado', true)
+      flash(t('config.rag.flashCleared'), true)
       loadDocs()
     } catch (e) {
       flash(String(e), false)
@@ -215,14 +219,14 @@ export function RagCard({
   }
 
   // ── Render ────────────────────────────────────────────────────────────────
-  if (!config) return <p className="rag-loading">Cargando configuración…</p>
+  if (!config) return <p className="rag-loading">{t('config.rag.loadingConfig')}</p>
 
   if (!config.enabled) {
     return (
       <div className="rag-panel-disabled">
-        <p>El servicio RAG no está configurado.</p>
+        <p>{t('config.rag.notConfigured')}</p>
         <code>RAG_URL</code>
-        <p className="rag-hint">Establece la variable de entorno en el servidor para habilitarlo.</p>
+        <p className="rag-hint">{t('config.rag.setEnvVar')}</p>
       </div>
     )
   }
@@ -230,18 +234,15 @@ export function RagCard({
   if (!fiwareTenant) {
     return (
       <div className="rag-panel-needs-tenant">
-        <p className="rag-needs-tenant-title">Tenant obligatorio</p>
+        <p className="rag-needs-tenant-title">{t('config.rag.tenantRequired')}</p>
         <p>
-          Para gestionar documentación RAG, la conexión Orion activa debe tener el campo{' '}
-          <strong>Tenant / NGSILD-Tenant</strong> definido: es el mismo identificador que Orion y el espacio en Chroma.
+          <Trans i18nKey="config.rag.tenantRequiredBody" components={{ strong: <strong /> }} />
         </p>
         <p className="rag-hint">
-          Cierra este panel, edita la tarjeta <strong>Conexión Orion (tenant)</strong>, rellena el tenant, y pulsa{' '}
-          <strong>Guardar</strong>, o pulsa <strong>Usar</strong> en una conexión guardada que ya lo incluya.
+          <Trans i18nKey="config.rag.tenantRequiredHint" components={{ strong: <strong /> }} />
         </p>
         <p className="rag-hint rag-hint--dev">
-          <code>RAG_CHROMA_DB</code> en el servidor sigue siendo útil como valor por defecto en el proxy cuando una petición
-          llega sin tenant; este panel no lo usa: siempre depende de la conexión Orion activa.
+          <Trans i18nKey="config.rag.tenantRequiredDev" components={{ code: <code /> }} />
         </p>
       </div>
     )
@@ -250,13 +251,10 @@ export function RagCard({
   if (!isOrionAuthenticated) {
     return (
       <div className="rag-panel-needs-tenant">
-        <p className="rag-needs-tenant-title">Sesión Orion requerida</p>
-        <p>
-          Para consultar o gestionar documentación RAG debes iniciar sesión primero en la conexión Orion activa.
-        </p>
+        <p className="rag-needs-tenant-title">{t('config.rag.sessionRequired')}</p>
+        <p>{t('config.rag.sessionRequiredBody')}</p>
         <p className="rag-hint">
-          Pulsa <strong>Usar</strong> en una conexión guardada si necesitas cargar sus parámetros, introduce usuario y
-          contraseña, y después pulsa <strong>Conectar</strong>.
+          <Trans i18nKey="config.rag.sessionRequiredHint" components={{ strong: <strong /> }} />
         </p>
       </div>
     )
@@ -269,45 +267,45 @@ export function RagCard({
     <div className="rag-panel-content">
 
       <div className="rag-section">
-        <p className="rag-section-label">Espacio RAG (tenant Chroma)</p>
+        <p className="rag-section-label">{t('config.rag.spaceLabel')}</p>
         <p className="rag-space-id"><code>{ragSpaceId}</code></p>
-        <p className="rag-hint">Derivado del tenant de la conexión Orion activa (normalizado igual que en el servicio RAG).</p>
+        <p className="rag-hint">{t('config.rag.spaceHint')}</p>
       </div>
 
       {/* ── Documentos indexados ── */}
       <div className="rag-section">
         <p className="rag-section-label">
-          Indexados
+          {t('config.rag.indexed')}
           {docs !== null && <span className="rag-section-count">{indexedDocs.length}</span>}
         </p>
         {docsLoading ? (
-          <p className="rag-hint">Cargando…</p>
+          <p className="rag-hint">{t('common.loading')}</p>
         ) : indexedDocs.length === 0 ? (
-          <p className="rag-hint">Sin documentos indexados.</p>
+          <p className="rag-hint">{t('config.rag.noIndexed')}</p>
         ) : (
           <ul className="rag-doc-list">
             {indexedDocs.map(([name, info]) => (
               <li key={name} className="rag-doc-item">
                 <div className="rag-doc-info">
                   <span className="rag-doc-name" title={name}>{name}</span>
-                  <span className="rag-doc-meta">{info.chunks} chunks · {info.pages} pág.</span>
+                  <span className="rag-doc-meta">{t('config.rag.docMeta', { chunks: info.chunks, pages: info.pages })}</span>
                 </div>
                 <div className="rag-doc-actions rag-doc-actions--row">
                   <button
                     type="button"
                     className="rag-btn rag-btn--ghost rag-btn--compact"
                     onClick={() => void handleDeleteDoc(name, false)}
-                    title="Quitar del índice (el archivo sigue en disco)"
+                    title={t('config.rag.removeIndexTitle')}
                   >
-                    Quitar índice
+                    {t('config.rag.removeIndex')}
                   </button>
                   <button
                     type="button"
                     className="rag-btn rag-btn--danger rag-btn--compact"
                     onClick={() => void handleDeleteDoc(name, true)}
-                    title="Eliminar del índice y borrar el archivo en disco"
+                    title={t('config.rag.deleteFileTitle')}
                   >
-                    Borrar archivo
+                    {t('config.rag.deleteFile')}
                   </button>
                 </div>
               </li>
@@ -320,7 +318,7 @@ export function RagCard({
       {pendingDocs.length > 0 && (
         <div className="rag-section">
           <p className="rag-section-label">
-            Pendientes de vectorizar
+            {t('config.rag.pending')}
             <span className="rag-section-count rag-section-count--warn">{pendingDocs.length}</span>
           </p>
           <ul className="rag-doc-list">
@@ -328,16 +326,16 @@ export function RagCard({
               <li key={name} className="rag-doc-item rag-doc-item--pending">
                 <div className="rag-doc-info">
                   <span className="rag-doc-name" title={name}>{name}</span>
-                  <span className="rag-doc-meta">Pendiente de vectorizar</span>
+                  <span className="rag-doc-meta">{t('config.rag.pendingMeta')}</span>
                 </div>
                 <div className="rag-doc-actions rag-doc-actions--row">
                   <button
                     type="button"
                     className="rag-btn rag-btn--danger rag-btn--compact"
                     onClick={() => void handleDeleteDoc(name, true)}
-                    title="Eliminar archivo del disco"
+                    title={t('config.rag.removeFromDiskTitle')}
                   >
-                    Quitar
+                    {t('config.rag.remove')}
                   </button>
                 </div>
               </li>
@@ -350,17 +348,17 @@ export function RagCard({
             style={{ marginTop: 8 }}
           >
             {vectorizing
-              ? 'Vectorizando…'
-              : `Vectorizar ${pendingDocs.length} pendiente${pendingDocs.length > 1 ? 's' : ''}`}
+              ? t('config.rag.vectorizing')
+              : t('config.rag.vectorizePending', { count: pendingDocs.length })}
           </button>
         </div>
       )}
 
       {/* ── Subida de documentos ── */}
       <div className="rag-section">
-        <p className="rag-section-label">Subir documento</p>
+        <p className="rag-section-label">{t('config.rag.uploadDoc')}</p>
         <div className="rag-field">
-          <label htmlFor="rag-collection">Colección</label>
+          <label htmlFor="rag-collection">{t('config.rag.collection')}</label>
           <input
             id="rag-collection"
             value={collection}
@@ -376,7 +374,7 @@ export function RagCard({
           onDrop={onDrop}
           role="button"
           tabIndex={0}
-          aria-label="Zona de arrastrar o seleccionar documento"
+          aria-label={t('config.rag.dropzoneAria')}
           onKeyDown={(e) => { if (e.key === 'Enter') fileInputRef.current?.click() }}
         >
           <input
@@ -409,9 +407,9 @@ export function RagCard({
                   <line x1="9" y1="15" x2="15" y2="15" />
                 </svg>
               </span>
-              <span className="rag-drop-label">Arrastra o haz clic</span>
+              <span className="rag-drop-label">{t('config.rag.dropLabel')}</span>
               <span className="rag-drop-hint">
-                {(config.allowed_extensions ?? []).join(' · ')} · máx {config.max_mb} MB
+                {t('config.rag.dropHint', { extensions: (config.allowed_extensions ?? []).join(' · '), maxMb: config.max_mb })}
               </span>
             </>
           )}
@@ -419,8 +417,8 @@ export function RagCard({
         {lastUpload && (
           <div className={`rag-result rag-result--${lastUpload.ok ? 'ok' : 'err'}`}>
             {lastUpload.ok
-              ? `✓ "${lastUpload.filename}" subido`
-              : `✗ ${lastUpload.error ?? 'Error desconocido'}`}
+              ? t('config.rag.uploadOk', { filename: lastUpload.filename })
+              : t('config.rag.uploadErr', { error: lastUpload.error ?? t('config.rag.unknownError') })}
           </div>
         )}
       </div>
@@ -434,10 +432,10 @@ export function RagCard({
             disabled={clearing}
           >
             {clearing
-              ? 'Vaciando…'
+              ? t('config.rag.clearing')
               : confirmClear
-                ? '¿Confirmar? Pulsa de nuevo para vaciar'
-                : 'Vaciar índice'}
+                ? t('config.rag.confirmClear')
+                : t('config.rag.clearIndex')}
           </button>
           {confirmClear && (
             <button
@@ -445,7 +443,7 @@ export function RagCard({
               style={{ marginTop: 4 }}
               onClick={() => setConfirmClear(false)}
             >
-              Cancelar
+              {t('common.cancel')}
             </button>
           )}
         </div>

@@ -1,3 +1,4 @@
+import i18n from '../lib/i18n'
 export type ChatEntityRow = {
   id: string
   type?: string
@@ -131,8 +132,8 @@ export function parseChatBlocks(data: Record<string, unknown> | undefined | null
   }
 
   const jsonCandidates: Array<[unknown, string | undefined]> = [
-    [data.entity, 'Entidad NGSI-LD'],
-    [data.payload, 'Payload NGSI-LD'],
+    [data.entity, i18n.t('agent.blocks.entityTitle')],
+    [data.payload, i18n.t('agent.blocks.payloadTitle')],
     [data.ngsi_ld, 'NGSI-LD'],
   ]
   for (const [value, title] of jsonCandidates) {
