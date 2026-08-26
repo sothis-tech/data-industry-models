@@ -1,5 +1,9 @@
 # Modelo de Datos Inteligente para Industria
 
+[![Descripción](https://img.shields.io/badge/Descripción-1f6feb?style=for-the-badge)](README.es.md)
+[![Despliegue](https://img.shields.io/badge/Despliegue-2c6b46?style=for-the-badge)](DEPLOYMENT.es.md)
+[![Primeros pasos](https://img.shields.io/badge/Primeros_pasos-8a5c1c?style=for-the-badge)](USER_GUIDE.es.md)
+
 Plataforma para la integración, el modelado y la explotación de datos industriales, que conecta la capa de operaciones (OT) con la de información (IT) sobre un espacio de datos basado en NGSI-LD. El sistema combina la adquisición de datos por OPC-UA, un modelo de datos compartido, la orquestación segura de servicios, el histórico de series temporales y un conjunto de agentes de IA para el control y la interacción en lenguaje natural.
 
 > **Idioma:** [English](README.md) | Español

@@ -1,5 +1,9 @@
 # Smart Data Models for Industry
 
+[![Overview](https://img.shields.io/badge/Overview-1f6feb?style=for-the-badge)](README.md)
+[![Deployment](https://img.shields.io/badge/Deployment-2c6b46?style=for-the-badge)](DEPLOYMENT.md)
+[![Getting Started](https://img.shields.io/badge/Getting_Started-8a5c1c?style=for-the-badge)](USER_GUIDE.md)
+
 A platform for the integration, modeling, and exploitation of industrial data, bridging the operational (OT) and information (IT) layers over an NGSI-LD data space. The system combines OPC-UA data acquisition, a shared data model, secured service orchestration, time-series history, and a set of AI agents for control and natural-language interaction.
 
 > **Language:** English | [Español](README.es.md)
