@@ -1,5 +1,12 @@
 # Smart Data Models for Industry
 
+![License](https://img.shields.io/badge/license-AGPL--3.0-orange)
+![FIWARE](https://img.shields.io/badge/powered_by-FIWARE-233c68)
+![NGSI-LD](https://img.shields.io/badge/NGSI--LD-1.6-5b3a8a)
+![Docker](https://img.shields.io/badge/Docker_Compose-ready-2496ed?logo=docker&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3776ab?logo=python&logoColor=white)
+![React](https://img.shields.io/badge/React-61dafb?logo=react&logoColor=black)
+
 [![Overview](https://img.shields.io/badge/Overview-1f6feb?style=for-the-badge)](README.md)
 [![Deployment](https://img.shields.io/badge/Deployment-2c6b46?style=for-the-badge)](DEPLOYMENT.md)
 [![Getting Started](https://img.shields.io/badge/Getting_Started-8a5c1c?style=for-the-badge)](USER_GUIDE.md)
@@ -84,3 +91,6 @@ The **OPC-UA Linker — Frontend** (React dashboard served by Nginx, `:8030`) is
 
 - **[Deployment Guide](DEPLOYMENT.md)** — prerequisites, installation, build, and configuration on a clean machine.
 - **[User Guide — Getting Started](USER_GUIDE.md)** — create a user, grant tenant access, and open the example data models.
+## License
+
+This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**. See the [LICENSE](LICENSE) file for the full text.

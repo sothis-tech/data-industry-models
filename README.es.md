@@ -1,5 +1,12 @@
 # Modelo de Datos Inteligente para Industria
 
+![Licencia](https://img.shields.io/badge/licencia-AGPL--3.0-orange)
+![FIWARE](https://img.shields.io/badge/powered_by-FIWARE-233c68)
+![NGSI-LD](https://img.shields.io/badge/NGSI--LD-1.6-5b3a8a)
+![Docker](https://img.shields.io/badge/Docker_Compose-ready-2496ed?logo=docker&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3776ab?logo=python&logoColor=white)
+![React](https://img.shields.io/badge/React-61dafb?logo=react&logoColor=black)
+
 [![Descripción](https://img.shields.io/badge/Descripción-1f6feb?style=for-the-badge)](README.es.md)
 [![Despliegue](https://img.shields.io/badge/Despliegue-2c6b46?style=for-the-badge)](DEPLOYMENT.es.md)
 [![Primeros pasos](https://img.shields.io/badge/Primeros_pasos-8a5c1c?style=for-the-badge)](USER_GUIDE.es.md)
@@ -84,3 +91,7 @@ El **OPC-UA Linker — Frontend** (dashboard React servido por Nginx, `:8030`) e
 
 - **[Guía de Despliegue](DEPLOYMENT.es.md)** — prerrequisitos, instalación, build y configuración en una máquina limpia.
 - **[Guía de Uso — Primeros pasos](USER_GUIDE.es.md)** — crear un usuario, conceder acceso al tenant y abrir los modelos de datos de ejemplo.
+
+## Licencia
+
+Este proyecto está licenciado bajo la **Licencia Pública General Affero de GNU v3.0 (AGPL-3.0)**. Consulta el archivo [LICENSE](LICENSE) para el texto completo.
