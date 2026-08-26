@@ -20,6 +20,7 @@
     "entities": "Entidades",
     "visualization": "Visualización"
   },
+  "language": { "label": "Idioma" },
   "status": {
     "loggedIn": "sesión iniciada",
     "noSession": "sin sesión",
