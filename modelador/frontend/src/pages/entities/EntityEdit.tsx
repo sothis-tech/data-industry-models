@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation, Trans } from 'react-i18next'
 import { getEntityById, patchEntityAttrs, prepareAttrsPayload } from '../../api/orion'
 import { humanizeSchemaError, validateAttrsPayload } from '../../api/validation'
 import type { NgsiLdEntity, ValidationResult } from '../../types/entity'
@@ -18,6 +19,7 @@ function formatJsonSafe(text: string): string {
 }
 
 export function EntityEdit({ entity, brokerUrl, brokerTenant, onDirty, onSaved, onDelete, onJsonDraftChange }: Props) {
+  const { t } = useTranslation()
   const [json, setJson] = useState('')
   const [infoHtml, setInfoHtml] = useState<{ id: string; type: string; noAttrs: boolean } | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -36,7 +38,7 @@ export function EntityEdit({ entity, brokerUrl, brokerTenant, onDirty, onSaved, 
       const { body, error } = await getEntityById(brokerUrl, entity.id, brokerTenant)
       setLoading(false)
       if (error || !body) {
-        setLoadError(error ?? 'Respuesta vacía')
+        setLoadError(error ?? t('entities.edit.emptyResponse'))
         return
       }
       const attrs: Record<string, unknown> = {}
@@ -65,7 +67,7 @@ export function EntityEdit({ entity, brokerUrl, brokerTenant, onDirty, onSaved, 
   async function handleValidate() {
     let payload: Record<string, unknown>
     try { payload = JSON.parse(json || '{}') as Record<string, unknown> }
-    catch (e) { setValidation({ valid: false, errors: [{ path: '', message: 'JSON inválido: ' + String(e) }] }); return }
+    catch (e) { setValidation({ valid: false, errors: [{ path: '', message: t('entities.create.errInvalidJson', { error: String(e) }) }] }); return }
     const prep = await prepareAttrsPayload(payload)
     if (prep.error) { setValidation({ valid: false, errors: [{ path: '', message: prep.error }] }); return }
     setJson(JSON.stringify(prep.attrsPayloadToSend, null, 2))
@@ -76,7 +78,7 @@ export function EntityEdit({ entity, brokerUrl, brokerTenant, onDirty, onSaved, 
   async function handleSave() {
     let payload: Record<string, unknown>
     try { payload = JSON.parse(json || '{}') as Record<string, unknown> }
-    catch (e) { setValidation({ valid: false, errors: [{ path: '', message: 'JSON inválido: ' + String(e) }] }); return }
+    catch (e) { setValidation({ valid: false, errors: [{ path: '', message: t('entities.create.errInvalidJson', { error: String(e) }) }] }); return }
 
     setBusy(true)
     try {
@@ -96,7 +98,7 @@ export function EntityEdit({ entity, brokerUrl, brokerTenant, onDirty, onSaved, 
       } else {
         const b = body as Record<string, unknown>
         const msg = error ?? (b?.title as string) ?? JSON.stringify(body)
-        setValidation({ valid: false, errors: [{ path: '', message: `Error ${status}: ${msg}` }] })
+        setValidation({ valid: false, errors: [{ path: '', message: t('entities.create.errCreate', { status: String(status), msg: String(msg) }) }] })
       }
     } finally {
       setBusy(false)
@@ -105,7 +107,7 @@ export function EntityEdit({ entity, brokerUrl, brokerTenant, onDirty, onSaved, 
 
   const validationText = validation
     ? validation.valid
-      ? 'Validación OK'
+      ? t('entities.create.validationOk')
       : validation.errors.map(humanizeSchemaError).join('\n')
     : ''
 
@@ -113,26 +115,26 @@ export function EntityEdit({ entity, brokerUrl, brokerTenant, onDirty, onSaved, 
     <div className="detail-body">
       {loadError && (
         <div className="entity-load-error">
-          ⚠ Error cargando la entidad: {loadError}
+          ⚠ {t('entities.edit.loadError', { error: loadError })}
         </div>
       )}
       {infoHtml && (
         <div className="entity-info-bar">
-          <span><code>{infoHtml.id}</code> · tipo: <code className="accent">{infoHtml.type}</code></span>
+          <span><code>{infoHtml.id}</code> · {t('entities.edit.typeLabel')}: <code className="accent">{infoHtml.type}</code></span>
           {infoHtml.noAttrs && (
             <span className="entity-no-attrs">
-              ⚠ Esta entidad no tiene atributos todavía. Añade campos al JSON y pulsa <strong>Guardar cambios</strong>.
+              ⚠ <Trans i18nKey="entities.edit.noAttrs" components={{ strong: <strong /> }} />
             </span>
           )}
         </div>
       )}
       <div className="form-group form-group--grow">
-        <label htmlFor="patch-json">Atributos actuales — edita los valores y envía PATCH</label>
+        <label htmlFor="patch-json">{t('entities.edit.attrsLabel')}</label>
         <textarea
           id="patch-json"
           className="payload-textarea"
           rows={16}
-          placeholder={loading ? 'Cargando atributos…' : '{"name":{"type":"Property","value":"nuevo valor"}}'}
+          placeholder={loading ? t('entities.edit.loadingAttrs') : '{"name":{"type":"Property","value":"nuevo valor"}}'}
           value={json}
           onChange={e => { setJson(e.target.value); onDirty() }}
           readOnly={loading}
@@ -140,23 +142,23 @@ export function EntityEdit({ entity, brokerUrl, brokerTenant, onDirty, onSaved, 
       </div>
       <div className="btn-row btn-row--space-between">
         <button type="button" className="secondary danger" onClick={onDelete} disabled={busy}>
-          Eliminar entidad
+          {t('entities.edit.deleteEntity')}
         </button>
         <span className="btn-group">
           <button
             type="button"
             className="secondary"
-            title="Formatear JSON (Alt+Shift+F)"
+            title={t('entities.create.formatTitle')}
             onClick={handleFormat}
             disabled={busy}
           >
             {'{ }'}
           </button>
           <button type="button" className="secondary" onClick={handleValidate} disabled={busy || loading}>
-            Validar
+            {t('entities.create.validate')}
           </button>
           <button id="btn-patch-save" type="button" onClick={handleSave} disabled={busy || loading}>
-            {busy ? 'Guardando…' : 'Guardar cambios'}
+            {busy ? t('entities.edit.saving') : t('entities.edit.saveChanges')}
           </button>
         </span>
       </div>
