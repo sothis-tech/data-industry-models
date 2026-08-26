@@ -1,5 +1,9 @@
 # Guía de Uso — Primeros pasos
 
+[![Descripción](https://img.shields.io/badge/Descripción-1f6feb?style=for-the-badge)](README.es.md)
+[![Despliegue](https://img.shields.io/badge/Despliegue-2c6b46?style=for-the-badge)](DEPLOYMENT.es.md)
+[![Primeros pasos](https://img.shields.io/badge/Primeros_pasos-8a5c1c?style=for-the-badge)](USER_GUIDE.es.md)
+
 Guía rápida mínima: cómo abrir la plataforma y acceder a los modelos de datos de ejemplo (`ibermot`, `metapan`, `sdm`) que se cargaron al final de la [Guía de Despliegue](DEPLOYMENT.es.md). Cubre solo lo esencial: crear un usuario, conceder acceso al tenant y conectar el Modelador a un tenant. Para la referencia completa de funcionalidades, consulta la Guía de Uso completa.
 
 > **Idioma:** [English](USER_GUIDE.md) | Español · Parte de la documentación de [Espacio de Datos Industrial](README.es.md).

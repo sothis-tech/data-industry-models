@@ -1,5 +1,9 @@
 # Guía de Despliegue
 
+[![Descripción](https://img.shields.io/badge/Descripción-1f6feb?style=for-the-badge)](README.es.md)
+[![Despliegue](https://img.shields.io/badge/Despliegue-2c6b46?style=for-the-badge)](DEPLOYMENT.es.md)
+[![Primeros pasos](https://img.shields.io/badge/Primeros_pasos-8a5c1c?style=for-the-badge)](USER_GUIDE.es.md)
+
 Este documento describe el procedimiento oficial para el despliegue completo de la plataforma **Espacio de Datos Industrial** sobre una máquina limpia, partiendo únicamente de un clon del repositorio. Está redactado para que cualquier persona con conocimientos básicos de Docker pueda dejar el stack operativo de forma reproducible, siguiendo pasos verificables y sin depender de conocimiento implícito del equipo de desarrollo.
 
 > **Idioma:** [English](DEPLOYMENT.md) | Español · Parte de la documentación de [Espacio de Datos Industrial](README.es.md).

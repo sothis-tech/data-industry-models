@@ -1,5 +1,9 @@
 # User Guide — Getting Started
 
+[![Overview](https://img.shields.io/badge/Overview-1f6feb?style=for-the-badge)](README.md)
+[![Deployment](https://img.shields.io/badge/Deployment-2c6b46?style=for-the-badge)](DEPLOYMENT.md)
+[![Getting Started](https://img.shields.io/badge/Getting_Started-8a5c1c?style=for-the-badge)](USER_GUIDE.md)
+
 This is a minimal quick-start: how to open the platform and access the example data models (`ibermot`, `metapan`, `sdm`) that were loaded at the end of the [Deployment Guide](DEPLOYMENT.md). It covers only the essentials — creating a user, granting tenant access, and connecting the Modelador to a tenant. For the full feature reference, see the complete User Guide.
 
 > **Language:** English | [Español](USER_GUIDE.es.md) · Part of the [Industrial Data Space](README.md) documentation.

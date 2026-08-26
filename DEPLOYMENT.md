@@ -1,5 +1,9 @@
 # Deployment Guide
 
+[![Overview](https://img.shields.io/badge/Overview-1f6feb?style=for-the-badge)](README.md)
+[![Deployment](https://img.shields.io/badge/Deployment-2c6b46?style=for-the-badge)](DEPLOYMENT.md)
+[![Getting Started](https://img.shields.io/badge/Getting_Started-8a5c1c?style=for-the-badge)](USER_GUIDE.md)
+
 This guide describes the official procedure for a full deployment of the **Industrial Data Space** platform on a clean machine, starting only from a clone of the repository. It is written so that anyone with basic Docker knowledge can bring the stack up reproducibly, following verifiable steps without relying on implicit knowledge from the development team.
 
 > **Language:** English | [Español](DEPLOYMENT.es.md) · Part of the [Industrial Data Space](README.md) documentation.
