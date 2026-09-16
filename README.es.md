@@ -23,6 +23,8 @@ Las fuentes industriales exponen sus datos por OPC-UA. Un IoT Agent traduce esa 
 
 La plataforma es **multitenant**: cada modelo de datos de fábrica vive en su propio tenant. Cada petición se autentica y autoriza — todo el tráfico pasa por el API gateway Kong, que valida los tokens de identidad emitidos por Keycloak y aplica el control de acceso por tenant. Todo el stack está contenedorizado y orquestado con Docker Compose.
 
+![Modelador — interfaz de modelado de entidades NGSI-LD, con el grafo de entidades de un tenant de fábrica](modelador-es.png)
+
 ## Diagrama de arquitectura
 
 ![Arquitectura de la solución](architecture.svg)
