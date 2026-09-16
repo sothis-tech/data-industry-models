@@ -154,6 +154,33 @@ class TestProxyDeleteValidation:
         assert data.get("status") == 0 or "error" in data
 
 
+class TestProxyDeleteEntityAttrValidation:
+    """DELETE /api/proxy/entities/{id}/attr — validación de broker_base_url."""
+
+    def test_missing_broker_url_returns_422(self, client):
+        r = client.delete(
+            "/api/proxy/entities/urn:ngsi-ld:Test:001/attr",
+            params={"attr_name": "name"},
+        )
+        assert r.status_code == 422
+
+    def test_invalid_scheme_returns_400(self, client):
+        r = client.delete(
+            "/api/proxy/entities/urn:ngsi-ld:Test:001/attr",
+            params={"broker_base_url": "file:///etc/passwd", "attr_name": "name"},
+        )
+        assert r.status_code == 400
+
+    def test_unreachable_broker_returns_200_with_error(self, client):
+        r = client.delete(
+            "/api/proxy/entities/urn:ngsi-ld:Test:001/attr",
+            params={"broker_base_url": "http://localhost:9999", "attr_name": "name"},
+        )
+        assert r.status_code == 200
+        data = r.json()
+        assert data.get("status") == 0 or "error" in data
+
+
 class TestProxyGetEntitiesValidation:
     """GET /api/proxy/entities — validación de broker_base_url."""
 
@@ -209,6 +236,55 @@ class TestProxyGetEntityByIdValidation:
     def test_unreachable_broker_returns_200_with_error(self, client):
         r = client.get(
             "/api/proxy/entities/urn:ngsi-ld:Test:001",
+            params={"broker_base_url": "http://localhost:9999"},
+        )
+        assert r.status_code == 200
+        data = r.json()
+        assert data.get("status") == 0 or "error" in data
+
+
+class TestProxyGetSubscriptionsValidation:
+    """GET /api/proxy/subscriptions — validación de broker_base_url."""
+
+    def test_missing_broker_url_returns_422(self, client):
+        r = client.get("/api/proxy/subscriptions")
+        assert r.status_code == 422
+
+    def test_invalid_scheme_returns_400(self, client):
+        r = client.get(
+            "/api/proxy/subscriptions",
+            params={"broker_base_url": "javascript://xss"},
+        )
+        assert r.status_code == 400
+
+    def test_unreachable_broker_returns_200_with_error(self, client):
+        r = client.get(
+            "/api/proxy/subscriptions",
+            params={"broker_base_url": "http://localhost:9999"},
+        )
+        assert r.status_code == 200
+        data = r.json()
+        assert data.get("status") == 0 or "error" in data
+        assert isinstance(data.get("body"), list)
+
+
+class TestProxyDeleteSubscriptionsValidation:
+    """DELETE /api/proxy/subscriptions/{id} — validación de broker_base_url."""
+
+    def test_missing_broker_url_returns_422(self, client):
+        r = client.delete("/api/proxy/subscriptions/urn:ngsi-ld:Subscription:1")
+        assert r.status_code == 422
+
+    def test_invalid_scheme_returns_400(self, client):
+        r = client.delete(
+            "/api/proxy/subscriptions/urn:ngsi-ld:Subscription:1",
+            params={"broker_base_url": "javascript://xss"},
+        )
+        assert r.status_code == 400
+
+    def test_unreachable_broker_returns_200_with_error(self, client):
+        r = client.delete(
+            "/api/proxy/subscriptions/urn:ngsi-ld:Subscription:1",
             params={"broker_base_url": "http://localhost:9999"},
         )
         assert r.status_code == 200

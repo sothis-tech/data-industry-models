@@ -1,7 +1,9 @@
 import { useTranslation } from 'react-i18next'
 import type * as d3 from 'd3'
+import type { SubscriptionFilterMode } from '../../lib/subscriptions'
 import type { OrionGraphNode } from '../../types/graph'
 import { resolveTypeColor, typeKeyFromFullType } from '../../lib/graph-utils'
+import { SubscriptionFilterPanel } from './SubscriptionFilterPanel'
 import { TypeFilterPanel } from './TypeFilterPanel'
 
 type Props = {
@@ -19,6 +21,11 @@ type Props = {
   colorScale: d3.ScaleOrdinal<string, string, never>
   onTypeFilterChange: (keys: string[]) => void
   typeFilterDisabled?: boolean
+  subscriptionFilter: SubscriptionFilterMode
+  onSubscriptionFilterChange: (mode: SubscriptionFilterMode) => void
+  subscribedCount: number
+  subscriptionFilterDisabled?: boolean
+  subscriptionError?: string | null
 }
 
 export function OrionSidePanel({
@@ -36,6 +43,11 @@ export function OrionSidePanel({
   colorScale,
   onTypeFilterChange,
   typeFilterDisabled = false,
+  subscriptionFilter,
+  onSubscriptionFilterChange,
+  subscribedCount,
+  subscriptionFilterDisabled = false,
+  subscriptionError = null,
 }: Props) {
   const { t } = useTranslation()
   const q = search.trim()
@@ -145,6 +157,14 @@ export function OrionSidePanel({
           disabled={typeFilterDisabled}
         />
       )}
+
+      <SubscriptionFilterPanel
+        mode={subscriptionFilter}
+        onChange={onSubscriptionFilterChange}
+        subscribedCount={subscribedCount}
+        disabled={subscriptionFilterDisabled || typeFilterDisabled}
+        error={subscriptionError}
+      />
 
       {compact ? (
         <div className="orion-side-panel-drawer-body">

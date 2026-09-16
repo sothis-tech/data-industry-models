@@ -29,6 +29,10 @@
     "noConnection": "No Orion connection",
     "modelNotLoaded": "Model not loaded",
     "model": "Model: {{label}}",
+    "contextOk": "context: reachable",
+    "contextUnreachable": "context: unreachable",
+    "contextChecking": "context: checking…",
+    "contextNoUrl": "context: no URL",
     "configure": "Configure"
   },
   "theme": {
@@ -86,6 +90,16 @@
       "processPackage": "Error processing the package",
       "uploadPackage": "Error uploading package: {{message}}"
     },
+    "context": {
+      "unreachable": "The context at {{url}} is not reachable. Check the URL or load a zip with context to use the context server."
+    },
+    "contextServer": {
+      "createTenant": "Error creating tenant space: {{status}}",
+      "deleteTenant": "Error deleting tenant space: {{status}}",
+      "getModel": "Error getting tenant model: {{status}}",
+      "saveModel": "Error saving tenant model: {{status}}",
+      "clearModel": "Error deleting tenant model: {{status}}"
+    },
     "orion": {
       "apiError": "API error",
       "keycloakFailed": "Could not connect to Keycloak",
@@ -96,6 +110,9 @@
       "paramsRequired": "Required parameters",
       "getEntity": "Error getting entity",
       "deleteEntity": "Error deleting entity",
+      "listSubscriptions": "Error listing subscriptions",
+      "deleteSubscription": "Error deleting subscription",
+      "deleteAttr": "Error deleting attribute",
       "preparePayload": "Error preparing payload",
       "prepareAttrs": "Error preparing attributes",
       "noModelTypes": "No types in the model"
@@ -192,6 +209,11 @@
     "list": {
       "allTypes": "— All types —",
       "noTypes": "No types available",
+      "subscriptionAll": "All",
+      "subscriptionYes": "With subscription",
+      "subscriptionNo": "Without subscription",
+      "subscriptionFilterAria": "Filter by QuantumLeap subscription",
+      "qlBadgeTitle": "Subscribed to QuantumLeap",
       "searchPlaceholder": "Search by name or ID…",
       "searchAria": "Search entities",
       "newEntity": "+ New entity",
@@ -228,12 +250,18 @@
       "loadingAttrs": "Loading attributes…",
       "deleteEntity": "Delete entity",
       "saving": "Saving…",
-      "saveChanges": "Save changes"
+      "saveChanges": "Save changes",
+      "subsLoadError": "Could not load subscriptions",
+      "subsCreateError": "Error {{status}} creating subscription",
+      "subsDeleteError": "Error {{status}}",
+      "subsDeleteFailed": "Could not delete subscriptions: {{errors}}",
+      "savedWithSubsWarning": "Attributes saved. Subscription warning: {{warning}}"
     },
     "page": {
       "discardChanges": "You have unsaved changes. Do you want to discard them?",
       "noTypesAlert": "No types available. Load a model in Configuration.",
       "deleteError": "Error deleting ({{status}}): {{error}}",
+      "deleteWarnings": "Warnings",
       "unknownError": "Unknown error",
       "resizeListAria": "Resize list panel",
       "backToListAria": "Back to entity list",
@@ -279,7 +307,9 @@
       "ariaLabel": "Instance filters and search",
       "drawerTitle": "Filters and search",
       "closeFiltersAria": "Close filters",
-      "searchHint": "As you type, the graph shows matches. Choose an instance or clear the search to return to type filtering."
+      "searchHint": "As you type, the graph shows matches. Choose an instance or clear the search to return to type filtering.",
+      "subscriptionsTitle": "Subscriptions",
+      "subscribedCount": "{{count}} to QL"
     },
     "page": {
       "tabSchema": "Abstract model",
@@ -326,7 +356,8 @@
       "deleteMessage": "The entity <code>{{id}}</code> will be permanently deleted.",
       "errLoadDetail": "Error loading detail",
       "errNoBrokerConfigured": "No Orion connection configured",
-      "errLoadEntity": "Could not load the entity"
+      "errLoadEntity": "Could not load the entity",
+      "subsLoadError": "Could not load subscriptions"
     }
   },
   "config": {
@@ -354,19 +385,21 @@
       "clearModel": "Clear model",
       "status": {
         "loading": "Loading...",
-        "processing": "Processing package...",
-        "needUrl": "Provide at least one schema or context URL.",
+        "processing": "Processing {{file}}...",
+        "needUrl": "Enter at least one URL (schema, context, descriptor or examples).",
         "selectFile": "Select a compressed file first.",
         "loadError": "Error loading model.",
         "processError": "Error processing the package.",
-        "cleared": "Model cleared successfully.",
-        "loaded": "Model loaded: {{details}}",
-        "summarySchemas_one": "{{count}} schema",
-        "summarySchemas_other": "{{count}} schemas",
-        "summaryContext": "context",
-        "summaryDescriptor": "descriptor",
-        "summaryExamples_one": "{{count}} example",
-        "summaryExamples_other": "{{count}} examples"
+        "clearError": "Error deleting the model from the server.",
+        "cleared": "Model deleted successfully.",
+        "loaded": "Model loaded — {{schemas}} schemas, context: {{context}}, descriptor: {{descriptor}}, {{examples}} examples{{persistNote}}.{{externalNote}}",
+        "packageLoaded": "Package loaded — {{schemas}} schemas, context: {{context}}, descriptor: {{descriptor}}, {{examples}} examples{{persistNote}}.{{stableNote}}{{externalNote}}",
+        "yes": "yes",
+        "no": "no",
+        "persistedInTenant": " (saved in the space for tenant \"{{tenant}}\")",
+        "persistedLocally": " (saved locally; connect a tenant to persist it on the context server)",
+        "externalContextHint": " The context is an external URL: it must remain reachable for Orion, the IoT Agent and the simulator.",
+        "stableContextUrl": " Context URL: {{url}}."
       }
     },
     "broker": {
@@ -395,20 +428,30 @@
       "logout": "Log out",
       "deleteTitle": "Delete connection \"{{name}}\"",
       "status": {
-        "needUrl": "Provide the Kong base URL.",
-        "needCredentials": "Enter username and password to connect.",
+        "needUrl": "Enter the Kong base URL.",
+        "needTenant": "Enter the tenant for the Orion connection.",
+        "needCredentials": "Enter a username and password to connect.",
         "checking": "Checking credentials and connection...",
-        "authFailed": "Authentication failed. {{detail}}",
-        "loginFailed": "Could not log in: {{error}}",
-        "connected": "Connection and session OK.",
-        "connectError": "Connection error: {{error}}",
-        "loggedOut": "Session closed.",
-        "logoutFailed": "Could not log out: {{error}}",
-        "saved": "Orion connection saved: {{name}}",
-        "activeConnection": "Active connection: {{name}}",
-        "deactivated": "Active connection deactivated.",
-        "confirmDelete": "Delete the connection \"{{name}}\"?",
-        "deleted": "Connection deleted: {{name}}"
+        "loginFailed": "Could not sign in: {{error}}",
+        "invalidCredentials": "invalid credentials",
+        "connected": "Orion connection started: {{name}}. Agent: {{summary}}.",
+        "connectedAgentWarning": "Orion connection started: {{name}}. Warning: the LLM agent was not set up ({{error}}).",
+        "connectError": "Could not connect: {{error}}",
+        "connectFailedHint": "Check the Kong URL, the tenant and the credentials.",
+        "loggedOut": "Orion connection session closed.",
+        "logoutFailed": "Could not sign out: {{error}}",
+        "unknownError": "unknown error",
+        "saved": "Orion connection saved and selected.",
+        "savedRagWarning": "Connection saved. The RAG space could not be ensured (is the RAG service down?); try again when opening documentation.",
+        "activeConnection": "Orion connection loaded: {{name}}. Enter credentials and press Connect.",
+        "loadedRagWarning": "Connection loaded. Warning: the RAG space for \"{{tenant}}\" could not be ensured.",
+        "deactivated": "Active Orion connection deactivated.",
+        "deleted": "Orion connection \"{{name}}\" deleted.",
+        "deletedTenantShared": "Orion connection \"{{name}}\" deleted. Tenant \"{{tenant}}\" remains on the context server because another connection uses it.",
+        "confirmDeleteTenantSpace": "Also delete the space for tenant \"{{tenant}}\" on the context server?\n\nIf you cancel, only the connection is deleted and the tenant's model stays on the server.",
+        "deletedTenantError": "Connection deleted. Warning: the space for tenant \"{{tenant}}\" could not be deleted on the context server.",
+        "deletedWithTenant": "Orion connection \"{{name}}\" deleted. Space for tenant \"{{tenant}}\" removed from the context server.",
+        "deletedTenantKept": "Orion connection \"{{name}}\" deleted. Tenant \"{{tenant}}\" remains on the context server."
       }
     },
     "onboarding": {

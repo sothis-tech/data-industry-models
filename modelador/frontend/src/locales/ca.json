@@ -29,6 +29,10 @@
     "noConnection": "Sense connexió Orion",
     "modelNotLoaded": "Model no carregat",
     "model": "Model: {{label}}",
+    "contextOk": "context: accessible",
+    "contextUnreachable": "context: no accessible",
+    "contextChecking": "context: comprovant…",
+    "contextNoUrl": "context: sense URL",
     "configure": "Configura"
   },
   "theme": {
@@ -86,6 +90,16 @@
       "processPackage": "Error en processar el paquet",
       "uploadPackage": "Error pujant el paquet: {{message}}"
     },
+    "context": {
+      "unreachable": "El context a {{url}} no és accessible. Comprova l'URL o carrega un zip amb context per usar el servidor de context."
+    },
+    "contextServer": {
+      "createTenant": "Error en crear l'espai del tenant: {{status}}",
+      "deleteTenant": "Error en eliminar l'espai del tenant: {{status}}",
+      "getModel": "Error en obtenir el model del tenant: {{status}}",
+      "saveModel": "Error en desar el model del tenant: {{status}}",
+      "clearModel": "Error en esborrar el model del tenant: {{status}}"
+    },
     "orion": {
       "apiError": "Error d'API",
       "keycloakFailed": "No s'ha pogut connectar amb Keycloak",
@@ -96,6 +110,9 @@
       "paramsRequired": "Paràmetres requerits",
       "getEntity": "Error obtenint l'entitat",
       "deleteEntity": "Error eliminant l'entitat",
+      "listSubscriptions": "Error en llistar les subscripcions",
+      "deleteSubscription": "Error en esborrar la subscripció",
+      "deleteAttr": "Error en esborrar l'atribut",
       "preparePayload": "Error preparant el payload",
       "prepareAttrs": "Error preparant els atributs",
       "noModelTypes": "Sense tipus al model"
@@ -106,11 +123,6 @@
       "typeView": "Error obtenint la vista del tipus",
       "entityView": "Error obtenint la vista de l'entitat",
       "noConnection": "Sense connexió: {{error}}"
-    },
-    "voice": {
-      "audioDiscarded": "Àudio descartat per l'agent.",
-      "wsNotConfigured": "AEA_WS_URL no està configurat al backend",
-      "connectFailed": "No s'ha pogut connectar amb l'agent d'escolta activa"
     }
   },
   "agent": {
@@ -181,6 +193,11 @@
     },
     "graph": {
       "ariaLabel": "Esquema de relacions"
+    },
+    "voice": {
+      "audioDiscarded": "Àudio descartat per l'agent.",
+      "wsNotConfigured": "AEA_WS_URL no està configurat al backend",
+      "connectFailed": "No s'ha pogut connectar amb l'agent d'escolta activa"
     }
   },
   "entities": {
@@ -192,6 +209,11 @@
     "list": {
       "allTypes": "— Tots els tipus —",
       "noTypes": "Sense tipus disponibles",
+      "subscriptionAll": "Totes",
+      "subscriptionYes": "Amb subscripció",
+      "subscriptionNo": "Sense subscripció",
+      "subscriptionFilterAria": "Filtra per subscripció a QuantumLeap",
+      "qlBadgeTitle": "Subscrita a QuantumLeap",
       "searchPlaceholder": "Cerca per nom o ID…",
       "searchAria": "Cerca entitats",
       "newEntity": "+ Nova entitat",
@@ -228,23 +250,29 @@
       "loadingAttrs": "Carregant atributs…",
       "deleteEntity": "Elimina l'entitat",
       "saving": "Desant…",
-      "saveChanges": "Desa els canvis"
+      "saveChanges": "Desa els canvis",
+      "subsLoadError": "No s'han pogut carregar les subscripcions",
+      "subsCreateError": "Error {{status}} en crear la subscripció",
+      "subsDeleteError": "Error {{status}}",
+      "subsDeleteFailed": "No s'han pogut esborrar les subscripcions: {{errors}}",
+      "savedWithSubsWarning": "Atributs desats. Avís de subscripció: {{warning}}"
     },
     "page": {
-      "discardChanges": "You have unsaved changes. Do you want to discard them?",
-      "noTypesAlert": "No types available. Load a model in Configuration.",
-      "deleteError": "Error deleting ({{status}}): {{error}}",
-      "unknownError": "Unknown error",
-      "resizeListAria": "Resize list panel",
-      "backToListAria": "Back to entity list",
-      "backToList": "← List",
-      "titleEmpty": "Entities",
-      "titleNew": "New entity",
-      "openInViz": "View in visualization",
-      "duplicate": "Duplicate",
-      "emptyHint": "Select an entity to edit it<br />or create a new one.",
-      "deleteTitle": "Delete entity?",
-      "deleteMessage": "The entity will be permanently deleted"
+      "discardChanges": "Tens canvis sense desar. Vols descartar-los?",
+      "noTypesAlert": "No hi ha tipus disponibles. Carrega un model a Configuració.",
+      "deleteError": "Error en eliminar ({{status}}): {{error}}",
+      "deleteWarnings": "Avisos",
+      "unknownError": "Error desconegut",
+      "resizeListAria": "Redimensiona el plafó de la llista",
+      "backToListAria": "Torna a la llista d'entitats",
+      "backToList": "← Llista",
+      "titleEmpty": "Entitats",
+      "titleNew": "Entitat nova",
+      "openInViz": "Mostra a la visualització",
+      "duplicate": "Duplica",
+      "emptyHint": "Selecciona una entitat per editar-la<br />o crea'n una de nova.",
+      "deleteTitle": "Vols eliminar l'entitat?",
+      "deleteMessage": "L'entitat s'eliminarà permanentment"
     }
   },
   "viz": {
@@ -279,7 +307,9 @@
       "ariaLabel": "Filtres i cerca d'instàncies",
       "drawerTitle": "Filtres i cerca",
       "closeFiltersAria": "Tanca els filtres",
-      "searchHint": "Mentre escrius, el graf mostra coincidències. Tria una instància o neteja la cerca per tornar al filtre per tipus."
+      "searchHint": "Mentre escrius, el graf mostra coincidències. Tria una instància o neteja la cerca per tornar al filtre per tipus.",
+      "subscriptionsTitle": "Subscripcions",
+      "subscribedCount": "{{count}} a QL"
     },
     "page": {
       "tabSchema": "Model abstracte",
@@ -326,7 +356,8 @@
       "deleteMessage": "L'entitat <code>{{id}}</code> s'eliminarà permanentment.",
       "errLoadDetail": "Error carregant el detall",
       "errNoBrokerConfigured": "Sense connexió Orion configurada",
-      "errLoadEntity": "No s'ha pogut carregar l'entitat"
+      "errLoadEntity": "No s'ha pogut carregar l'entitat",
+      "subsLoadError": "No s'han pogut carregar les subscripcions"
     }
   },
   "config": {
@@ -354,19 +385,21 @@
       "clearModel": "Neteja el model",
       "status": {
         "loading": "Carregant...",
-        "processing": "Processant el paquet...",
-        "needUrl": "Indica com a mínim una URL d'schema o de context.",
+        "processing": "Processant {{file}}...",
+        "needUrl": "Indica com a mínim un URL (schema, context, descriptor o exemples).",
         "selectFile": "Selecciona primer un fitxer comprimit.",
         "loadError": "Error en carregar el model.",
         "processError": "Error en processar el paquet.",
+        "clearError": "Error en esborrar el model del servidor.",
         "cleared": "Model eliminat correctament.",
-        "loaded": "Model carregat: {{details}}",
-        "summarySchemas_one": "{{count}} schema",
-        "summarySchemas_other": "{{count}} schemas",
-        "summaryContext": "context",
-        "summaryDescriptor": "descriptor",
-        "summaryExamples_one": "{{count}} exemple",
-        "summaryExamples_other": "{{count}} exemples"
+        "loaded": "Model carregat — {{schemas}} schemas, context: {{context}}, descriptor: {{descriptor}}, {{examples}} exemples{{persistNote}}.{{externalNote}}",
+        "packageLoaded": "Paquet carregat — {{schemas}} schemas, context: {{context}}, descriptor: {{descriptor}}, {{examples}} exemples{{persistNote}}.{{stableNote}}{{externalNote}}",
+        "yes": "sí",
+        "no": "no",
+        "persistedInTenant": " (desat a l'espai del tenant \"{{tenant}}\")",
+        "persistedLocally": " (desat localment; connecta un tenant per persistir-lo al servidor de context)",
+        "externalContextHint": " El context és un URL extern: ha de continuar sent accessible per a Orion, l'IoT Agent i el simulador.",
+        "stableContextUrl": " URL de context: {{url}}."
       }
     },
     "broker": {
@@ -396,19 +429,29 @@
       "deleteTitle": "Elimina la connexió \"{{name}}\"",
       "status": {
         "needUrl": "Indica l'URL base de Kong.",
+        "needTenant": "Indica el tenant de la connexió Orion.",
         "needCredentials": "Introdueix usuari i contrasenya per connectar.",
-        "checking": "Comprovant les credencials i la connexió...",
-        "authFailed": "Autenticació fallida. {{detail}}",
+        "checking": "Comprovant credencials i connexió...",
         "loginFailed": "No s'ha pogut iniciar la sessió: {{error}}",
-        "connected": "Connexió i sessió correctes.",
-        "connectError": "Error de connexió: {{error}}",
-        "loggedOut": "Sessió tancada.",
+        "invalidCredentials": "credencials no vàlides",
+        "connected": "Connexió Orion iniciada: {{name}}. Agent: {{summary}}.",
+        "connectedAgentWarning": "Connexió Orion iniciada: {{name}}. Avís: l'agent LLM no s'ha preparat ({{error}}).",
+        "connectError": "No s'ha pogut connectar: {{error}}",
+        "connectFailedHint": "Comprova l'URL de Kong, el tenant i les credencials.",
+        "loggedOut": "Sessió de la connexió Orion tancada.",
         "logoutFailed": "No s'ha pogut tancar la sessió: {{error}}",
-        "saved": "Connexió Orion desada: {{name}}",
-        "activeConnection": "Connexió activa: {{name}}",
-        "deactivated": "Connexió activa desactivada.",
-        "confirmDelete": "Vols eliminar la connexió \"{{name}}\"?",
-        "deleted": "Connexió eliminada: {{name}}"
+        "unknownError": "error desconegut",
+        "saved": "Connexió Orion desada i seleccionada.",
+        "savedRagWarning": "Connexió desada. No s'ha pogut assegurar l'espai RAG (el servei RAG està caigut?); torna-ho a provar en obrir la documentació.",
+        "activeConnection": "Connexió Orion carregada: {{name}}. Introdueix les credencials i prem Connecta.",
+        "loadedRagWarning": "Connexió carregada. Avís: no s'ha pogut assegurar l'espai RAG per a \"{{tenant}}\".",
+        "deactivated": "Connexió Orion activa desactivada.",
+        "deleted": "Connexió Orion \"{{name}}\" eliminada.",
+        "deletedTenantShared": "Connexió Orion \"{{name}}\" eliminada. El tenant \"{{tenant}}\" es manté al servidor de context perquè una altra connexió l'utilitza.",
+        "confirmDeleteTenantSpace": "Vols eliminar també l'espai del tenant \"{{tenant}}\" al servidor de context?\n\nSi canceles, només s'elimina la connexió i el model del tenant es manté al servidor.",
+        "deletedTenantError": "Connexió eliminada. Avís: no s'ha pogut eliminar l'espai del tenant \"{{tenant}}\" al servidor de context.",
+        "deletedWithTenant": "Connexió Orion \"{{name}}\" eliminada. Espai del tenant \"{{tenant}}\" eliminat del servidor de context.",
+        "deletedTenantKept": "Connexió Orion \"{{name}}\" eliminada. El tenant \"{{tenant}}\" es manté al servidor de context."
       }
     },
     "onboarding": {

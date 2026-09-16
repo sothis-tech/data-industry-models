@@ -212,6 +212,74 @@ export async function postSubscription(
   }
 }
 
+export async function getSubscriptions(
+  brokerBaseUrl: string,
+  opts: { tenant?: string; limit?: number } = {},
+): Promise<ApiResult<{ body: Record<string, unknown>[] }>> {
+  if (!brokerBaseUrl || !brokerBaseUrl.trim()) {
+    return { status: 400, body: [], error: 'URL del broker vacía' }
+  }
+  const params = withTenant(new URLSearchParams({ broker_base_url: brokerBaseUrl.trim() }), opts.tenant)
+  if (opts.limit != null) params.set('limit', String(opts.limit))
+  try {
+    const res = await fetch(`${API_BASE}/api/proxy/subscriptions?${params}`, { credentials: 'include' })
+    const data = await readJson<Record<string, unknown>>(res, {})
+    const list =
+      data.body != null
+        ? data.body
+        : Array.isArray(data)
+          ? data
+          : []
+    const body = Array.isArray(list)
+      ? (list as Record<string, unknown>[])
+      : list && typeof list === 'object' && 'id' in list
+        ? [list as Record<string, unknown>]
+        : []
+    const error =
+      data.error && typeof data.error === 'string'
+        ? data.error
+        : !res.ok
+          ? extractApiError(data, i18n.t('errors.orion.listSubscriptions'))
+          : null
+    const status = envelopeStatus(data, res.status)
+    reportOrionAuthFailure(status, data, error)
+    return { status, body, error }
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e)
+    return { status: 0, body: [], error: i18n.t('errors.orion.noConnection', { message }) }
+  }
+}
+
+export async function deleteSubscription(
+  brokerBaseUrl: string,
+  subscriptionId: string,
+  tenant?: string,
+): Promise<ApiResult<{ body: null }>> {
+  if (!brokerBaseUrl?.trim() || !subscriptionId) {
+    return { status: 400, body: null, error: i18n.t('errors.orion.paramsRequired') }
+  }
+  const params = withTenant(new URLSearchParams({ broker_base_url: brokerBaseUrl.trim() }), tenant)
+  try {
+    const res = await fetch(
+      `${API_BASE}/api/proxy/subscriptions/${encodeURIComponent(subscriptionId)}?${params}`,
+      { method: 'DELETE', credentials: 'include' },
+    )
+    const data = await readJson<Record<string, unknown>>(res, {})
+    const error =
+      data.error && typeof data.error === 'string'
+        ? data.error
+        : !res.ok
+          ? extractApiError(data, i18n.t('errors.orion.deleteSubscription'))
+          : null
+    const status = envelopeStatus(data, res.status)
+    reportOrionAuthFailure(status, data, error)
+    return { status, body: null, error }
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e)
+    return { status: 0, body: null, error: i18n.t('errors.orion.noConnection', { message }) }
+  }
+}
+
 export async function getEntities(
 
   brokerBaseUrl: string,
@@ -301,6 +369,38 @@ export async function patchEntityAttrs(
     return parseProxyEnvelope(res, data, data)
   } catch (e) {
     return networkError(e instanceof Error ? e.message : String(e), {})
+  }
+}
+
+export async function deleteEntityAttr(
+  brokerBaseUrl: string,
+  entityId: string,
+  attrName: string,
+  tenant?: string,
+): Promise<ApiResult<{ body: null }>> {
+  if (!brokerBaseUrl?.trim() || !entityId || !attrName) {
+    return { status: 400, body: null, error: i18n.t('errors.orion.paramsRequired') }
+  }
+  const params = withTenant(new URLSearchParams({ broker_base_url: brokerBaseUrl.trim() }), tenant)
+  params.set('attr_name', attrName)
+  try {
+    const res = await fetch(
+      `${API_BASE}/api/proxy/entities/${encodeURIComponent(entityId)}/attr?${params}`,
+      { method: 'DELETE', credentials: 'include' },
+    )
+    const data = await readJson<Record<string, unknown>>(res, {})
+    const error =
+      data.error && typeof data.error === 'string'
+        ? data.error
+        : !res.ok
+          ? extractApiError(data, i18n.t('errors.orion.deleteAttr'))
+          : null
+    const status = envelopeStatus(data, res.status)
+    reportOrionAuthFailure(status, data, error)
+    return { status, body: null, error }
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e)
+    return { status: 0, body: null, error: i18n.t('errors.orion.noConnection', { message }) }
   }
 }
 

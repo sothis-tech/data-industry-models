@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getEntities, postEntity, postSubscription, prepareEntityPayload } from '../../api/orion'
+import { assertContextReachable } from '../../lib/contextReachability'
 import { humanizeSchemaError, validateEntityPayload } from '../../api/validation'
 import { buildCreateBasePayload, getSchemaForType } from '../../lib/model-parser'
+import { buildQuantumLeapSubscriptionPayload } from '../../lib/subscriptions'
 import type { NgsiLdEntity, ValidationResult } from '../../types/entity'
 
 type Props = {
@@ -80,6 +82,15 @@ export function EntityCreate({ type, modelJson, brokerUrl, brokerTenant, initial
 
     setBusy(true)
     try {
+      try {
+        await assertContextReachable(modelJson)
+      } catch (e) {
+        setValidation({
+          valid: false,
+          errors: [{ path: '', message: e instanceof Error ? e.message : String(e) }],
+        })
+        return
+      }
       const prep = await prepareEntityPayload(payload, type, null)
       if (prep.error) { setValidation({ valid: false, errors: [{ path: '', message: prep.error }] }); return }
       const { payloadForValidation, payloadToSend, inputMode } = prep
@@ -102,34 +113,10 @@ export function EntityCreate({ type, modelJson, brokerUrl, brokerTenant, initial
       if (!error && status >= 200 && status < 300) {
         if (subscribeToQuantumLeap) {
           const entityId = payloadToSend.id as string
-          const entityType = type
           const attributes = Object.keys(payloadToSend).filter(
             k => k !== 'id' && k !== 'type' && k !== '@context'
           )
-
-          const subPayload = {
-            description: `Suscripción para persistir atributos de ${entityType}`,
-            type: 'Subscription',
-            entities: [
-              {
-                id: entityId,
-                type: entityType
-              }
-            ],
-            watchedAttributes: attributes,
-            notification: {
-              attributes: attributes,
-              format: 'normalized',
-              endpoint: {
-                uri: 'http://quantumleap:8668/v2/notify',
-                accept: 'application/json'
-              }
-            },
-            '@context': [
-              'https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld'
-            ]
-          }
-
+          const subPayload = buildQuantumLeapSubscriptionPayload(entityId, type, attributes)
           const subRes = await postSubscription(brokerUrl, subPayload, brokerTenant)
           if (subRes.error) {
             console.error('Failed to notify quantumleap', subRes.error)

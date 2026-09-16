@@ -7,6 +7,7 @@ import {
   dispatchAgentOpenVizEntity,
 } from '../lib/agentEvents'
 import { normalizeImportedEntityPayload } from '../lib/model-parser'
+import { getModelJson } from '../lib/modelStore'
 import { setVizFocusEntityId } from '../lib/vizNavigation'
 import type { ChatBlock, ChatEntityRow, ChatGraphEdge, ChatGraphNode } from '../lib/chatBlocks'
 import { AgentGraphBlock } from './AgentGraphBlock'
@@ -193,7 +194,7 @@ function JsonBlock({
 
   function handleApply() {
     if (!payload) return
-    const modelJson = localStorage.getItem('ngsi_model')
+    const modelJson = getModelJson()
     const normalized = normalizeImportedEntityPayload(payload, modelJson)
     onGoEntities()
     dispatchAgentApplyEntity({ payload: normalized, mode: 'create' })

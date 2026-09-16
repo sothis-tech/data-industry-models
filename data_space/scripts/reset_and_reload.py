@@ -4,17 +4,18 @@ Limpieza completa y recarga del modelo de datos E-Therm en Orion-LD.
 Borra TODAS las entidades existentes y recarga desde los archivos
 originales del proyecto usando el contexto correcto.
 
-Ejecutar desde: ~/proyectos/proyectos/07INN_DATA_SPACE
-  python3 reset_and_reload.py
+Ejecutar desde la raíz de data_space:
+  python3 scripts/reset_and_reload.py
 """
 import json, urllib.request, urllib.error, urllib.parse, sys
 from pathlib import Path
 
+_ROOT = Path(__file__).resolve().parent.parent
 BROKER = "http://localhost:1026"
 NGSI   = f"{BROKER}/ngsi-ld/v1"
 
 # Contexto original del proyecto
-CONTEXT_FILE = Path("context/industrial-oven-context.jsonld")
+CONTEXT_FILE = _ROOT / "context" / "industrial-oven-context.jsonld"
 
 GREEN, RED, YELLOW, NC = "\033[92m", "\033[91m", "\033[93m", "\033[0m"
 
@@ -175,10 +176,10 @@ def main():
     ]
 
     # Todos los Device
-    device_dir = Path("examples/Device")
+    device_dir = _ROOT / "examples" / "Device"
     if device_dir.exists():
         for f in sorted(device_dir.glob("*.json")):
-            load_order.append((str(f), "Device"))
+            load_order.append((str(f.relative_to(_ROOT)), "Device"))
 
     # Máquina (referencia modelo + devices)
     load_order.append(("examples/ManufacturingMachine/example.json", "ManufacturingMachine"))
@@ -187,15 +188,15 @@ def main():
     load_order.append(("examples/ManufacturingMachineOperation/example.json", "ManufacturingMachineOperation"))
 
     # Mediciones
-    meas_dir = Path("examples/DeviceMeasurement")
+    meas_dir = _ROOT / "examples" / "DeviceMeasurement"
     if meas_dir.exists():
         for f in sorted(meas_dir.glob("*.json")):
-            load_order.append((str(f), "DeviceMeasurement"))
+            load_order.append((str(f.relative_to(_ROOT)), "DeviceMeasurement"))
 
     ok = 0
     fail = 0
     for filepath, label in load_order:
-        p = Path(filepath)
+        p = _ROOT / filepath
         if not p.exists():
             print(f"  {YELLOW}⚠️  No encontrado: {filepath}{NC}")
             fail += 1

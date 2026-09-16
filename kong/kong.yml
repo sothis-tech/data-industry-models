@@ -12,7 +12,7 @@ jwt_secrets:                              # Configuración de la clave para vali
       -----BEGIN PUBLIC KEY-----
       MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA04N+vjkB0P6LAmEyWdtnh9a+bUgaYlRCPa5/LNJAm1rDJwUIFJglaYHt1gORMC50wIK2VfAWGDeZ1IeK5fmd4Ebu+Vr6f6zX3qf5J9HCj2RcRHCDrxC5xxcXcWixDOjQWpkB6xGsS1rpN/VajtKIH1YTNfrURtBZocmIM1XzRp9HhyLd4iazro35GKnH0YMHbxRh8NL1XOAL5kDfKHgAclPtGLSx4WzVmTlRjgmEi00BKRR65WQnr+tGsuVIrtFTg/Eq1QletCe+bOBph2RR/q1LUP4wV662pIXUYJ1XX1UTjzk7UCFibzn0AmrhRkETI+HxkC7GTzsfBtHyUeHenQIDAQAB
       -----END PUBLIC KEY-----
-
+      
 services:
   - name: keycloak
     url: http://keycloak:8085             # Nombre y puerto internos del contenedor Keycloak

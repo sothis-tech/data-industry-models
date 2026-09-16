@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { getOrionAuthStatus } from '../api/orion'
+import { useModelJson } from '../lib/modelStore'
 import { ORION_SESSION_LOST } from '../lib/orionSessionEvents'
 import { getCurrentBroker } from '../lib/storage'
 import type { StoredBroker } from '../types/broker'
@@ -14,9 +15,8 @@ export type ModelSummary = {
   loaded: boolean
 }
 
-function readModelSummary(): ModelSummary {
+function readModelSummary(raw: string | null): ModelSummary {
   try {
-    const raw = localStorage.getItem('ngsi_model')
     if (!raw) return { label: '', loaded: false }
     const m = JSON.parse(raw) as {
       schemas?: unknown[]
@@ -39,10 +39,11 @@ export function useAppStatus(refreshKey = 0) {
     [refreshKey],
   )
 
+  const modelJson = useModelJson()
   const model = useMemo<ModelSummary>(
-    () => readModelSummary(),
+    () => readModelSummary(modelJson),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [refreshKey],
+    [modelJson, refreshKey],
   )
 
   const [health, setHealth] = useState<BrokerHealthState>('unknown')

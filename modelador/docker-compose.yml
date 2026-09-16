@@ -15,6 +15,9 @@ services:
       CORS_ORIGINS: ${CORS_ORIGINS:-*}
       LOG_FORMAT: ${LOG_FORMAT:-json}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      # Context server multi-tenant
+      CONTEXT_SERVER_URL: ${CONTEXT_SERVER_URL:-http://context-server:8090}
+      CONTEXT_SERVER_PUBLIC_URL: ${CONTEXT_SERVER_PUBLIC_URL:-http://context-server:8090}
       # Chatbot / AEA
       AEA_WS_URL: ${AEA_WS_URL:-}
       CHAT_LLM_URL: ${CHAT_LLM_URL:-}

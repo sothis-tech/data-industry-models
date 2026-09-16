@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation, Trans } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { deleteEntity, getEntityById } from '../../api/orion'
+import { getEntityById } from '../../api/orion'
+import { deleteEntityCascade } from '../../lib/entity-delete'
 import {
   AGENT_APPLY_ENTITY,
   AGENT_OPEN_ENTITY,
@@ -19,6 +20,7 @@ import {
   parseModel,
   resolveSchemaTypeName,
 } from '../../lib/model-parser'
+import { useModelJson } from '../../lib/modelStore'
 import { getCurrentBroker } from '../../lib/storage'
 import { setVizFocusEntityId } from '../../lib/vizNavigation'
 import type { NgsiLdEntity } from '../../types/entity'
@@ -28,10 +30,6 @@ import { EntityList } from './EntityList'
 import { SelectTypeModal } from './SelectTypeModal'
 
 type Panel = 'empty' | 'create' | 'edit'
-
-function readModelJson(): string | null {
-  return localStorage.getItem('ngsi_model')
-}
 
 function entityIdFromJsonDraft(draft?: string): string | null {
   if (!draft?.trim()) return null
@@ -47,7 +45,7 @@ function entityIdFromJsonDraft(draft?: string): string | null {
 export function EntitiesPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const modelJson = readModelJson()
+  const modelJson = useModelJson()
   const { types } = parseModel(modelJson)
   const broker = getCurrentBroker()
 
@@ -113,8 +111,8 @@ export function EntitiesPage() {
             if (body?.id) target = body as NgsiLdEntity
           }
           if (target) {
-            const tt = String(target.type ?? '').split('/').pop() ?? ''
-            if (tt) setTypeFilter(tt)
+            const t = String(target.type ?? '').split('/').pop() ?? ''
+            if (t) setTypeFilter(t)
             handleSelectEntity(target)
           }
         })()
@@ -214,7 +212,11 @@ export function EntitiesPage() {
   async function handleDeleteConfirm() {
     if (!selectedEntity || !broker?.url) return
     setDeleting(true)
-    const { status, error } = await deleteEntity(broker.url, selectedEntity.id, broker.tenant)
+    const { status, error, warnings } = await deleteEntityCascade(
+      broker.url,
+      selectedEntity.id,
+      { tenant: broker.tenant, knownEntities: entityList.allEntities },
+    )
     setDeleting(false)
     setShowDeleteModal(false)
     if (!error && status >= 200 && status < 300) {
@@ -223,8 +225,12 @@ export function EntitiesPage() {
       setPanel('empty')
       focusListPane()
       await entityList.fetchEntities()
+      if (warnings.length) {
+        console.warn('Avisos al eliminar entidad:', warnings)
+      }
     } else {
-      alert(t('entities.page.deleteError', { status, error: error ?? t('entities.page.unknownError') }))
+      const extra = warnings.length ? `\n${t('entities.page.deleteWarnings')}: ${warnings.join('; ')}` : ''
+      alert(t('entities.page.deleteError', { status, error: error ?? t('entities.page.unknownError') }) + extra)
     }
   }
 
@@ -317,12 +323,16 @@ export function EntitiesPage() {
           types={types}
           typeFilter={typeFilter}
           search={entityList.search}
+          subscriptionFilter={entityList.subscriptionFilter}
+          subscribedIds={entityList.subscribedIds}
+          subscriptionError={entityList.subscriptionError}
           loading={entityList.loading}
           loadCount={entityList.loadCount}
           error={entityList.error}
           selectedId={selectedEntity?.id ?? null}
           onTypeFilterChange={handleTypeFilterChange}
           onSearchChange={entityList.setSearch}
+          onSubscriptionFilterChange={entityList.setSubscriptionFilter}
           onSelect={e => guardDirty(() => handleSelectEntity(e))}
           onNewEntity={handleNewEntity}
         />

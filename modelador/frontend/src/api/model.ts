@@ -41,11 +41,18 @@ export async function fetchManyViaProxy(urls: string[]): Promise<unknown[]> {
     throw new Error(i18n.t('errors.model.loadUrls', { message }))
   }
 }
-export async function uploadModelPackage(file: File): Promise<{
+
+export async function uploadModelPackage(
+  file: File,
+  tenant?: string,
+  contextUrl?: string,
+): Promise<{
   schemas?: unknown[]
   context?: unknown
   descriptor?: unknown
   examples?: Record<string, unknown>
+  persisted?: boolean
+  contextUrl?: string | null
   summary: {
     schemas: number
     context: boolean
@@ -56,8 +63,12 @@ export async function uploadModelPackage(file: File): Promise<{
 }> {
   const formData = new FormData()
   formData.append('file', file)
+  const params = new URLSearchParams()
+  if (tenant?.trim()) params.set('tenant', tenant.trim())
+  if (contextUrl?.trim()) params.set('context_url', contextUrl.trim())
+  const query = params.toString() ? `?${params.toString()}` : ''
   try {
-    const res = await fetch(`${API_BASE}/api/upload/model-package`, {
+    const res = await fetch(`${API_BASE}/api/upload/model-package${query}`, {
       method: 'POST',
       body: formData,
     })
@@ -68,6 +79,8 @@ export async function uploadModelPackage(file: File): Promise<{
       context?: unknown
       descriptor?: unknown
       examples?: Record<string, unknown>
+      persisted?: boolean
+      contextUrl?: string | null
       summary: {
         schemas: number
         context: boolean

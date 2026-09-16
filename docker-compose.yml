@@ -149,6 +149,11 @@ services:
       CORS_ORIGINS: ${CORS_ORIGINS:-*}
       LOG_FORMAT: ${LOG_FORMAT:-json}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      # Servidor de contexto multi-tenant (almacena el modelo NGSI por tenant)
+      CONTEXT_SERVER_URL: http://context-server:8090
+      CONTEXT_SERVER_PUBLIC_URL: http://context-server:8090
+    depends_on:
+      - context-server
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped
@@ -317,6 +322,31 @@ services:
     volumes:
       - ./iotagent-opcua/conf:/opt/iotagent-opcua/conf
   
+  # Servidor de Contexto multi-tenant: almacena el modelo NGSI (schemas,
+  # contexto JSON-LD, descriptor y ejemplos) de cada tenant en carpetas.
+  # El modelador lo usa como fuente de verdad del modelo (sustituye a localStorage).
+  context-server:
+    build:
+      context: ./data_space/context_server
+      dockerfile: Dockerfile
+    image: inn-context-server:latest
+    container_name: dataspace-context-server
+    restart: unless-stopped
+    ports:
+      # Host 8095: en este entorno 8090 lo usa marvin_gateway.
+      # Dentro de la red Docker el servicio sigue en :8090.
+      - "8095:8090"
+    environment:
+      - TENANTS_ROOT=/data/tenants
+    volumes:
+      - context_tenants:/data/tenants
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8090/health')\""]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
   # Servidor de Contextos (para iotagent y modelador principalmente, pero accesible para cualquier servicio que quiera consultar contextos predefinidos o subir nuevos)
   context-provider:
     image: nginx:alpine
@@ -380,6 +410,7 @@ volumes:
   crate_data_dataspace:
   kc_pg:
   rag_docs:
+  context_tenants:
   hf_cache:
   torch_cache:
   uv_cache:

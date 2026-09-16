@@ -7,10 +7,16 @@ import type { GraphHandle } from './SchemaGraph'
 type SimNode = OrionGraphNode & d3.SimulationNodeDatum
 type SimLink = d3.SimulationLinkDatum<SimNode> & { property?: string; implicit?: boolean }
 
+const EMPTY_SUBSCRIBED_IDS = new Set<string>()
+const EMPTY_GHOST_IDS = new Set<string>()
+
 type Props = {
   nodes: OrionGraphNode[]
   links: OrionGraphLink[]
   visibleNodeIds: Set<string>
+  /** Nodos visibles atenuados (filtro suscripción); siguen siendo clicables. */
+  ghostNodeIds?: Set<string>
+  subscribedNodeIds?: Set<string>
   colorScale: d3.ScaleOrdinal<string, string, never>
   labelPlacement?: GraphLabelPlacement
   focusedNodeId?: string | null
@@ -19,7 +25,18 @@ type Props = {
 }
 
 export const OrionGraph = forwardRef<GraphHandle, Props>(function OrionGraph(
-  { nodes, links, visibleNodeIds, colorScale, labelPlacement = 'below', focusedNodeId, searchActive = false, onNodeClick },
+  {
+    nodes,
+    links,
+    visibleNodeIds,
+    ghostNodeIds = EMPTY_GHOST_IDS,
+    subscribedNodeIds = EMPTY_SUBSCRIBED_IDS,
+    colorScale,
+    labelPlacement = 'below',
+    focusedNodeId,
+    searchActive = false,
+    onNodeClick,
+  },
   ref,
 ) {
   const svgRef = useRef<SVGSVGElement>(null)
@@ -71,6 +88,8 @@ export const OrionGraph = forwardRef<GraphHandle, Props>(function OrionGraph(
   }))
 
   const visibleNodeIdsRef = useRef(visibleNodeIds)
+  const ghostNodeIdsRef = useRef(ghostNodeIds)
+  const subscribedNodeIdsRef = useRef(subscribedNodeIds)
   const searchActiveRef = useRef(searchActive)
   const prevSearchActiveRef = useRef(searchActive)
   const prevFocusedIdRef = useRef<string | null>(null)
@@ -80,26 +99,48 @@ export const OrionGraph = forwardRef<GraphHandle, Props>(function OrionGraph(
   }, [visibleNodeIds])
 
   useEffect(() => {
+    ghostNodeIdsRef.current = ghostNodeIds
+  }, [ghostNodeIds])
+
+  useEffect(() => {
+    subscribedNodeIdsRef.current = subscribedNodeIds
+  }, [subscribedNodeIds])
+
+  useEffect(() => {
     searchActiveRef.current = searchActive
   }, [searchActive])
 
-  function applyVisibility(ids: Set<string>) {
+  function applyVisibility(ids: Set<string>, ghosts: Set<string> = ghostNodeIdsRef.current) {
     const nodeSel = nodeSelRef.current
     const linkSel = linkSelRef.current
     const labelSel = labelSelRef.current
     if (!nodeSel || !linkSel || !labelSel) return
 
     const isVisible = (id: string) => ids.has(id)
+    const isGhost = (id: string) => ghosts.has(id)
     nodeSel.classed('orion-graph-hidden', (d) => !isVisible(d.id))
+    nodeSel.classed('orion-graph-ghost', (d) => isVisible(d.id) && isGhost(d.id))
     linkSel.classed('orion-graph-hidden', (d) => {
       const s = (d.source as SimNode).id ?? (d.source as string)
       const t = (d.target as SimNode).id ?? (d.target as string)
       return !isVisible(s as string) || !isVisible(t as string)
     })
+    linkSel.classed('orion-graph-ghost', (d) => {
+      const s = ((d.source as SimNode).id ?? (d.source as string)) as string
+      const t = ((d.target as SimNode).id ?? (d.target as string)) as string
+      if (!isVisible(s) || !isVisible(t)) return false
+      return isGhost(s) || isGhost(t)
+    })
     labelSel.classed('orion-graph-hidden', (d) => {
       const s = (d.source as SimNode).id ?? (d.source as string)
       const t = (d.target as SimNode).id ?? (d.target as string)
       return !isVisible(s as string) || !isVisible(t as string)
+    })
+    labelSel.classed('orion-graph-ghost', (d) => {
+      const s = ((d.source as SimNode).id ?? (d.source as string)) as string
+      const t = ((d.target as SimNode).id ?? (d.target as string)) as string
+      if (!isVisible(s) || !isVisible(t)) return false
+      return isGhost(s) || isGhost(t)
     })
     nodeSel.style('opacity', null)
     linkSel.style('opacity', null)
@@ -132,10 +173,22 @@ export const OrionGraph = forwardRef<GraphHandle, Props>(function OrionGraph(
     return zoomToExtent(svgD3Ref.current, zoomRef.current, x0, y0, x1, y1, padding, 500)
   }
 
-  // Solo visibilidad (mostrar/ocultar nodos). Nunca resaltar aquí.
+  // Solo visibilidad (mostrar/ocultar / fantasma). Nunca resaltar aquí.
   useLayoutEffect(() => {
-    applyVisibility(visibleNodeIds)
-  }, [visibleNodeIds])
+    applyVisibility(visibleNodeIds, ghostNodeIds)
+  }, [visibleNodeIds, ghostNodeIds])
+
+  useLayoutEffect(() => {
+    const nodeSel = nodeSelRef.current
+    if (!nodeSel) return
+    nodeSel.selectAll<SVGGElement, SimNode>('.orion-sub-badge')
+      .style('display', (d) => (subscribedNodeIds.has(d.id) ? null : 'none'))
+    nodeSel.selectAll<SVGTitleElement, SimNode>('title')
+      .text((d) => {
+        const base = `${d.id}\nTipo: ${(d.type || '').split('/').pop() || '–'}`
+        return subscribedNodeIds.has(d.id) ? `${base}\nSuscrita a QuantumLeap` : base
+      })
+  }, [subscribedNodeIds, nodes, links])
 
   // Al salir del modo búsqueda: restaurar visibilidad sin recentrar (el usuario conserva zoom/pan).
   useLayoutEffect(() => {
@@ -330,18 +383,32 @@ export const OrionGraph = forwardRef<GraphHandle, Props>(function OrionGraph(
     nodeSelRef.current = node
 
     const initialIds = visibleNodeIdsRef.current
+    const initialGhosts = ghostNodeIdsRef.current
     node.classed('orion-graph-hidden', (d) => initialIds.size > 0 && !initialIds.has(d.id))
+    node.classed('orion-graph-ghost', (d) => initialIds.has(d.id) && initialGhosts.has(d.id))
     link.classed('orion-graph-hidden', (d) => {
       if (initialIds.size === 0) return false
       const s = (d.source as SimNode).id ?? (d.source as string)
       const t = (d.target as SimNode).id ?? (d.target as string)
-      return !initialIds.has(s) || !initialIds.has(t)
+      return !initialIds.has(s as string) || !initialIds.has(t as string)
+    })
+    link.classed('orion-graph-ghost', (d) => {
+      const s = ((d.source as SimNode).id ?? (d.source as string)) as string
+      const t = ((d.target as SimNode).id ?? (d.target as string)) as string
+      if (initialIds.size > 0 && (!initialIds.has(s) || !initialIds.has(t))) return false
+      return initialGhosts.has(s) || initialGhosts.has(t)
     })
     linkLabel.classed('orion-graph-hidden', (d) => {
       if (initialIds.size === 0) return false
       const s = (d.source as SimNode).id ?? (d.source as string)
       const t = (d.target as SimNode).id ?? (d.target as string)
-      return !initialIds.has(s) || !initialIds.has(t)
+      return !initialIds.has(s as string) || !initialIds.has(t as string)
+    })
+    linkLabel.classed('orion-graph-ghost', (d) => {
+      const s = ((d.source as SimNode).id ?? (d.source as string)) as string
+      const t = ((d.target as SimNode).id ?? (d.target as string)) as string
+      if (initialIds.size > 0 && (!initialIds.has(s) || !initialIds.has(t))) return false
+      return initialGhosts.has(s) || initialGhosts.has(t)
     })
 
     const initialFocusId = focusedNodeIdRef.current
@@ -349,12 +416,33 @@ export const OrionGraph = forwardRef<GraphHandle, Props>(function OrionGraph(
 
     svgD3.on('click', () => onNodeClickRef.current(null))
 
-    node.append('title').text((d) => `${d.id}\nTipo: ${(d.type || '').split('/').pop() || '–'}`)
+    const initialSubs = subscribedNodeIdsRef.current
+    node.append('title').text((d) => {
+      const base = `${d.id}\nTipo: ${(d.type || '').split('/').pop() || '–'}`
+      return initialSubs.has(d.id) ? `${base}\nSuscrita a QuantumLeap` : base
+    })
     node
       .append('circle')
       .attr('r', (d) => nodeRadius(d))
       .style('fill', (d) => nodeTypeColor(d))
       .style('stroke', (d) => (d3.color(nodeTypeColor(d))?.darker(0.7)?.toString() ?? nodeTypeColor(d)))
+
+    const badge = node
+      .append('g')
+      .attr('class', 'orion-sub-badge')
+      .attr('transform', (d) => {
+        const r = nodeRadius(d)
+        return `translate(${r * 0.7},${-r * 0.7})`
+      })
+      .style('display', (d) => (initialSubs.has(d.id) ? null : 'none'))
+    badge.append('circle').attr('r', 7).attr('class', 'orion-sub-badge-circle')
+    badge
+      .append('text')
+      .attr('class', 'orion-sub-badge-text')
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'central')
+      .text('QL')
+
     appendGraphNodeLabel(node, (d) => d.label || d.id, nodeRadius, { placement: labelPlacement })
 
     sim.on('tick', () => {

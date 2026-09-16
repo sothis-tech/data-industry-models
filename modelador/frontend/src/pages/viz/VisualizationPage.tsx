@@ -3,11 +3,12 @@ import { useTranslation, Trans } from 'react-i18next'
 import { useVizCanvasCompact } from '../../hooks/useVizCanvasCompact'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 import { buildOrionGraph, buildSchemaGraph, buildSchemaTypeView, getEntityView } from '../../api/graph'
-import { deleteEntity, getEntityById } from '../../api/orion'
+import { getEntityById, getSubscriptions } from '../../api/orion'
 import {
   AGENT_OPEN_VIZ_ENTITY,
   type AgentOpenVizEntityDetail,
 } from '../../lib/agentEvents'
+import { deleteEntityCascade } from '../../lib/entity-delete'
 import {
   createTypeColorScale,
   computeOrionVisibleNodeIds,
@@ -24,7 +25,13 @@ import {
 } from '../../lib/graph-utils'
 import { fetchAllOrionEntities, uniqueEntitiesById } from '../../lib/orion-entities'
 import { parseModel } from '../../lib/model-parser'
+import { useModelJson } from '../../lib/modelStore'
 import { getCurrentBroker } from '../../lib/storage'
+import {
+  subscriptionGhostNodeIds,
+  subscribedEntityIdsFromSubscriptions,
+  type SubscriptionFilterMode,
+} from '../../lib/subscriptions'
 import { consumeVizFocusEntityId } from '../../lib/vizNavigation'
 import type { NgsiLdEntity } from '../../types/entity'
 import type { EntityView, OrionGraphLink, OrionGraphNode, SchemaGraphData, SchemaTypeView } from '../../types/graph'
@@ -62,9 +69,10 @@ export function VisualizationPage() {
     localStorage.setItem('ngsi_onboarding_step3_done', '1')
   }, [])
 
-  // Model data — re-leído cuando el layout notifica un cambio de modelo (refreshKey)
+  // Model data — re-leído cuando cambia el modelo en el store o el layout notifica (refreshKey)
+  const modelJson = useModelJson()
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const { types, relationships } = useMemo(() => parseModel(localStorage.getItem('ngsi_model')), [refreshKey])
+  const { types, relationships } = useMemo(() => parseModel(modelJson), [modelJson, refreshKey])
 
   // Color scale shared between both graphs
   const colorScale = useMemo(() => createTypeColorScale(types), [types])
@@ -97,6 +105,9 @@ export function VisualizationPage() {
   const [orionLinks, setOrionLinks] = useState<OrionGraphLink[]>([])
   const [orionAllTypeKeys, setOrionAllTypeKeys] = useState<string[]>([])
   const [orionActiveTypeKeys, setOrionActiveTypeKeys] = useState<string[]>([])
+  const [orionSubscriptionFilter, setOrionSubscriptionFilter] = useState<SubscriptionFilterMode>('all')
+  const [orionSubscribedIds, setOrionSubscribedIds] = useState<Set<string>>(() => new Set())
+  const [orionSubscriptionError, setOrionSubscriptionError] = useState<string | null>(null)
   const [orionEntityCount, setOrionEntityCount] = useState(0)
   const [orionLinkCount, setOrionLinkCount] = useState(0)
   const [orionLoadCount, setOrionLoadCount] = useState<number | null>(null)
@@ -131,23 +142,27 @@ export function VisualizationPage() {
     setOrionSearchDraft('')
   }, [])
 
-  const orionVisibleIds = useMemo(
-    () =>
-      computeOrionVisibleNodeIds(
-        orionNodes,
-        orionLinks,
-        orionActiveTypeKeys,
-        orionAllTypeKeys,
-        orionSearchFiltering ? orionSearchDraft : '',
-      ),
-    [
+  const orionVisibleIds = useMemo(() => {
+    return computeOrionVisibleNodeIds(
       orionNodes,
       orionLinks,
       orionActiveTypeKeys,
       orionAllTypeKeys,
-      orionSearchFiltering,
-      orionSearchDraft,
-    ],
+      orionSearchFiltering ? orionSearchDraft : '',
+    )
+  }, [
+    orionNodes,
+    orionLinks,
+    orionActiveTypeKeys,
+    orionAllTypeKeys,
+    orionSearchFiltering,
+    orionSearchDraft,
+  ])
+
+  /** Nodos visibles que no cumplen el filtro QL → se muestran atenuados (fantasma). */
+  const orionGhostNodeIds = useMemo(
+    () => subscriptionGhostNodeIds(orionVisibleIds, orionSubscribedIds, orionSubscriptionFilter),
+    [orionVisibleIds, orionSubscribedIds, orionSubscriptionFilter],
   )
 
   const orionSearchHits = useMemo(() => {
@@ -282,16 +297,29 @@ export function VisualizationPage() {
     }
     setOrionLoading(true)
     setOrionError(null)
+    setOrionSubscriptionError(null)
     setOrionFocusedNodeId(null)
     setOrionLoadCount(0)
     orionRawEntitiesRef.current = []
 
-    const { entities: fetched, error: fetchError } = await fetchAllOrionEntities(broker.url, {
-      tenant: broker.tenant,
-      onProgress: setOrionLoadCount,
-    })
+    const [{ entities: fetched, error: fetchError }, subRes] = await Promise.all([
+      fetchAllOrionEntities(broker.url, {
+        tenant: broker.tenant,
+        onProgress: setOrionLoadCount,
+      }),
+      getSubscriptions(broker.url, { tenant: broker.tenant }),
+    ])
 
-    let entities = await ensurePendingEntityInBatch(fetched, broker.url, broker.tenant)
+    if (subRes.error || subRes.status >= 400) {
+      setOrionSubscribedIds(new Set())
+      setOrionSubscriptionError(t('viz.page.subsLoadError'))
+      setOrionSubscriptionFilter('all')
+    } else {
+      setOrionSubscribedIds(subscribedEntityIdsFromSubscriptions(subRes.body ?? []))
+      setOrionSubscriptionError(null)
+    }
+
+    const entities = await ensurePendingEntityInBatch(fetched, broker.url, broker.tenant)
     orionRawEntitiesRef.current = entities
 
     if (fetchError && !entities.length) {
@@ -314,7 +342,7 @@ export function VisualizationPage() {
     setOrionLoadCount(null)
     if (fetchError) setOrionError(fetchError)
     if (ok) setOrionLoaded(true)
-  }, [applyOrionGraphFromEntities, ensurePendingEntityInBatch])
+  }, [applyOrionGraphFromEntities, ensurePendingEntityInBatch, t])
 
   // Load Orion when switching to its tab for the first time
   function handleTabChange(tab: ActiveTab) {
@@ -511,11 +539,16 @@ export function VisualizationPage() {
     const broker = getCurrentBroker()
     if (!broker) return
     setDeleteModal((s) => ({ ...s, loading: true }))
-    const { error, status } = await deleteEntity(broker.url, deleteModal.entityId, broker.tenant)
+    const { error, status, warnings } = await deleteEntityCascade(
+      broker.url,
+      deleteModal.entityId,
+      { tenant: broker.tenant, knownEntities: orionRawEntitiesRef.current },
+    )
     setDeleteModal({ open: false, entityId: '', loading: false })
     if (!error && status >= 200 && status < 300) {
       setOrionDetail(null)
       setOrionLoaded(false)
+      if (warnings.length) console.warn('Avisos al eliminar entidad:', warnings)
       void loadOrionGraph()
     }
   }
@@ -868,6 +901,8 @@ export function VisualizationPage() {
               nodes={orionNodes}
               links={orionLinks}
               visibleNodeIds={orionVisibleIds}
+              ghostNodeIds={orionGhostNodeIds}
+              subscribedNodeIds={orionSubscribedIds}
               colorScale={colorScale}
               labelPlacement={graphLabelPlacement}
               focusedNodeId={orionFocusedNodeId}
@@ -931,6 +966,11 @@ export function VisualizationPage() {
               colorScale={colorScale}
               onTypeFilterChange={handleOrionTypeFilterChange}
               typeFilterDisabled={orionSearchFiltering}
+              subscriptionFilter={orionSubscriptionFilter}
+              onSubscriptionFilterChange={setOrionSubscriptionFilter}
+              subscribedCount={orionSubscribedIds.size}
+              subscriptionFilterDisabled={!!orionSubscriptionError}
+              subscriptionError={orionSubscriptionError}
             />
           )}
 
@@ -958,7 +998,6 @@ export function VisualizationPage() {
             }}
             footer={
               <>
-                
                 <a
                   href="#"
                   onClick={(e) => {

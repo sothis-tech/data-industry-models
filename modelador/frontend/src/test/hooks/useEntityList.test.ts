@@ -5,10 +5,12 @@ import { useEntityList } from '../../hooks/useEntityList'
 // ── Mock de api/orion ─────────────────────────────────────────────────────────
 vi.mock('../../api/orion', () => ({
   getEntities: vi.fn(),
+  getSubscriptions: vi.fn(),
 }))
 
-import { getEntities } from '../../api/orion'
+import { getEntities, getSubscriptions } from '../../api/orion'
 const mockGetEntities = vi.mocked(getEntities)
+const mockGetSubscriptions = vi.mocked(getSubscriptions)
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 // getEntities devuelve ApiResult<{body:[]}> = { status, error, body }
@@ -41,7 +43,10 @@ function err(msg: string) {
 
 describe('useEntityList', () => {
 
-  beforeEach(() => { vi.clearAllMocks() })
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockGetSubscriptions.mockResolvedValue({ status: 200, error: null, body: [] })
+  })
 
   // ── Sin broker — no pide nada ────────────────────────────────────────────
 
@@ -165,6 +170,27 @@ describe('useEntityList', () => {
     expect(result.current.search).toBe('algo')
     await act(async () => { await result.current.fetchEntities() })
     expect(result.current.search).toBe('')
+  })
+
+  it('filtra por suscripción a QuantumLeap', async () => {
+    mockGetEntities.mockResolvedValue(ok([E_MACHINE, E_AREA]))
+    mockGetSubscriptions.mockResolvedValue({
+      status: 200,
+      error: null,
+      body: [{
+        id: 'urn:ngsi-ld:Subscription:1',
+        status: 'active',
+        entities: [{ id: E_MACHINE.id, type: 'Machine' }],
+        notification: { endpoint: { uri: 'http://quantumleap:8668/v2/notify' } },
+      }],
+    })
+    const { result } = renderHook(() => useEntityList(BROKER, '', MODEL_JSON, ['Machine', 'Area']))
+    await act(async () => { await result.current.fetchEntities() })
+    expect(result.current.filteredEntities).toHaveLength(2)
+    act(() => { result.current.setSubscriptionFilter('subscribed') })
+    expect(result.current.filteredEntities.map((e) => e.id)).toEqual([E_MACHINE.id])
+    act(() => { result.current.setSubscriptionFilter('unsubscribed') })
+    expect(result.current.filteredEntities.map((e) => e.id)).toEqual([E_AREA.id])
   })
 
 })

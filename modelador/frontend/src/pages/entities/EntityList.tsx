@@ -1,6 +1,10 @@
 import { useEffect, useRef } from 'react'
 import { useTranslation, Trans } from 'react-i18next'
 import Select from 'react-select'
+import {
+  SUBSCRIPTION_FILTER_OPTIONS,
+  type SubscriptionFilterMode,
+} from '../../lib/subscriptions'
 import type { NgsiLdEntity } from '../../types/entity'
 
 type SelectOption = { value: string; label: string }
@@ -55,12 +59,16 @@ type Props = {
   types: string[]
   typeFilter: string
   search: string
+  subscriptionFilter: SubscriptionFilterMode
+  subscribedIds?: Set<string>
+  subscriptionError?: string | null
   loading: boolean
   loadCount?: number | null
   error?: string | null
   selectedId: string | null
   onTypeFilterChange: (type: string) => void
   onSearchChange: (q: string) => void
+  onSubscriptionFilterChange: (mode: SubscriptionFilterMode) => void
   onSelect: (entity: NgsiLdEntity) => void
   onNewEntity: () => void
 }
@@ -78,12 +86,16 @@ export function EntityList({
   types,
   typeFilter,
   search,
+  subscriptionFilter,
+  subscribedIds,
+  subscriptionError = null,
   loading,
   loadCount = null,
   error = null,
   selectedId,
   onTypeFilterChange,
   onSearchChange,
+  onSubscriptionFilterChange,
   onSelect,
   onNewEntity,
 }: Props) {
@@ -103,9 +115,13 @@ export function EntityList({
 
   const typeOptions: SelectOption[] = types.map(t => ({ value: t, label: t }))
   const selectedOption = typeFilter ? typeOptions.find(o => o.value === typeFilter) ?? null : null
+  const subOptions = SUBSCRIPTION_FILTER_OPTIONS.map((o) => ({ value: o.value, label: t(o.labelKey) }))
+  const selectedSubOption =
+    subOptions.find((o) => o.value === subscriptionFilter) ?? subOptions[0]
 
   const showEmpty = !loading && entities.length === 0
   const showFooter = !loading && allCount > 0
+  const subFilterDisabled = !!subscriptionError
 
   return (
     <div className="entity-list-panel">
@@ -120,6 +136,18 @@ export function EntityList({
           styles={selectStyles as never}
           noOptionsMessage={() => t('entities.list.noTypes')}
         />
+        <Select<{ value: SubscriptionFilterMode; label: string }>
+          options={subOptions}
+          value={selectedSubOption}
+          onChange={(opt) => onSubscriptionFilterChange(opt?.value ?? 'all')}
+          isDisabled={subFilterDisabled}
+          isSearchable={false}
+          styles={selectStyles as never}
+          aria-label={t('entities.list.subscriptionFilterAria')}
+        />
+        {subscriptionError && (
+          <p className="entity-list-sub-hint" role="status">{subscriptionError}</p>
+        )}
         <input
           ref={searchRef}
           type="search"
@@ -159,6 +187,7 @@ export function EntityList({
           const name = entityLabel(entity)
           const short = entity.id.split(':').pop() ?? entity.id
           const type = (entity.type ?? '').split('/').pop() ?? entity.type
+          const hasQlSub = subscribedIds?.has(entity.id) ?? false
           return (
             <div
               key={entity.id}
@@ -167,7 +196,12 @@ export function EntityList({
             >
               <div className="entity-item-name">{name}</div>
               <div className="entity-item-id">{short}</div>
-              <span className="type-badge">{type}</span>
+              <div className="entity-item-badges">
+                <span className="type-badge">{type}</span>
+                {hasQlSub && (
+                  <span className="sub-badge" title={t('entities.list.qlBadgeTitle')}>QL</span>
+                )}
+              </div>
             </div>
           )
         })}

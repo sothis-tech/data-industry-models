@@ -14,8 +14,8 @@ from pathlib import Path
 BROKER = "http://localhost:1026"
 NGSI = f"{BROKER}/ngsi-ld/v1"
 
-# Contexto del proyecto
-CONTEXT_FILE = Path(__file__).parent / "context" / "industrial-oven-context.jsonld"
+# Contexto del proyecto (script vive en data_space/scripts/)
+CONTEXT_FILE = Path(__file__).resolve().parent.parent / "context" / "industrial-oven-context.jsonld"
 
 # Entidades corregidas (formato normalizado NGSI-LD)
 ENTITIES = [

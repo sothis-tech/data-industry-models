@@ -1,9 +1,11 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, Route, Routes } from 'react-router-dom'
 import { AgentPanel } from './components/AgentPanel'
 import { StatusBar } from './components/StatusBar'
 import { ThemeToggle } from './components/ThemeToggle'
 import { useAppStatus } from './hooks/useAppStatus'
+import { useContextReachability } from './lib/contextReachability'
+import { refreshModelFromServer, useModelJson } from './lib/modelStore'
 import { ConfigPage } from './pages/config/ConfigPage'
 import { EntitiesPage } from './pages/entities/EntitiesPage'
 import { VisualizationPage } from './pages/viz/VisualizationPage'
@@ -17,6 +19,14 @@ function Layout() {
   const [refreshKey, setRefreshKey] = useState(0)
   const appBodyRef = useRef<HTMLDivElement>(null)
   const { broker, health, model } = useAppStatus(refreshKey)
+  const modelJson = useModelJson()
+  const contextReachability = useContextReachability(modelJson)
+
+  // Sincronizar el modelo desde el servidor de contexto al arrancar y al
+  // cambiar el tenant de la conexión activa.
+  useEffect(() => {
+    void refreshModelFromServer()
+  }, [broker?.tenant])
 
   function triggerRefresh() {
     setRefreshKey((k) => k + 1)
@@ -26,9 +36,9 @@ function Layout() {
     <div className="app-shell">
       <header className="topbar">
         <h1>{t('app.title')}</h1>
-	<div className="topbar-actions">
+	      <div className="topbar-actions">
           <LanguageSelector />
-        <ThemeToggle />
+          <ThemeToggle />
         </div>
       </header>
       <nav className="tabs">
@@ -38,7 +48,12 @@ function Layout() {
         <NavLink to="/entidades">{t('nav.entities')}</NavLink>
         <NavLink to="/visualizacion">{t('nav.visualization')}</NavLink>
       </nav>
-      <StatusBar broker={broker} health={health} model={model} />
+      <StatusBar
+        broker={broker}
+        health={health}
+        model={model}
+        contextReachability={contextReachability}
+      />
       <div className="app-body" ref={appBodyRef}>
         <main>
           <Outlet context={{ broker, health, refreshKey, triggerRefresh }} />

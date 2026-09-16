@@ -29,6 +29,10 @@
     "noConnection": "Sin conexión Orion",
     "modelNotLoaded": "Modelo no cargado",
     "model": "Modelo: {{label}}",
+    "contextOk": "contexto: alcanzable",
+    "contextUnreachable": "contexto: no alcanzable",
+    "contextChecking": "contexto: comprobando…",
+    "contextNoUrl": "contexto: sin URL",
     "configure": "Configurar"
   },
   "theme": {
@@ -86,6 +90,16 @@
       "processPackage": "Error al procesar el paquete",
       "uploadPackage": "Error subiendo paquete: {{message}}"
     },
+    "context": {
+      "unreachable": "El contexto en {{url}} no es alcanzable. Comprueba la URL o carga un zip con contexto para usar el servidor de contexto."
+    },
+    "contextServer": {
+      "createTenant": "Error creando espacio del tenant: {{status}}",
+      "deleteTenant": "Error eliminando espacio del tenant: {{status}}",
+      "getModel": "Error obteniendo modelo del tenant: {{status}}",
+      "saveModel": "Error guardando modelo del tenant: {{status}}",
+      "clearModel": "Error borrando modelo del tenant: {{status}}"
+    },
     "orion": {
       "apiError": "Error de API",
       "keycloakFailed": "No se pudo conectar con Keycloak",
@@ -96,6 +110,9 @@
       "paramsRequired": "Parámetros requeridos",
       "getEntity": "Error obteniendo entidad",
       "deleteEntity": "Error eliminando entidad",
+      "listSubscriptions": "Error al listar suscripciones",
+      "deleteSubscription": "Error al borrar suscripción",
+      "deleteAttr": "Error al borrar atributo",
       "preparePayload": "Error preparando payload",
       "prepareAttrs": "Error preparando atributos",
       "noModelTypes": "Sin tipos en el modelo"
@@ -192,6 +209,11 @@
     "list": {
       "allTypes": "— Todos los tipos —",
       "noTypes": "Sin tipos disponibles",
+      "subscriptionAll": "Todas",
+      "subscriptionYes": "Con suscripción",
+      "subscriptionNo": "Sin suscripción",
+      "subscriptionFilterAria": "Filtrar por suscripción a QuantumLeap",
+      "qlBadgeTitle": "Suscrita a QuantumLeap",
       "searchPlaceholder": "Buscar por nombre o ID…",
       "searchAria": "Buscar entidades",
       "newEntity": "+ Nueva entidad",
@@ -228,12 +250,18 @@
       "loadingAttrs": "Cargando atributos…",
       "deleteEntity": "Eliminar entidad",
       "saving": "Guardando…",
-      "saveChanges": "Guardar cambios"
+      "saveChanges": "Guardar cambios",
+      "subsLoadError": "No se pudieron cargar las suscripciones",
+      "subsCreateError": "Error {{status}} al crear suscripción",
+      "subsDeleteError": "Error {{status}}",
+      "subsDeleteFailed": "No se pudieron borrar suscripciones: {{errors}}",
+      "savedWithSubsWarning": "Atributos guardados. Aviso suscripción: {{warning}}"
     },
     "page": {
       "discardChanges": "Tienes cambios sin guardar. ¿Deseas descartarlos?",
       "noTypesAlert": "No hay tipos disponibles. Carga un modelo en Configuración.",
       "deleteError": "Error al eliminar ({{status}}): {{error}}",
+      "deleteWarnings": "Avisos",
       "unknownError": "Error desconocido",
       "resizeListAria": "Redimensionar panel de lista",
       "backToListAria": "Volver a la lista de entidades",
@@ -279,7 +307,9 @@
       "ariaLabel": "Filtros y búsqueda de instancias",
       "drawerTitle": "Filtros y búsqueda",
       "closeFiltersAria": "Cerrar filtros",
-      "searchHint": "Mientras escribes, el grafo muestra coincidencias. Elige una instancia o limpia la búsqueda para volver al filtro por tipos."
+      "searchHint": "Mientras escribes, el grafo muestra coincidencias. Elige una instancia o limpia la búsqueda para volver al filtro por tipos.",
+      "subscriptionsTitle": "Suscripciones",
+      "subscribedCount": "{{count}} a QL"
     },
     "page": {
       "tabSchema": "Modelo abstracto",
@@ -326,7 +356,8 @@
       "deleteMessage": "Se eliminará permanentemente la entidad <code>{{id}}</code>.",
       "errLoadDetail": "Error cargando detalle",
       "errNoBrokerConfigured": "Sin conexión Orion configurada",
-      "errLoadEntity": "No se pudo cargar la entidad"
+      "errLoadEntity": "No se pudo cargar la entidad",
+      "subsLoadError": "No se pudieron cargar las suscripciones"
     }
   },
   "config": {
@@ -354,19 +385,21 @@
       "clearModel": "Limpiar modelo",
       "status": {
         "loading": "Cargando...",
-        "processing": "Procesando paquete...",
-        "needUrl": "Indica al menos una URL de schema o de contexto.",
+        "processing": "Procesando {{file}}...",
+        "needUrl": "Indica al menos una URL (schema, contexto, descriptor o ejemplos).",
         "selectFile": "Selecciona un archivo comprimido primero.",
         "loadError": "Error al cargar modelo.",
         "processError": "Error al procesar el paquete.",
+        "clearError": "Error al borrar el modelo del servidor.",
         "cleared": "Modelo eliminado correctamente.",
-        "loaded": "Modelo cargado: {{details}}",
-        "summarySchemas_one": "{{count}} schema",
-        "summarySchemas_other": "{{count}} schemas",
-        "summaryContext": "contexto",
-        "summaryDescriptor": "descriptor",
-        "summaryExamples_one": "{{count}} ejemplo",
-        "summaryExamples_other": "{{count}} ejemplos"
+        "loaded": "Modelo cargado — {{schemas}} schemas, contexto: {{context}}, descriptor: {{descriptor}}, {{examples}} ejemplos{{persistNote}}.{{externalNote}}",
+        "packageLoaded": "Paquete cargado — {{schemas}} schemas, contexto: {{context}}, descriptor: {{descriptor}}, {{examples}} ejemplos{{persistNote}}.{{stableNote}}{{externalNote}}",
+        "yes": "sí",
+        "no": "no",
+        "persistedInTenant": " (guardado en el espacio del tenant \"{{tenant}}\")",
+        "persistedLocally": " (guardado localmente; conecta un tenant para persistirlo en el servidor de contexto)",
+        "externalContextHint": " El contexto es una URL externa: debe seguir alcanzable para Orion, el IoT Agent y el simulador.",
+        "stableContextUrl": " URL de contexto: {{url}}."
       }
     },
     "broker": {
@@ -396,19 +429,29 @@
       "deleteTitle": "Eliminar conexión \"{{name}}\"",
       "status": {
         "needUrl": "Indica la URL base de Kong.",
+        "needTenant": "Indica el tenant de la conexión Orion.",
         "needCredentials": "Introduce usuario y contraseña para conectar.",
         "checking": "Comprobando credenciales y conexión...",
-        "authFailed": "Autenticación fallida. {{detail}}",
         "loginFailed": "No se pudo iniciar sesión: {{error}}",
-        "connected": "Conexión y sesión correctas.",
-        "connectError": "Error de conexión: {{error}}",
-        "loggedOut": "Sesión cerrada.",
+        "invalidCredentials": "credenciales no válidas",
+        "connected": "Conexión Orion iniciada: {{name}}. Agente: {{summary}}.",
+        "connectedAgentWarning": "Conexión Orion iniciada: {{name}}. Aviso: el agente LLM no se preparó ({{error}}).",
+        "connectError": "No se pudo conectar: {{error}}",
+        "connectFailedHint": "Comprueba la URL de Kong, el tenant y las credenciales.",
+        "loggedOut": "Sesión de la conexión Orion cerrada.",
         "logoutFailed": "No se pudo cerrar sesión: {{error}}",
-        "saved": "Conexión Orion guardada: {{name}}",
-        "activeConnection": "Conexión activa: {{name}}",
-        "deactivated": "Conexión activa desactivada.",
-        "confirmDelete": "¿Eliminar la conexión \"{{name}}\"?",
-        "deleted": "Conexión eliminada: {{name}}"
+        "unknownError": "error desconocido",
+        "saved": "Conexión Orion guardada y seleccionada.",
+        "savedRagWarning": "Conexión guardada. No se pudo asegurar el espacio RAG (¿servicio RAG caído?); inténtalo al abrir documentación.",
+        "activeConnection": "Conexión Orion cargada: {{name}}. Introduce credenciales y pulsa Conectar.",
+        "loadedRagWarning": "Conexión cargada. Aviso: no se pudo asegurar el espacio RAG para \"{{tenant}}\".",
+        "deactivated": "Conexión Orion activa desactivada.",
+        "deleted": "Conexión Orion \"{{name}}\" eliminada.",
+        "deletedTenantShared": "Conexión Orion \"{{name}}\" eliminada. El tenant \"{{tenant}}\" persiste en el servidor de contexto porque otra conexión lo usa.",
+        "confirmDeleteTenantSpace": "¿Eliminar también el espacio del tenant \"{{tenant}}\" en el servidor de contexto?\n\nSi cancelas, se elimina solo la conexión y el modelo del tenant permanece en el servidor.",
+        "deletedTenantError": "Conexión eliminada. Aviso: no se pudo eliminar el espacio del tenant \"{{tenant}}\" en el servidor de contexto.",
+        "deletedWithTenant": "Conexión Orion \"{{name}}\" eliminada. Espacio del tenant \"{{tenant}}\" eliminado del servidor de contexto.",
+        "deletedTenantKept": "Conexión Orion \"{{name}}\" eliminada. El tenant \"{{tenant}}\" permanece en el servidor de contexto."
       }
     },
     "onboarding": {

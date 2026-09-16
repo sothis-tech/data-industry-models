@@ -18,9 +18,6 @@ import os
 import time
 import httpx
 import uuid
-import zipfile
-import tarfile
-import io
 import json
 from jsonschema import Draft202012Validator, FormatChecker
 from referencing import Registry, Resource
@@ -34,17 +31,13 @@ import orion_auth
 from starlette.websockets import WebSocketDisconnect
 
 from logging_config import setup_logging
+from context_server_proxy import router as context_server_router
+from model_package import router as model_package_router
 
 setup_logging()
 
 # Ruta al build del frontend React (un nivel arriba de backend)
 FRONTEND_DIST = Path(__file__).resolve().parent.parent / "frontend" / "dist"
-
-# ── Límites para subida de paquetes ──
-MAX_UPLOAD_BYTES   = 50 * 1024 * 1024   # 50 MB
-MAX_ZIP_MEMBERS    = 200
-MAX_MEMBER_BYTES   = 10 * 1024 * 1024   # 10 MB por fichero descomprimido
-
 
 def _fiware_headers(base: dict, fiware_service: str | None, fiware_service_path: str | None = None) -> dict:
     """
@@ -165,6 +158,9 @@ app = FastAPI(
 )
 
 api_logger = logging.getLogger("modelador.api")
+
+app.include_router(context_server_router)
+app.include_router(model_package_router)
 
 
 @app.exception_handler(Exception)
@@ -422,6 +418,63 @@ async def proxy_post_subscriptions(request: Request, body: dict, broker_base_url
         return {"status": 0, "body": {}, "error": str(e)}
 
 
+@app.get("/api/proxy/subscriptions")
+async def proxy_get_subscriptions(
+    request: Request,
+    broker_base_url: str = "",
+    fiware_service: str = "",
+    limit: int = 1000,
+):
+    """Proxy GET /ngsi-ld/v1/subscriptions al broker seleccionado."""
+    _validate_broker_url(broker_base_url)
+    base = broker_base_url.rstrip("/")
+    url = f"{base}/ngsi-ld/v1/subscriptions"
+    params: dict = {}
+    if limit is not None:
+        params["limit"] = limit
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            headers, err_code = await _orion_proxy_headers(request, {}, broker_base_url, fiware_service)
+            if err_code:
+                return _proxy_auth_failure(err_code, [])
+            r = await client.get(url, params=params or None, headers=headers)
+            if not r.content:
+                return {"status": r.status_code, "body": []}
+            try:
+                body = r.json()
+            except Exception:
+                body = []
+            if not isinstance(body, list):
+                body = [body] if body else []
+            error = None if r.status_code < 400 else (r.text[:300] if r.text else "Error Orion")
+            return {"status": r.status_code, "body": body, "error": error}
+    except Exception as e:
+        return {"status": 0, "body": [], "error": str(e)}
+
+
+@app.delete("/api/proxy/subscriptions/{subscription_id}")
+async def proxy_delete_subscription(
+    request: Request,
+    subscription_id: str,
+    broker_base_url: str = "",
+    fiware_service: str = "",
+):
+    """Proxy DELETE /ngsi-ld/v1/subscriptions/{id} al broker seleccionado."""
+    _validate_broker_url(broker_base_url)
+    base = broker_base_url.rstrip("/")
+    url = f"{base}/ngsi-ld/v1/subscriptions/{subscription_id}"
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            headers, err_code = await _orion_proxy_headers(request, {}, broker_base_url, fiware_service)
+            if err_code:
+                return _proxy_auth_failure(err_code, None)
+            r = await client.delete(url, headers=headers)
+            error = None if r.status_code < 400 else (r.text[:300] if r.text else "Error Orion")
+            return {"status": r.status_code, "error": error}
+    except Exception as e:
+        return {"status": 0, "error": str(e)}
+
+
 @app.patch("/api/proxy/entities/{entity_id}/attrs")
 async def proxy_patch_entity_attrs(
     request: Request,
@@ -450,6 +503,34 @@ async def proxy_patch_entity_attrs(
             return {"status": r.status_code, "body": resp_body, "error": error}
     except Exception as e:
         return {"status": 0, "body": {}, "error": str(e)}
+
+
+@app.delete("/api/proxy/entities/{entity_id}/attr")
+async def proxy_delete_entity_attr(
+    request: Request,
+    entity_id: str,
+    attr_name: str,
+    broker_base_url: str = "",
+    fiware_service: str = "",
+):
+    """Proxy DELETE /ngsi-ld/v1/entities/{id}/attrs/{attr}. attr_name por query (soporta URIs)."""
+    _validate_broker_url(broker_base_url)
+    if not attr_name or not str(attr_name).strip():
+        from fastapi import HTTPException
+
+        raise HTTPException(status_code=422, detail="attr_name requerido")
+    base = broker_base_url.rstrip("/")
+    url = f"{base}/ngsi-ld/v1/entities/{entity_id}/attrs/{urllib.parse.quote(attr_name, safe='')}"
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            headers, err_code = await _orion_proxy_headers(request, {}, broker_base_url, fiware_service)
+            if err_code:
+                return _proxy_auth_failure(err_code, None)
+            r = await client.delete(url, headers=headers)
+            error = None if r.status_code < 400 else (r.text[:300] if r.text else "Error Orion")
+            return {"status": r.status_code, "error": error}
+    except Exception as e:
+        return {"status": 0, "error": str(e)}
 
 
 @app.delete("/api/proxy/entities/{entity_id}")
@@ -1398,140 +1479,6 @@ async def serve_context(url: str):
         raise HTTPException(502, detail=f"No se pudo obtener el contexto: {e}")
 
 
-# ---------- Carga de paquete de modelo comprimido ----------
-
-def _safe_member_name(name: str) -> str | None:
-    """Devuelve el nombre normalizado o None si contiene path traversal."""
-    # Rechazar rutas absolutas y componentes ".."
-    normalized = name.replace("\\", "/").lstrip("/")
-    parts = normalized.split("/")
-    if any(p == ".." for p in parts):
-        return None
-    return normalized
-
-
-def _extract_zip(content: bytes) -> dict[str, str]:
-    """Extrae un ZIP en memoria → {ruta_normalizada: contenido_utf8}.
-    Aplica límites de número de entradas y tamaño descomprimido por entrada."""
-    result = {}
-    with zipfile.ZipFile(io.BytesIO(content)) as zf:
-        names = [n for n in zf.namelist() if not n.endswith("/")]
-        if len(names) > MAX_ZIP_MEMBERS:
-            raise HTTPException(400, f"El ZIP supera el límite de {MAX_ZIP_MEMBERS} ficheros")
-        for name in names:
-            safe = _safe_member_name(name)
-            if safe is None:
-                continue  # Ignorar entradas con path traversal
-            info = zf.getinfo(name)
-            if info.file_size > MAX_MEMBER_BYTES:
-                continue  # Ignorar ficheros individuales demasiado grandes
-            with zf.open(name) as f:
-                result[safe] = f.read().decode("utf-8", errors="replace")
-    return result
-
-
-def _extract_tar(content: bytes) -> dict[str, str]:
-    """Extrae un TAR / TAR.GZ en memoria → {ruta_normalizada: contenido_utf8}.
-    Ignora symlinks y aplica límites de tamaño y número de entradas."""
-    result = {}
-    with tarfile.open(fileobj=io.BytesIO(content)) as tf:
-        members = [m for m in tf.getmembers() if m.isfile() and not m.issym() and not m.islnk()]
-        if len(members) > MAX_ZIP_MEMBERS:
-            raise HTTPException(400, f"El TAR supera el límite de {MAX_ZIP_MEMBERS} ficheros")
-        for member in members:
-            safe = _safe_member_name(member.name)
-            if safe is None:
-                continue
-            if member.size > MAX_MEMBER_BYTES:
-                continue
-            f = tf.extractfile(member)
-            if f:
-                result[safe] = f.read().decode("utf-8", errors="replace")
-    return result
-
-
-def _strip_root_folder(members: dict[str, str]) -> dict[str, str]:
-    """
-    Si todos los ficheros están bajo una única carpeta raíz (ej. mi-modelo/schemas/...)
-    la elimina para normalizar a rutas relativas (schemas/...).
-    Funciona sea cual sea el nombre del archivo comprimido.
-    """
-    if not members:
-        return members
-    paths = list(members.keys())
-    first_segments = [p.lstrip("/").split("/")[0] for p in paths]
-    # Si todos comparten la misma carpeta raíz Y ningún fichero está en la raíz directa
-    if len(set(first_segments)) == 1 and all("/" in p.lstrip("/") for p in paths):
-        prefix = first_segments[0] + "/"
-        return {p[len(prefix):] if p.startswith(prefix) else p: v for p, v in members.items()}
-    return members
-
-
-def _classify_members(members: dict[str, str]) -> dict:
-    """
-    Clasifica los ficheros del paquete según la estructura estándar:
-      schemas/      → JSON Schema definitions
-      context/      → JSON-LD context (primer fichero encontrado)
-      descriptor.json → descriptor de relaciones (opcional)
-      examples/     → ejemplos de entidades (opcional)
-    """
-    schemas    = []
-    context    = None
-    descriptor = None
-    examples   = {}
-    unrecognized = []
-
-    for path, raw in members.items():
-        parts = path.strip("/").split("/")
-        if not parts or not parts[-1]:
-            continue
-
-        fname  = parts[-1].lower()
-        folder = parts[0].lower() if len(parts) > 1 else ""
-
-        # Intentar parsear como JSON (schemas y ejemplos deben ser JSON válido)
-        parsed = None
-        if fname.endswith((".json", ".jsonld")):
-            try:
-                parsed = json.loads(raw)
-            except json.JSONDecodeError:
-                unrecognized.append(path)
-                continue
-
-        if folder == "schemas" and fname.endswith(".json") and parsed is not None:
-            schemas.append(parsed)
-
-        elif folder == "context" and fname.endswith((".jsonld", ".json")) and parsed is not None:
-            if context is None:
-                context = parsed  # solo el primero
-
-        elif fname == "descriptor.json" and parsed is not None:
-            if descriptor is None:
-                descriptor = parsed
-
-        elif folder == "examples" and fname.endswith(".json") and parsed is not None:
-            if len(parts) >= 3:
-                # Estructura con subcarpeta por tipo: examples/Building/example.json
-                # La clave es el nombre de la subcarpeta (original case), no el fichero.
-                # Si ya hay un ejemplo para ese tipo, no lo sobreescribimos (se queda el primero).
-                example_key = parts[1]
-                if example_key not in examples:
-                    examples[example_key] = parsed
-            else:
-                # Estructura plana: examples/Building.json
-                example_key = parts[-1][:-5] if parts[-1].lower().endswith(".json") else parts[-1]
-                if example_key not in examples:
-                    examples[example_key] = parsed
-
-    return {
-        "schemas": schemas,
-        "context": context,
-        "descriptor": descriptor,
-        "examples": examples,
-        "unrecognized": unrecognized,
-    }
-
-
 # ---------- RAG (documentos para ChromaDB / servicio externo) ----------
 
 RAG_ALLOWED_EXTENSIONS = {".pdf", ".txt", ".md", ".docx"}
@@ -1795,65 +1742,6 @@ async def rag_upload(
             }
     except httpx.HTTPError as e:
         return {"ok": False, "status": 0, "filename": filename, "error": str(e)}
-
-
-@app.post("/api/upload/model-package")
-async def upload_model_package(file: UploadFile = File(...)):
-    """
-    Carga un paquete de modelo comprimido (.zip, .tar.gz, .tgz, .tar).
-    Estructura estándar dentro del comprimido (la carpeta raíz puede tener cualquier nombre):
-
-        schemas/          ← JSON Schema definitions  (*.json)
-        context/          ← JSON-LD context file     (*.jsonld o *.json)
-        descriptor.json   ← descriptor de relaciones (opcional)
-        examples/         ← ejemplos de entidades    (*.json, opcional)
-
-    Devuelve el mismo formato que se almacena en localStorage (ngsi_model),
-    más un campo 'examples' con los payloads de ejemplo indexados por nombre de fichero.
-    """
-    filename = (file.filename or "").lower()
-    content  = await file.read(MAX_UPLOAD_BYTES + 1)
-    if len(content) > MAX_UPLOAD_BYTES:
-        raise HTTPException(413, detail=f"El archivo supera el límite de {MAX_UPLOAD_BYTES // (1024*1024)} MB")
-
-    # Detectar formato por extensión o por cabecera mágica
-    try:
-        if filename.endswith(".zip") or content[:2] == b"PK":
-            members = _extract_zip(content)
-        elif filename.endswith((".tar.gz", ".tgz", ".tar")) or content[:2] in (b"\x1f\x8b", b"us"):
-            members = _extract_tar(content)
-        else:
-            # Intentar ZIP primero, luego TAR
-            try:
-                members = _extract_zip(content)
-            except Exception:
-                members = _extract_tar(content)
-    except Exception as e:
-        raise HTTPException(400, detail=f"No se pudo descomprimir el archivo: {e}")
-
-    members    = _strip_root_folder(members)
-    classified = _classify_members(members)
-
-    if not classified["schemas"] and classified["context"] is None and classified["descriptor"] is None:
-        raise HTTPException(422, detail=(
-            "El paquete no contiene ficheros reconocibles. "
-            "Asegúrate de que incluye las carpetas 'schemas/', 'context/' y/o el fichero 'descriptor.json'."
-        ))
-
-    return {
-        "ok":        True,
-        "schemas":   classified["schemas"],
-        "context":   classified["context"],
-        "descriptor":classified["descriptor"],
-        "examples":  classified["examples"],
-        "summary": {
-            "schemas":    len(classified["schemas"]),
-            "context":    classified["context"] is not None,
-            "descriptor": classified["descriptor"] is not None,
-            "examples":   len(classified["examples"]),
-            "unrecognized": classified["unrecognized"],
-        },
-    }
 
 
 # ---------- Validación JSON / Schema ----------

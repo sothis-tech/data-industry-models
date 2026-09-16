@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation, Trans } from 'react-i18next'
 import { Link } from 'react-router-dom'
+import { getModelJson } from '../../lib/modelStore'
 import { getCurrentBroker } from '../../lib/storage'
 const HIDDEN_KEY = 'ngsi_onboarding_hidden'
 const STEP3_KEY = 'ngsi_onboarding_step3_done'
@@ -9,7 +10,7 @@ function hasOrionConnection() {
 }
 function hasModel() {
   try {
-    const raw = localStorage.getItem('ngsi_model')
+    const raw = getModelJson()
     if (!raw) return false
     const m = JSON.parse(raw) as {
       schemas?: unknown[]
@@ -80,6 +81,7 @@ export function OnboardingCard({ refreshKey = 0 }: Props) {
               />
             </li>
           </ol>
+
           {completed === 3 && (
             <p className="onboarding-done">
               {t('config.onboarding.allDone')}

@@ -10,10 +10,9 @@ Estructura de preguntas:
 Uso:
   python benchmark.py --config config.local.yaml --agent orion ql
   python benchmark.py --config config.local.yaml --level 1 2 3 --agent orion ql
-  python benchmark.py --config config.local.yaml --tenant ibermot --agent orion ql
+  python benchmark.py --config config.local.yaml --tenant metapan --agent orion ql
   python benchmark.py --config config.local.yaml --model mistral-large-3 --agent orion ql
   python benchmark.py --config config.local.yaml --category ibermot_specific
-  python tests/benchmark.py --config config/config.local.yaml --level 1 2 3 --tenant ibermot --agent orion ql
 """
 
 import asyncio
@@ -494,6 +493,100 @@ TEST_QUERIES = {
              "prompt": "¿Qué procedimientos de seguridad están documentados para trabajos de mantenimiento?",
              "expected_agents": ["rag_knowledge"], "difficulty": 2,
              "notes": "consultar_base_conocimiento — seguridad."},
+
+            # ── A. Recuperación de dato único (Nivel 1) ───────────────────────
+            {"id": "RAG-005", "scope": "ibermot",
+             "prompt": "¿Cada cuántas horas de operación o meses se cambia el aceite de los reductores de los robots FANUC?",
+             "expected_agents": ["rag_knowledge"], "difficulty": 1,
+             "notes": "Esperado: cada 4000 h / 12 meses (gama anual). Fuente: Plan Mantenimiento §2."},
+            {"id": "RAG-006", "scope": "ibermot",
+             "prompt": "¿Cuál es el rango normal de presión hidráulica de la prensa DSF-4000?",
+             "expected_agents": ["rag_knowledge"], "difficulty": 1,
+             "notes": "Esperado: 180–220 bar. Fuente: Manual Dispositivos §3."},
+            {"id": "RAG-007", "scope": "ibermot",
+             "prompt": "¿A qué temperatura de aceite salta la alarma en las prensas de estampación?",
+             "expected_agents": ["rag_knowledge"], "difficulty": 1,
+             "notes": "Esperado: > 75 °C (ERR-PRE-002). Fuente: Manual Dispositivos §3."},
+            {"id": "RAG-008", "scope": "ibermot",
+             "prompt": "¿Cuál es la velocidad máxima permitida de un AGV en zona peatonal?",
+             "expected_agents": ["rag_knowledge"], "difficulty": 1,
+             "notes": "Esperado: 0,3 m/s (parada si > 0,4 m/s). Fuente: Manual Dispositivos §5."},
+            {"id": "RAG-009", "scope": "ibermot",
+             "prompt": "¿Cuántos sensores hay instalados en la Nave de Carrocería?",
+             "expected_agents": ["rag_knowledge"], "difficulty": 2,
+             "notes": "Esperado: 50 sensores (10 máquinas). Fuente: Manual Dispositivos §1."},
+
+            # ── B. Recuperación de procedimiento / lista (Nivel 2) ────────────
+            {"id": "RAG-010", "scope": "ibermot",
+             "prompt": "¿Cuáles son los pasos del procedimiento LOTO de consignación de energías?",
+             "expected_agents": ["rag_knowledge"], "difficulty": 2,
+             "notes": "Esperado: los 8 pasos (informar, apagar, identificar fuentes, aislar, candado+etiqueta, disipar energía residual, verificar ausencia de energía, ejecutar/reponer). Fuente: Procedimientos Seguridad §2.1."},
+            {"id": "RAG-011", "scope": "ibermot",
+             "prompt": "¿Qué EPI es obligatorio en la zona de hornos de curado de la nave de pintura?",
+             "expected_agents": ["rag_knowledge"], "difficulty": 2,
+             "notes": "Esperado: guantes térmicos 250 °C + pantalla facial anti-IR (además del EPI básico). Fuente: Procedimientos Seguridad §1.1."},
+            {"id": "RAG-012", "scope": "ibermot",
+             "prompt": "Durante el LOTO de un robot, ¿qué energías adicionales hay que consignar además de la eléctrica?",
+             "expected_agents": ["rag_knowledge"], "difficulty": 2,
+             "notes": "Esperado: cinética (pasador eje J1), neumática (purgar silenciador) y señal PLC (desconectar EtherCAT). Fuente: Procedimientos Seguridad §2.2."},
+
+            # ── C. Búsqueda condicional / códigos de error (Nivel 2) ──────────
+            {"id": "RAG-013", "scope": "ibermot",
+             "prompt": "¿Qué acción correctiva hay que tomar ante el error ERR-SOL-002 de un robot de soldadura?",
+             "expected_agents": ["rag_knowledge"], "difficulty": 2,
+             "notes": "Esperado: reducir cadencia 20 % y verificar ventilación del armario controlador (temp. motor > 95 °C). Fuente: Manual Dispositivos §2."},
+            {"id": "RAG-014", "scope": "ibermot",
+             "prompt": "Un AGV muestra el código E-AGV-010, ¿qué significa y qué hay que hacer?",
+             "expected_agents": ["rag_knowledge"], "difficulty": 2,
+             "notes": "Esperado: batería crítica < 15 %; retorno automático a base; carga mínima 45 min. Fuente: Manual Dispositivos §5."},
+            {"id": "RAG-015", "scope": "ibermot",
+             "prompt": "¿Qué respuesta automática ejecuta el horno de pintura ante la alarma ALM-HORN-001?",
+             "expected_agents": ["rag_knowledge"], "difficulty": 2,
+             "notes": "Esperado: corte de gas + apertura de ventilación de emergencia (temp. zona > 195 °C); el operario evacúa. Fuente: Manual Dispositivos §4."},
+
+            # ── D. Datos tabulares / trazabilidad (Nivel 2) ───────────────────
+            {"id": "RAG-016", "scope": "ibermot",
+             "prompt": "¿Cuál es el objetivo de OEE para máquinas críticas y cuál fue el valor real de 2024?",
+             "expected_agents": ["rag_knowledge"], "difficulty": 2,
+             "notes": "Esperado: objetivo ≥ 85 %, real 83,4 %. Fuente: Plan Mantenimiento §1."},
+            {"id": "RAG-017", "scope": "ibermot",
+             "prompt": "¿Cuántas unidades del filtro hidráulico AIDA hay en stock mínimo y para qué prensas?",
+             "expected_agents": ["rag_knowledge"], "difficulty": 2,
+             "notes": "Esperado: 4 ud. (ref. 45P-2201-X), prensas P-001 y P-002. Fuente: Plan Mantenimiento §7."},
+            {"id": "RAG-018", "scope": "ibermot",
+             "prompt": "¿Cuál es la próxima fecha de calibración de la célula de carga de la prensa P-001?",
+             "expected_agents": ["rag_knowledge"], "difficulty": 2,
+             "notes": "Esperado: 15/10/2025. Fuente: Manual Dispositivos §7."},
+
+            # ── E. Desambiguación (Nivel 3) — elegir la fuente correcta ───────
+            {"id": "RAG-019", "scope": "ibermot",
+             "prompt": "¿Cuál es la temperatura objetivo de la zona de curado del horno de pintura?",
+             "expected_agents": ["rag_knowledge"], "difficulty": 3,
+             "notes": "Esperado: 182 °C (zona 2; mín. 175 / máx. 190). Distractor: las otras zonas térmicas tienen otras temperaturas. Fuente: Manual Dispositivos §4."},
+            {"id": "RAG-020", "scope": "ibermot",
+             "prompt": "¿Qué presión neumática debe tener el sistema de seguridad de las prensas?",
+             "expected_agents": ["rag_knowledge"], "difficulty": 3,
+             "notes": "Esperado: 6–6,5 bar. Distractor: el aire comprimido de los robots es 6 ± 0,2 bar. Fuente: Plan Mantenimiento §3."},
+
+            # ── F. Multi-documento (Nivel 3) — combina dos manuales ───────────
+            {"id": "RAG-021", "scope": "ibermot",
+             "prompt": "Para intervenir en una prensa, ¿qué procedimiento de seguridad hay que aplicar y cuánto tiempo hay que esperar a que se disipe la energía del volante de inercia?",
+             "expected_agents": ["rag_knowledge"], "difficulty": 3,
+             "notes": "Esperado: procedimiento LOTO completo (IBERMOT-SEG-003) + mínimo 5 min de disipación. Combina Plan Mantenimiento §3 y Procedimientos Seguridad §2. Multi-documento."},
+            {"id": "RAG-022", "scope": "ibermot",
+             "prompt": "¿A qué teléfono externo se llama al servicio técnico de FANUC ante un error de corriente de motor de un robot?",
+             "expected_agents": ["rag_knowledge"], "difficulty": 3,
+             "notes": "Esperado: +34 916 484 010. Combina Manual Dispositivos §2 (acción ERR-SOL-001) y Procedimientos Seguridad §7 (contactos). Multi-documento."},
+
+            # ── G. Información ausente / anti-alucinación (Nivel 3) ────────────
+            {"id": "RAG-023", "scope": "ibermot",
+             "prompt": "¿Qué presión de inflado requieren las ruedas de los AGV?",
+             "expected_agents": ["rag_knowledge"], "difficulty": 3,
+             "notes": "Esperado: NO figura en la documentación (solo se documenta el desgaste < 20 % del perfil). El RAG debe reconocer que no tiene el dato y NO inventarlo."},
+            {"id": "RAG-024", "scope": "ibermot",
+             "prompt": "¿Cuál es el consumo eléctrico medio mensual de la planta?",
+             "expected_agents": ["rag_knowledge"], "difficulty": 3,
+             "notes": "Esperado: NO figura en la documentación. El RAG debe reconocer la ausencia del dato y NO inventarlo."},
         ],
     },
 

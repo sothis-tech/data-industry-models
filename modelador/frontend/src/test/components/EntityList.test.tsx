@@ -27,11 +27,13 @@ const defaultProps = {
   types: ['Machine', 'Area'],
   typeFilter: '',
   search: '',
+  subscriptionFilter: 'all' as const,
   loading: false,
   loadCount: null,
   selectedId: null,
   onTypeFilterChange: vi.fn(),
   onSearchChange: vi.fn(),
+  onSubscriptionFilterChange: vi.fn(),
   onSelect: vi.fn(),
   onNewEntity: vi.fn(),
 }
@@ -148,6 +150,25 @@ describe('EntityList', () => {
   it('muestra contador de carga cuando loadCount está definido', () => {
     render(<EntityList {...defaultProps} loading loadCount={1200} />)
     expect(screen.getByText(/cargando… 1200/i)).toBeInTheDocument()
+  })
+
+  it('muestra el filtro de suscripción con opción Todas', () => {
+    render(<EntityList {...defaultProps} />)
+    expect(screen.getByText('Todas')).toBeInTheDocument()
+    expect(screen.queryByText(/todas las suscripciones/i)).not.toBeInTheDocument()
+  })
+
+  it('muestra badge QL junto al tipo cuando la entidad está suscrita', () => {
+    render(
+      <EntityList
+        {...defaultProps}
+        subscribedIds={new Set([ENTITY_MACHINE.id])}
+      />,
+    )
+    const item = screen.getByText('Horno A').closest('.entity-item')
+    expect(item?.querySelector('.sub-badge')?.textContent).toBe('QL')
+    const areaItem = screen.getByText('urn:ngsi-ld:Area:001').closest('.entity-item')
+    expect(areaItem?.querySelector('.sub-badge')).toBeNull()
   })
 
 })

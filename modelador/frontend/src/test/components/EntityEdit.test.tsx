@@ -6,8 +6,11 @@ import type { NgsiLdEntity } from '../../types/entity'
 // ── Mocks ─────────────────────────────────────────────────────────────────────
 vi.mock('../../api/orion', () => ({
   getEntityById:        vi.fn(),
+  getSubscriptions:     vi.fn(),
   patchEntityAttrs:     vi.fn(),
   prepareAttrsPayload:  vi.fn(),
+  postSubscription:     vi.fn(),
+  deleteSubscription:   vi.fn(),
 }))
 
 vi.mock('../../api/validation', () => ({
@@ -15,11 +18,21 @@ vi.mock('../../api/validation', () => ({
   humanizeSchemaError:   vi.fn(({ message }: { path: string; message: unknown }) => String(message)),
 }))
 
-import { getEntityById, patchEntityAttrs, prepareAttrsPayload } from '../../api/orion'
+import {
+  deleteSubscription,
+  getEntityById,
+  getSubscriptions,
+  patchEntityAttrs,
+  postSubscription,
+  prepareAttrsPayload,
+} from '../../api/orion'
 import { validateAttrsPayload } from '../../api/validation'
 
 const mockGetEntityById       = vi.mocked(getEntityById)
+const mockGetSubscriptions    = vi.mocked(getSubscriptions)
 const mockPatchEntityAttrs    = vi.mocked(patchEntityAttrs)
+const mockPostSubscription    = vi.mocked(postSubscription)
+const mockDeleteSubscription  = vi.mocked(deleteSubscription)
 
 type GetEntityByIdResult = Awaited<ReturnType<typeof getEntityById>>
 type PatchEntityResult = Awaited<ReturnType<typeof patchEntityAttrs>>
@@ -62,6 +75,22 @@ function patchOk() {
     ReturnType<typeof patchEntityAttrs> extends Promise<infer T> ? T : never
 }
 
+function subscriptionsOk(body: Record<string, unknown>[] = []) {
+  return { status: 200, error: null, body } as
+    ReturnType<typeof getSubscriptions> extends Promise<infer T> ? T : never
+}
+
+function qlSubFor(entityId: string, subId = 'urn:ngsi-ld:Subscription:1') {
+  return {
+    id: subId,
+    status: 'active',
+    entities: [{ id: entityId, type: 'Sensor' }],
+    notification: {
+      endpoint: { uri: 'http://quantumleap:8668/v2/notify', accept: 'application/json' },
+    },
+  }
+}
+
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 // Usamos tipo único (Sensor) para evitar ambigüedad con el ID
 
@@ -93,7 +122,10 @@ const defaultProps = {
 
 describe('EntityEdit', () => {
 
-  beforeEach(() => { vi.clearAllMocks() })
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockGetSubscriptions.mockResolvedValue(subscriptionsOk())
+  })
 
   // ── Render inicial ────────────────────────────────────────────────────────
 
@@ -260,6 +292,72 @@ describe('EntityEdit', () => {
     await waitFor(() => expect(screen.getByRole('textbox')).not.toHaveAttribute('readonly'))
     fireEvent.change(screen.getByRole('textbox'), { target: { value: '{ json roto }' } })
     expect(() => fireEvent.click(screen.getByTitle(/formatear json/i))).not.toThrow()
+  })
+
+  // ── Suscripción QuantumLeap ───────────────────────────────────────────────
+
+  it('marca el checkbox cuando hay suscripción activa a QL', async () => {
+    mockGetEntityById.mockResolvedValue(entityOk(ENTITY))
+    mockGetSubscriptions.mockResolvedValue(subscriptionsOk([qlSubFor(ENTITY.id)]))
+    render(<EntityEdit {...defaultProps} />)
+    await waitFor(() => {
+      const cb = screen.getByRole('checkbox', { name: /notificar a quantumleap/i })
+      expect(cb).toBeChecked()
+      expect(cb).not.toBeDisabled()
+    })
+  })
+
+  it('no llama post ni delete si el checkbox no cambia al guardar', async () => {
+    mockGetEntityById.mockResolvedValue(entityOk(ENTITY))
+    mockGetSubscriptions.mockResolvedValue(subscriptionsOk())
+    mockPrepareAttrsPayload.mockResolvedValue(prepareOk())
+    mockValidateAttrsPayload.mockResolvedValue(validateOk())
+    mockPatchEntityAttrs.mockResolvedValue(patchOk())
+    render(<EntityEdit {...defaultProps} />)
+    await waitFor(() => expect(screen.getByRole('textbox')).not.toHaveAttribute('readonly'))
+    fireEvent.click(screen.getByRole('button', { name: /guardar cambios/i }))
+    await waitFor(() => expect(mockPatchEntityAttrs).toHaveBeenCalled())
+    expect(mockPostSubscription).not.toHaveBeenCalled()
+    expect(mockDeleteSubscription).not.toHaveBeenCalled()
+  })
+
+  it('llama postSubscription al activar el checkbox y guardar', async () => {
+    mockGetEntityById.mockResolvedValue(entityOk(ENTITY))
+    mockGetSubscriptions.mockResolvedValue(subscriptionsOk())
+    mockPrepareAttrsPayload.mockResolvedValue(prepareOk())
+    mockValidateAttrsPayload.mockResolvedValue(validateOk())
+    mockPatchEntityAttrs.mockResolvedValue(patchOk())
+    mockPostSubscription.mockResolvedValue({ status: 201, error: null, body: {} })
+    render(<EntityEdit {...defaultProps} />)
+    await waitFor(() => {
+      expect(screen.getByRole('checkbox', { name: /notificar a quantumleap/i })).not.toBeDisabled()
+    })
+    fireEvent.click(screen.getByRole('checkbox', { name: /notificar a quantumleap/i }))
+    fireEvent.click(screen.getByRole('button', { name: /guardar cambios/i }))
+    await waitFor(() => expect(mockPostSubscription).toHaveBeenCalledTimes(1))
+  })
+
+  it('llama deleteSubscription al desactivar el checkbox y guardar', async () => {
+    mockGetEntityById.mockResolvedValue(entityOk(ENTITY))
+    mockGetSubscriptions.mockResolvedValue(subscriptionsOk([qlSubFor(ENTITY.id)]))
+    mockPrepareAttrsPayload.mockResolvedValue(prepareOk())
+    mockValidateAttrsPayload.mockResolvedValue(validateOk())
+    mockPatchEntityAttrs.mockResolvedValue(patchOk())
+    mockDeleteSubscription.mockResolvedValue({ status: 204, error: null, body: null })
+    render(<EntityEdit {...defaultProps} />)
+    await waitFor(() => {
+      expect(screen.getByRole('checkbox', { name: /notificar a quantumleap/i })).toBeChecked()
+    })
+    fireEvent.click(screen.getByRole('checkbox', { name: /notificar a quantumleap/i }))
+    fireEvent.click(screen.getByRole('button', { name: /guardar cambios/i }))
+    await waitFor(() =>
+      expect(mockDeleteSubscription).toHaveBeenCalledWith(
+        'http://localhost:1026',
+        'urn:ngsi-ld:Subscription:1',
+        undefined,
+      ),
+    )
+    expect(mockPostSubscription).not.toHaveBeenCalled()
   })
 
 })

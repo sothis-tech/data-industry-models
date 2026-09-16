@@ -94,3 +94,363 @@ nodes:
       min: 0.0
       max: 100.0
       update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_10
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_11
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_12
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_13
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_14
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_15
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_16
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_17
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_18
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_19
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_20
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_21
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_22
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_23
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_24
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_25
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_26
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_27
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_28
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_29
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_30
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_31
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_32
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_33
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_34
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_35
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_36
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_37
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_38
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_39
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_40
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_41
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_42
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_43
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_44
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_45
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_46
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_47
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_48
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
+  - kind: Variable
+    browse_name: Sensor_Test_49
+    data_type: Float
+    writable: false
+    simulation:
+      mode: uniform
+      min: 0.0
+      max: 100.0
+      update_ms: 1000
