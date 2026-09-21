@@ -1,5 +1,7 @@
 # Modelo de Datos Inteligente para Industria
 
+[![GitHub Release](https://img.shields.io/github/v/release/sothis-tech/data-industry-models?style=flat-square)](https://github.com/sothis-tech/data-industry-models/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/sothis-tech/data-industry-models/total?style=flat-square&label=Downloads)](https://github.com/sothis-tech/data-industry-models/releases)
 ![Licencia](https://img.shields.io/badge/licencia-AGPL--3.0-orange)
 ![FIWARE](https://img.shields.io/badge/powered_by-FIWARE-233c68)
 ![NGSI-LD](https://img.shields.io/badge/NGSI--LD-1.6-5b3a8a)
