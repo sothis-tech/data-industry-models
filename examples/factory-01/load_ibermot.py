@@ -44,32 +44,65 @@ def parse_args():
     p.add_argument("--dry-run", action="store_true", help="Muestra entidades pero no las envía")
     p.add_argument("--delete",  action="store_true", help="Elimina todas las entidades del loader")
     p.add_argument("--list",    action="store_true", help="Lista todos los IDs que se cargarían")
+    p.add_argument("--context",
+                   default=None,
+                   help="@context a usar en la carga (PRIORIDAD si se indica). "
+                        "URL (la descarga Orion; usar hostname interno, p. ej. "
+                        "http://context-provider/...) o ruta a un .jsonld local "
+                        "(se incrusta su array @context). Si NO se indica, se usa el "
+                        "contexto ibermot del proveedor; y si ese no está, el core.")
     return p.parse_args()
 
 ARGS = parse_args()
 BROKER  = ARGS.broker.rstrip("/")
 NGSI    = f"{BROKER}/ngsi-ld/v1"
-# Resolución automática del contexto JSON-LD
-# Si existe el contexto del proyecto (07INN_DATA_SPACE/context/), lo usa.
-# En caso contrario, emplea el contexto NGSI-LD core estándar.
-_SCRIPT_DIR    = Path(__file__).resolve().parent
-_PROJECT_CTX   = _SCRIPT_DIR / ".." / ".." / "07INN_DATA_SPACE" / "context" / "ibermot-context.jsonld"
-_CORE_CTX_URL  = "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
+# Resolución del @context, por orden de prioridad:
+#   1. --context indicado por parámetro  → manda (URL tal cual, o ruta incrustada).
+#   2. Sin parámetro → contexto ibermot del proveedor de contextos. Se comprueba
+#      que el fichero está en la carpeta que sirve nginx (data_space/context/),
+#      porque desde el host no se puede resolver el hostname interno 'context-provider'
+#      pero sí ver el fichero en disco; si está en disco, el proveedor lo sirve.
+#   3. Si el contexto ibermot no está → contexto core por defecto + ADVERTENCIA.
+#
+# Nota: la URL que se referencia (la que descargará Orion) usa el hostname interno
+# 'context-provider'. La comprobación de existencia se hace sobre el fichero local.
+_SCRIPT_DIR        = Path(__file__).resolve().parent
+_CORE_CTX_URL      = "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
+_IBERMOT_CTX_URL   = "http://context-provider/ibermot-context.jsonld"
+# El script vive en examples/factory-01/ y el proveedor sirve la carpeta
+# data_space/context/ de la raíz del repo → dos niveles por encima.
+_REPO_ROOT         = _SCRIPT_DIR.parent.parent
+_IBERMOT_CTX_FILE  = _REPO_ROOT / "data_space" / "context" / "ibermot-context.jsonld"
 
 def _resolve_context():
-    ctx_path = _PROJECT_CTX.resolve()
-    if ctx_path.exists():
-        import json as _json
-        try:
-            with open(ctx_path, encoding="utf-8") as _f:
-                data = _json.load(_f)
-                ctx = data.get("@context", data)
-                print(f"  📄 Contexto: archivo local ({ctx_path.name})")
-                return ctx
-        except Exception as _e:
-            print(f"  ⚠️  Error cargando contexto local ({_e}). Usando contexto core.")
-    else:
-        print(f"  📄 Contexto: NGSI-LD core estándar")
+    # 1. Parámetro explícito = máxima prioridad
+    if ARGS.context is not None:
+        c = ARGS.context
+        if c.startswith(("http://", "https://")):
+            print(f"  📄 Contexto: por parámetro — URL ({c})")
+            return c
+        ctx_path = Path(c).resolve()
+        if ctx_path.exists():
+            try:
+                with open(ctx_path, encoding="utf-8") as _f:
+                    data = json.load(_f)
+                print(f"  📄 Contexto: por parámetro — archivo local ({ctx_path.name})")
+                return data.get("@context", data)
+            except Exception as _e:
+                print(f"  ⚠️  Error cargando contexto local ({_e}). Usando contexto core.")
+                return _CORE_CTX_URL
+        print(f"  ⚠️  Contexto indicado por parámetro no encontrado ({c}). "
+              f"Usando contexto core.")
+        return _CORE_CTX_URL
+
+    # 2. Sin parámetro → contexto ibermot del proveedor (si el proveedor lo sirve)
+    if _IBERMOT_CTX_FILE.exists():
+        print(f"  📄 Contexto: ibermot del proveedor ({_IBERMOT_CTX_URL})")
+        return _IBERMOT_CTX_URL
+
+    # 3. No está → core + advertencia
+    print(f"  ⚠️  No se ha encontrado el contexto ibermot en el proveedor "
+          f"({_IBERMOT_CTX_FILE}); se aplica el contexto por defecto (core NGSI-LD).")
     return _CORE_CTX_URL
 
 CONTEXT = _resolve_context()
