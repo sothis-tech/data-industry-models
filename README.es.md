@@ -99,3 +99,9 @@ El **OPC-UA Linker — Frontend** (dashboard React servido por Nginx, `:8030`) e
 ## Licencia
 
 Este proyecto está licenciado bajo la **Licencia Pública General Affero de GNU v3.0 (AGPL-3.0)**. Consulta el archivo [LICENSE](LICENSE) para el texto completo.
+
+## Financiación
+ 
+<img src="docs/img/logo-eu-ngeu.png" height="60"> <img src="docs/img/logo-ministerio.png" height="60"> <img src="docs/img/logo-prtr.png" height="60"> <img src="docs/img/logo-esp-digital.png" height="60"> 
+ 
+Proyecto **TSI-100130-2024-101, Smart Data Models**, financiado por el Ministerio para la Transformación Digital y de la Función Pública, en el marco del Plan de Recuperación, Transformación y Resiliencia. **Financiado por la Unión Europea – NextGenerationEU.**
