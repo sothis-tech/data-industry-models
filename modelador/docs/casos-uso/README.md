@@ -8,10 +8,6 @@ La especificación completa está en:
 
 `**Casos de Uso NGSI-LD.docx`**
 
-Ruta de evidencias del proyecto (ajustar si tu copia local difiere):
-
-`NUNSYS\Proyectos Innovación - Subvenciones\INNOVACION\APROBADOS\07-SMART DATA MODELS\03_Tecnico\PT2\Evidencias\`
-
 ## Casos definidos en el documento
 
 
