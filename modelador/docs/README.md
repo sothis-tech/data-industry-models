@@ -30,8 +30,6 @@
 
 ### Fuentes oficiales fuera del repo (Word)
 
-Ruta habitual de evidencias (OneDrive/NUNSYS):
-
 `...\07-SMART DATA MODELS\03_Tecnico\PT2\Evidencias\`
 
 
